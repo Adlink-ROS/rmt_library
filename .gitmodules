@@ -1,0 +1,3 @@
+[submodule "RMT_core/external/cyclonedds"]
+	path = RMT_core/external/cyclonedds
+	url = https://github.com/eclipse-cyclonedds/cyclonedds.git
