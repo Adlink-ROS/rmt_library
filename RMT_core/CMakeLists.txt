@@ -10,3 +10,6 @@ project(RMT_core VERSION 0.9.0)
 
 # Build RMT library
 add_subdirectory(library)
+
+# Add test
+add_subdirectory(test)
