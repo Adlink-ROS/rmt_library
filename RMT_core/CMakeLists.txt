@@ -13,3 +13,5 @@ add_subdirectory(library)
 
 # Add test
 add_subdirectory(test)
+enable_testing()
+add_test("RMT library API test" test/rmt_test)

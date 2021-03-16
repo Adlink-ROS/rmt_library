@@ -26,9 +26,13 @@ int main()
 
     /* Run basic test */
     CU_basic_run_tests();
+    int success_numbers = CU_get_number_of_successes();
+    int failure_numbers = CU_get_number_of_failures();
+    printf("Total success: %d\n", success_numbers);
+    printf("Total fail: %d\n", failure_numbers);
 
     /* Clean Registry */
     CU_cleanup_registry();
 
-    return 0;
+    return failure_numbers;
 }

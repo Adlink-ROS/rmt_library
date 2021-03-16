@@ -21,5 +21,8 @@ cmake --build build
 * Run test
 
 ```bash
-./build/test/rmt_test
+cd build
+ctest
+# verbose
+ctest -V
 ```
