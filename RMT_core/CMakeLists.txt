@@ -5,11 +5,17 @@ cmake_minimum_required(VERSION 3.10)
 project(RMT_core VERSION 0.9.0)
 
 # Include external project
-#execute_process(COMMAND git submodule update --init)
-#add_subdirectory(external/cyclonedds)
+execute_process(COMMAND git submodule update --init)
+add_subdirectory(external/cyclonedds)
+
+# Build IDL
+add_subdirectory(comm_idl)
 
 # Build RMT library
 add_subdirectory(library)
+
+# Build RMT Agent
+add_subdirectory(agent)
 
 # Add test
 add_subdirectory(test)
