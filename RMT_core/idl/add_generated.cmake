@@ -4,7 +4,7 @@
 # https://cmake.org/cmake/help/latest/prop_sf/GENERATED.html#prop_sf:GENERATED
 
 function(add_generated _target)
-    set(_dir "${CMAKE_BINARY_DIR}/comm_idl")
+    set(_dir "${CMAKE_BINARY_DIR}/idl")
     set(_source "${_dir}/${_target}.c")
     set(_header "${_dir}/${_target}.h")
     set_source_files_properties(

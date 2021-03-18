@@ -9,7 +9,7 @@ execute_process(COMMAND git submodule update --init)
 add_subdirectory(external/cyclonedds)
 
 # Build IDL
-add_subdirectory(comm_idl)
+add_subdirectory(idl)
 
 # Build RMT library
 add_subdirectory(library)
