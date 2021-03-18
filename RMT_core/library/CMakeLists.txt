@@ -2,6 +2,8 @@
 configure_file("config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+include(../comm_idl/add_generated.cmake)
+
 # Build library rmt_lib
 add_library(rmt_lib rmt_lib.c)
 
