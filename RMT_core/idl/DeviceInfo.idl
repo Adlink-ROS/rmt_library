@@ -1,0 +1,13 @@
+module DeviceInfo
+{
+  struct Msg
+  {
+    long deviceID;
+    string model;
+    string host;
+    string ip;
+    string mac;
+    string rmt_version;
+  };
+  #pragma keylist Msg deviceID
+};
