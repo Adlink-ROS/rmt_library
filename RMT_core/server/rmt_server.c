@@ -1,10 +1,10 @@
 #include "rmt_server.h"
 #include "config.h"
 
-void rmt_init(void) {
+void rmt_server_init(void) {
     return;
 }
 
-char* rmt_lib_version(void) {
+char* rmt_server_version(void) {
     return PROJECT_VERSION;
 }

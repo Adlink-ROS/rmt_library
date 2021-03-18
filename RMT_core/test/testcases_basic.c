@@ -5,7 +5,7 @@
 void testVersion(void)
 {
     // Check the version's format
-    char *version = rmt_lib_version();
+    char *version = rmt_server_version();
     int version_len = strlen(version);
     int ret = 0;
     int dot_number = 0;

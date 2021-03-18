@@ -16,7 +16,7 @@ int main(void)
     dds_sample_info_t infos[MAX_SAMPLES];
     dds_return_t rc;
 
-    printf("RMT Library version is %s\n", rmt_lib_version());
+    printf("RMT Library version is %s\n", rmt_server_version());
 
     /* Create a Participant. */
     participant = dds_create_participant (DDS_DOMAIN_DEFAULT, NULL, NULL);
