@@ -3,8 +3,8 @@
 The repo contains several components:
 
 * RESTful API server
-* RMT Library (Server Side)
-* RMT Engine (Client Side)
+* RMT Server (Server Side)
+* RMT Agent (Client Side)
 
 # Build
 
