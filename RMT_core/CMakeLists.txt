@@ -20,4 +20,4 @@ add_subdirectory(agent)
 # Add test
 add_subdirectory(test)
 enable_testing()
-add_test("RMT library API test" test/rmt_test)
+add_test("RMT_library_API_test" test/rmt_test)
