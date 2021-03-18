@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "rmt_lib.h"
+#include "rmt_server.h"
 #include "dds/dds.h"
 #include "DeviceInfo.h"
 

@@ -1,4 +1,4 @@
-#include "rmt_lib.h"
+#include "rmt_server.h"
 #include "config.h"
 
 void rmt_init(void) {

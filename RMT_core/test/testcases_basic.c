@@ -1,6 +1,6 @@
 #include <CUnit/Basic.h>
 #include <string.h>
-#include "rmt_lib.h"
+#include "rmt_server.h"
 
 void testVersion(void)
 {
