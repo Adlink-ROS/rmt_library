@@ -11,8 +11,8 @@ add_subdirectory(external/cyclonedds)
 # Build IDL
 add_subdirectory(idl)
 
-# Build RMT library
-add_subdirectory(library)
+# Build RMT server
+add_subdirectory(server)
 
 # Build RMT Agent
 add_subdirectory(agent)
