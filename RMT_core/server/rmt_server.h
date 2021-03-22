@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct _device_info {
-    int  devcieID;
+    int  deviceID;
     char *model;
     char *host;
     char *ip;
@@ -13,7 +13,7 @@ typedef struct _device_info {
 } device_info;
 
 int rmt_server_init(void);
-int rmt_server_list_device(device_info *dev, uint32_t *num);
+int rmt_server_list_device(device_info **dev, uint32_t *num);
 int rmt_server_get_info(char *key, char *value);
 int rmt_server_set_info(char *key, char *value);
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len);

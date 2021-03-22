@@ -1,11 +1,91 @@
+#include <stdlib.h>
+#include <string.h>
 /* Used by DDS */
 #include "dds/dds.h"
 #include "DeviceInfo.h"
+#include "rmt_server.h" // TODO: we only want to use the structure device_info
 
 #define MAX_SAMPLES 1
 
+typedef struct _dev_list {
+    struct _dev_list *next;
+    device_info *info;
+} dev_list;
+static dev_list *dev_head = NULL;
+static uint32_t dev_num = 0;
+
 static dds_entity_t participant;
 static dds_entity_t reader;
+
+static int add_device(DeviceInfo_Msg *msg)
+{
+    // Check whether the device exist or not.
+    dev_list *ptr = dev_head;
+    while (ptr) {
+        if (ptr->info->deviceID == msg->deviceID)
+            break;
+        ptr = ptr->next;
+    }
+    // Add/Update the device
+    dev_list *selected_dev;
+    if (ptr == NULL) {
+        // The device doesn't exist. Add it.
+        selected_dev = (dev_list *) malloc(sizeof(dev_list));
+        selected_dev->next = dev_head;
+        dev_head = selected_dev;
+        dev_num++;
+        selected_dev->info = (device_info *) malloc(sizeof(device_info));
+    } else {
+        // The device exist. Update it.
+        selected_dev = ptr;
+    }
+    selected_dev->info->deviceID = msg->deviceID;
+    selected_dev->info->host = strdup(msg->host);
+    selected_dev->info->ip = strdup(msg->ip);
+    selected_dev->info->mac = strdup(msg->mac);
+    selected_dev->info->model = strdup(msg->model);
+    selected_dev->info->rmt_version = strdup(msg->rmt_version);
+    
+    return 0;
+}
+
+void free_dev_list(dev_list *ptr)
+{
+    if (ptr) {
+        free(ptr->info->host);
+        free(ptr->info->ip);
+        free(ptr->info->mac);
+        free(ptr->info->model);
+        free(ptr->info->rmt_version);
+        free(ptr);
+    }
+}
+
+static int del_device(int32_t id)
+{
+    dev_list *ptr = dev_head;
+    if (ptr == NULL) goto exit;
+    // If the device is on the head of list
+    if (ptr->info->deviceID == id) {
+        dev_head = ptr->next;
+        dev_num--;
+        goto exit;
+    }
+    // Check if the device exist
+    while (ptr->next) {
+        if (ptr->next->info->deviceID == id) {
+            dev_list *to_be_freed = ptr->next;
+            ptr->next = ptr->next->next;
+            ptr = to_be_freed;
+            goto exit;
+        }
+        ptr = ptr->next;
+    }
+
+exit:
+    free_dev_list(ptr);
+    return 0;
+}
 
 int device_info_subscriber_init(void)
 {
@@ -46,7 +126,7 @@ exit:
     return ret;
 }
 
-int list_device_info(void)
+int update_device_info(void)
 {
     dds_sample_info_t infos[MAX_SAMPLES];
     void *samples[MAX_SAMPLES];
@@ -67,13 +147,7 @@ int list_device_info(void)
         /* Check if we read some data and it is valid. */
         if ((rc > 0) && (infos[0].valid_data)) {
             msg = (DeviceInfo_Msg*) samples[0];
-            printf("ID: %d\n", msg->deviceID);
-            printf("Model: %s\n", msg->model);
-            printf("Host: %s\n", msg->host);
-            printf("IP: %s\n", msg->ip);
-            printf("MAC: %s\n", msg->mac);
-            printf("RMT version: %s\n", msg->rmt_version);
-            fflush (stdout);
+            add_device(msg);
             break;
         } else {
             dds_sleepfor(DDS_MSECS(20));
@@ -85,6 +159,18 @@ int list_device_info(void)
     return ret;
 }
 
+int list_device_info(device_info **dev, uint32_t *num)
+{
+    update_device_info();
+    *num = dev_num;
+    *dev = (device_info *) malloc(sizeof(device_info) * dev_num);
+    dev_list *ptr = dev_head;
+    for (int i = 0; i < dev_num; i++) {
+        (*dev)[i] = *ptr->info;
+        ptr = ptr->next;
+    }
+}
+
 int device_info_subscriber_deinit(void)
 {
     dds_return_t rc;
@@ -94,6 +180,14 @@ int device_info_subscriber_deinit(void)
     if (rc != DDS_RETCODE_OK) {
         DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));
         ret = -1;
+    }
+
+    // Remove all device
+    while (dev_head) {
+        dev_list *ptr = dev_head;
+        dev_head = dev_head->next;
+        free_dev_list(ptr);
+        dev_num--;
     }
 
     return ret;

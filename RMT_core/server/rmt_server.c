@@ -7,9 +7,10 @@ int rmt_server_init(void)
     return device_info_subscriber_init();
 }
 
-int rmt_server_list_device(device_info *dev, uint32_t *num)
+int rmt_server_list_device(device_info **dev, uint32_t *num)
 {
-    return list_device_info();
+    list_device_info(dev, num);
+    return 0;
 }
 
 int rmt_server_get_info(char *key, char *value)
