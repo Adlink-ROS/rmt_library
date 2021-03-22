@@ -15,7 +15,7 @@ int device_info_subscriber_init(void)
     int ret = 0;
 
     /* Create a Participant. */
-    participant = dds_create_participant (DDS_DOMAIN_DEFAULT, NULL, NULL);
+    participant = dds_create_participant(DDS_DOMAIN_DEFAULT, NULL, NULL);
     if (participant < 0) {
         DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-participant));
         ret = -1;
@@ -23,7 +23,7 @@ int device_info_subscriber_init(void)
     }
 
     /* Create a Topic. */
-    topic = dds_create_topic (participant, &DeviceInfo_Msg_desc, "DeviceInfo_Msg", NULL, NULL);
+    topic = dds_create_topic(participant, &DeviceInfo_Msg_desc, "DeviceInfo_Msg", NULL, NULL);
     if (topic < 0) {
         DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));    
         ret = -1;
