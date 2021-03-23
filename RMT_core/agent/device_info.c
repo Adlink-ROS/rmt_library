@@ -1,5 +1,10 @@
+#include <stdlib.h>  // used by rand()
+#include <time.h>    // used by time()
 #include "DeviceInfo.h"
 #include "dds/dds.h"
+#include "config.h"
+
+#define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
 
 static dds_entity_t participant;
 static dds_entity_t writer;
@@ -8,20 +13,19 @@ static int info_change = 1;
 
 static int device_info_publisher_update(void);
 
-int update_device_info(void)
+static void get_device_info(void)
 {
     /* TODO: Need to get real information data */
-    msg.deviceID = 1;
+    srand(time(NULL));
+    msg.deviceID = rand(); // Just for test.
     msg.model = "ROScube-I";
     msg.host = "myhost";
     msg.ip = "1.2.3.4";
     msg.mac = "00:11:22:33:44:55";
-    msg.rmt_version = "0.9.0";
-
-    return device_info_publisher_update();
+    msg.rmt_version = PROJECT_VERSION;
 }
 
-int device_info_publisher_init(void)
+int device_info_init(void)
 {
     dds_entity_t topic;
     dds_return_t rc;
@@ -37,7 +41,7 @@ int device_info_publisher_init(void)
     }
 
     /* Create a Topic. */
-    topic = dds_create_topic(participant, &DeviceInfo_Msg_desc, "DeviceInfo_Msg", NULL, NULL);
+    topic = dds_create_topic(participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
     if (topic < 0) {
         DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));
         ret = -1;
@@ -60,10 +64,12 @@ exit:
     return ret;
 }
 
-static int device_info_publisher_update(void)
+int device_info_update(void)
 {
     dds_return_t rc;
     int ret = 0;
+
+    get_device_info();
 
     /* If info mation changes */
     if (info_change) {
@@ -78,7 +84,7 @@ static int device_info_publisher_update(void)
     return ret;
 }
 
-int device_info_publisher_deinit(void)
+int device_info_deinit(void)
 {
     dds_return_t rc;
     int ret = 0;

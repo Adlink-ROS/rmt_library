@@ -4,13 +4,13 @@
 
 int rmt_agent_init(void)
 {
-    return device_info_publisher_init();
+    return device_info_init();
 }
 
 int rmt_agent_running(void)
 {
     while (1) {
-        update_device_info();
+        device_info_update();
         sleep(1);
     }
     return 0;
@@ -18,5 +18,5 @@ int rmt_agent_running(void)
 
 int rmt_agent_deinit(void)
 {
-    return device_info_publisher_deinit();
+    return device_info_deinit();
 }

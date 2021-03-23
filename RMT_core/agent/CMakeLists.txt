@@ -1,3 +1,7 @@
+# Define the version
+configure_file("config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+
 include(../idl/add_generated.cmake)
 
 # Build library rmt_agent
