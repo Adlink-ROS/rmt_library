@@ -89,7 +89,7 @@ exit:
     return 0;
 }
 
-int device_info_init(void)
+int devinfo_server_init(void)
 {
     dds_entity_t topic;
     dds_qos_t *qos;
@@ -131,7 +131,7 @@ exit:
     return ret;
 }
 
-int device_info_update(void)
+int devinfo_server_update(void)
 {
     dds_sample_info_t infos[MAX_SAMPLES];
     void *samples[MAX_SAMPLES];
@@ -164,11 +164,11 @@ int device_info_update(void)
     return ret;
 }
 
-int device_info_create_list(device_info **dev, uint32_t *num)
+int devinfo_server_create_list(device_info **dev, uint32_t *num)
 {
     int ret = 0;
 
-    ret = device_info_update();
+    ret = devinfo_server_update();
     if (ret != 0) {
         goto exit;
     }
@@ -189,7 +189,7 @@ exit:
     return ret;
 }
 
-int device_info_free_list(device_info **dev)
+int devinfo_server_free_list(device_info **dev)
 {
     if (*dev == NULL)
         return -1;
@@ -198,7 +198,7 @@ int device_info_free_list(device_info **dev)
     return 0;
 }
 
-int device_info_deinit(void)
+int devinfo_server_deinit(void)
 {
     dds_return_t rc;
     int ret = 0;

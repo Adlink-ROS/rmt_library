@@ -25,7 +25,7 @@ static void get_device_info(void)
     msg.rmt_version = PROJECT_VERSION;
 }
 
-int device_info_init(void)
+int devinfo_agent_init(void)
 {
     dds_entity_t topic;
     dds_return_t rc;
@@ -64,7 +64,7 @@ exit:
     return ret;
 }
 
-int device_info_update(void)
+int devinfo_agent_update(void)
 {
     dds_return_t rc;
     int ret = 0;
@@ -85,7 +85,7 @@ int device_info_update(void)
     return ret;
 }
 
-int device_info_deinit(void)
+int devinfo_agent_deinit(void)
 {
     dds_return_t rc;
     int ret = 0;
