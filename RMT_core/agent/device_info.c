@@ -79,6 +79,7 @@ int device_info_update(void)
             DDS_FATAL("dds_write: %s\n", dds_strretcode(-rc));
             ret = -1;
         }
+        info_change = 0;
     }
 
     return ret;

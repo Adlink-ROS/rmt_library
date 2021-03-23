@@ -124,6 +124,9 @@ int device_info_init(void)
     }
     dds_delete_qos(qos);
 
+    /* Waiting */
+    dds_sleepfor(DDS_MSECS(1000));
+
 exit:
     return ret;
 }
@@ -139,7 +142,7 @@ int device_info_update(void)
     samples[0] = DeviceInfo_Msg__alloc();
 
     while(true) {
-        rc = dds_read(reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
+        rc = dds_take(reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
         if (rc < 0) {
             DDS_FATAL("dds_read: %s\n", dds_strretcode(-rc));
             ret = -1;
@@ -150,9 +153,9 @@ int device_info_update(void)
         if ((rc > 0) && (infos[0].valid_data)) {
             msg = (DeviceInfo_Msg*) samples[0];
             add_device(msg);
-            break;
         } else {
-            dds_sleepfor(DDS_MSECS(20));
+            // If there is no other device
+            break;
         }
     }
 
