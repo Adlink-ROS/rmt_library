@@ -5,6 +5,8 @@
 #include "DeviceInfo.h"
 #include "rmt_server.h" // TODO: we only want to use the structure device_info
 
+#define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
+
 #define MAX_SAMPLES 1
 
 typedef struct _dev_list {
@@ -49,7 +51,7 @@ static int add_device(DeviceInfo_Msg *msg)
     return 0;
 }
 
-void free_dev_list(dev_list *ptr)
+static void free_dev_list(dev_list *ptr)
 {
     if (ptr) {
         free(ptr->info->host);
@@ -87,7 +89,7 @@ exit:
     return 0;
 }
 
-int device_info_subscriber_init(void)
+int device_info_init(void)
 {
     dds_entity_t topic;
     dds_qos_t *qos;
@@ -103,7 +105,7 @@ int device_info_subscriber_init(void)
     }
 
     /* Create a Topic. */
-    topic = dds_create_topic(participant, &DeviceInfo_Msg_desc, "DeviceInfo_Msg", NULL, NULL);
+    topic = dds_create_topic(participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
     if (topic < 0) {
         DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));    
         ret = -1;
@@ -126,7 +128,7 @@ exit:
     return ret;
 }
 
-int update_device_info(void)
+int device_info_update(void)
 {
     dds_sample_info_t infos[MAX_SAMPLES];
     void *samples[MAX_SAMPLES];
@@ -159,19 +161,41 @@ int update_device_info(void)
     return ret;
 }
 
-int list_device_info(device_info **dev, uint32_t *num)
+int device_info_create_list(device_info **dev, uint32_t *num)
 {
-    update_device_info();
+    int ret = 0;
+
+    ret = device_info_update();
+    if (ret != 0) {
+        goto exit;
+    }
+
     *num = dev_num;
     *dev = (device_info *) malloc(sizeof(device_info) * dev_num);
+    if (*dev == NULL) {
+        ret = -1;
+        goto exit;
+    }
     dev_list *ptr = dev_head;
     for (int i = 0; i < dev_num; i++) {
         (*dev)[i] = *ptr->info;
         ptr = ptr->next;
     }
+
+exit:
+    return ret;
 }
 
-int device_info_subscriber_deinit(void)
+int device_info_free_list(device_info **dev)
+{
+    if (*dev == NULL)
+        return -1;
+    free(*dev);
+    *dev = NULL;
+    return 0;
+}
+
+int device_info_deinit(void)
 {
     dds_return_t rc;
     int ret = 0;

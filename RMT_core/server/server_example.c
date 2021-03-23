@@ -8,7 +8,7 @@ int main(void)
 
     printf("RMT Library version is %s\n", rmt_server_version());
     rmt_server_init();
-    rmt_server_list_device(&dev_ptr, &dev_num);
+    dev_ptr = rmt_server_get_device_list(&dev_num);
     for (int i = 0; i < dev_num; i++) {
         printf("Device %d\n", i);
         printf("ID: %d\n", dev_ptr[i].deviceID);
@@ -19,6 +19,7 @@ int main(void)
         printf("RMT version: %s\n", dev_ptr[i].rmt_version);
         fflush (stdout);
     }
+    rmt_server_free_device_list(&dev_ptr);
     rmt_server_deinit();
 
     return 0;

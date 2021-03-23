@@ -13,7 +13,8 @@ typedef struct _device_info {
 } device_info;
 
 int rmt_server_init(void);
-int rmt_server_list_device(device_info **dev, uint32_t *num);
+device_info *rmt_server_get_device_list(uint32_t *num);
+int rmt_server_free_device_list(device_info **dev);
 int rmt_server_get_info(char *key, char *value);
 int rmt_server_set_info(char *key, char *value);
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len);
