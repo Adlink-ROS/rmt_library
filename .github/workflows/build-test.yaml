@@ -1,0 +1,15 @@
+name: build-test
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install necessary packages
+        run: sudo apt-get install libcunit1-dev
+      - name: Build
+        working-directory: ./RMT_core
+        run: cmake -Bbuild -H. && cmake --build build
+      - name: Test
+        working-directory: ./RMT_core/build
+        run: ctest -V
