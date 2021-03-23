@@ -1,6 +1,7 @@
 #include "rmt_agent.h"
 #include "devinfo_agent.h"
 #include <unistd.h> // sleep
+#include "config.h"
 
 int rmt_agent_init(void)
 {
@@ -19,4 +20,9 @@ int rmt_agent_running(void)
 int rmt_agent_deinit(void)
 {
     return devinfo_agent_deinit();
+}
+
+char* rmt_agent_version(void)
+{
+    return PROJECT_VERSION;
 }
