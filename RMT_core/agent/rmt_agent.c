@@ -1,6 +1,5 @@
 #include "rmt_agent.h"
 #include "devinfo_agent.h"
-#include <unistd.h> // sleep
 #include "config.h"
 
 int rmt_agent_init(void)
@@ -10,11 +9,7 @@ int rmt_agent_init(void)
 
 int rmt_agent_running(void)
 {
-    while (1) {
-        devinfo_agent_update();
-        sleep(1);
-    }
-    return 0;
+    return devinfo_agent_update();
 }
 
 int rmt_agent_deinit(void)

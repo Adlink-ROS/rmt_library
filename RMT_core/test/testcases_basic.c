@@ -35,7 +35,24 @@ void testVersion(void)
     CU_ASSERT_TRUE(ret == 0);
 }
 
+void testSearch(void)
+{
+    int dev_num;
+    device_info *dev_ptr;
+
+    // Run the agent
+    rmt_agent_running();
+    // Run the server
+    dev_ptr = rmt_server_create_device_list(&dev_num);
+
+    // Only 1 device here
+    CU_ASSERT_TRUE(dev_num == 1);
+
+    rmt_server_free_device_list(&dev_ptr);
+}
+
 CU_TestInfo testcases_basic[] = {
     {"Version", testVersion},
+    {"Search", testSearch},
     CU_TEST_INFO_NULL
 };
