@@ -5,7 +5,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include(../idl/add_generated.cmake)
 
 # Build library rmt_server
-add_library(rmt_server rmt_server.c device_info.c)
+add_library(rmt_server rmt_server.c devinfo_server.c)
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)

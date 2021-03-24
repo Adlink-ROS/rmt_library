@@ -6,6 +6,12 @@ The repo contains several components:
 * RMT Server (Server Side)
 * RMT Agent (Client Side)
 
+# Install necessary packages
+
+```bash
+sudo apt install libcunit1-dev
+```
+
 # Build
 
 * Build RMT_core
