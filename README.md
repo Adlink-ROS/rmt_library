@@ -22,6 +22,18 @@ cmake -Bbuild -H.
 cmake --build build
 ```
 
+# Run
+
+* Run RMT_core example
+  
+```bash
+cd RMT_core
+# Run the agent
+./build/agent/agent_example
+# Run the server
+./build/server/server_example
+```
+
 # Test
 
 * Run test
