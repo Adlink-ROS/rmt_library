@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+// TODO: use char[] instead of char* in the future, or it'll cause memory leak.
 typedef struct _device_info {
     uint64_t deviceID;
     char *model;
