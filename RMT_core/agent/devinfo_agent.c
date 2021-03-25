@@ -21,28 +21,38 @@ static dds_entity_t g_participant;
 static dds_entity_t g_writer;
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
-static char g_hostname[1024];
-static char g_interface[40];
-static char g_ip[40];
-static char g_mac[40];
+typedef struct _device_info {
+    char hostname[1024];
+    char interface[40];
+    char ip[40];
+    char mac[20];
+} device_info;
+static device_info g_dev;
 
 static int device_info_publisher_update(void);
 
 static void get_device_info(void)
 {
-    // Check hostname
-    gethostname(g_hostname, sizeof(g_hostname));
-    g_hostname[sizeof(g_hostname) - 1] = 0;
-    // Get IP
-    net_get_ip(g_interface, g_ip, sizeof(g_ip));
-    // Get MAC
-    net_get_mac(g_interface, g_mac, sizeof(g_mac));
+    device_info tmp_dev = g_dev;
 
-    g_msg.deviceID = net_get_id_from_mac(g_interface);
+    // Check hostname
+    gethostname(tmp_dev.hostname, sizeof(tmp_dev.hostname));
+    g_dev.hostname[sizeof(tmp_dev.hostname) - 1] = 0;
+    // Get IP
+    net_get_ip(tmp_dev.interface, tmp_dev.ip, sizeof(tmp_dev.ip));
+    // Get MAC
+    net_get_mac(tmp_dev.interface, tmp_dev.mac, sizeof(tmp_dev.mac));
+
+    if (memcmp(&g_dev, &tmp_dev, sizeof(device_info)) != 0) {
+        g_dev = tmp_dev;
+        g_info_change = 1;
+    }
+
+    g_msg.deviceID = net_get_id_from_mac(g_dev.interface);
     g_msg.model = "ROScube-I"; // TODO: get the correct model.
-    g_msg.host = g_hostname;
-    g_msg.ip = g_ip;
-    g_msg.mac = g_mac;
+    g_msg.host = g_dev.hostname;
+    g_msg.ip = g_dev.ip;
+    g_msg.mac = g_dev.mac;
     g_msg.rmt_version = PROJECT_VERSION;
 }
 
@@ -60,13 +70,13 @@ int devinfo_agent_init(char *interface)
      * If fail, return error.
      */
     if (interface != NULL) {
-        strcpy(g_interface, interface);
-    } else if (net_select_interface(g_interface) < 0) {
+        strcpy(g_dev.interface, interface);
+    } else if (net_select_interface(g_dev.interface) < 0) {
         ret = -1;
         goto exit;
     }
 
-    sprintf(dds_config, DDS_CONFIG, g_interface);
+    sprintf(dds_config, DDS_CONFIG, g_dev.interface);
     g_domain = dds_create_domain(DOMAIN_ID, dds_config);
     /* Create a Participant */
     g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
