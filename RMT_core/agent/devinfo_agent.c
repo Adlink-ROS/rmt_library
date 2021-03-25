@@ -24,6 +24,7 @@ static int g_info_change = 1;
 static char g_hostname[1024];
 static char g_interface[40];
 static char g_ip[40];
+static char g_mac[40];
 
 static int device_info_publisher_update(void);
 
@@ -34,6 +35,8 @@ static void get_device_info(void)
     g_hostname[sizeof(g_hostname) - 1] = 0;
     // Get IP
     get_ip(g_interface, g_ip, sizeof(g_ip));
+    // Get MAC
+    get_mac(g_interface, g_mac, sizeof(g_mac));
 
     /* TODO: Need to get real information data */
     srand(time(NULL));
@@ -41,7 +44,7 @@ static void get_device_info(void)
     g_msg.model = "ROScube-I";
     g_msg.host = g_hostname;
     g_msg.ip = g_ip;
-    g_msg.mac = "00:11:22:33:44:55";
+    g_msg.mac = g_mac;
     g_msg.rmt_version = PROJECT_VERSION;
 }
 

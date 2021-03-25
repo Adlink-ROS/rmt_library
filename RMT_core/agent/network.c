@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <net/if.h>
 #include <sys/socket.h>
@@ -54,5 +56,28 @@ int get_ip(char *interface, char *ip, int ip_len)
     strncpy(ip, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), ip_len-1);
     ip[ip_len-1] = 0;
    
+    return 0;
+}
+
+int get_mac(char *interface, char *mac, int mac_len)
+{
+    struct ifreq ifr;
+    int fd;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+
+    close(fd);
+
+    snprintf(mac, mac_len, "%02x:%02x:%02x:%02x:%02x:%02x", 
+            (unsigned char) ifr.ifr_hwaddr.sa_data[0],
+            (unsigned char) ifr.ifr_hwaddr.sa_data[1],
+            (unsigned char) ifr.ifr_hwaddr.sa_data[2],
+            (unsigned char) ifr.ifr_hwaddr.sa_data[3],
+            (unsigned char) ifr.ifr_hwaddr.sa_data[4],
+            (unsigned char) ifr.ifr_hwaddr.sa_data[5]);
+
     return 0;
 }
