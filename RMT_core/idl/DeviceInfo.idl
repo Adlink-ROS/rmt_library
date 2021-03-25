@@ -2,7 +2,7 @@ module DeviceInfo
 {
   struct Msg
   {
-    long deviceID;
+    unsigned long long deviceID;
     string model;
     string host;
     string ip;

@@ -81,3 +81,24 @@ int get_mac(char *interface, char *mac, int mac_len)
 
     return 0;
 }
+
+uint64_t get_id_from_mac(char *interface)
+{
+    uint64_t id = 0;
+    struct ifreq ifr;
+    int fd;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+
+    close(fd);
+
+    for (int i = 0; i < 6; i++) {
+        id <<= 8;
+        id += ifr.ifr_hwaddr.sa_data[i];
+    }
+
+    return id;
+}

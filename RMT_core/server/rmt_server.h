@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct _device_info {
-    int  deviceID;
+    uint64_t deviceID;
     char *model;
     char *host;
     char *ip;

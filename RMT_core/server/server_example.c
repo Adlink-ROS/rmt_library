@@ -11,7 +11,7 @@ int main(void)
     dev_ptr = rmt_server_create_device_list(&dev_num);
     for (int i = 0; i < dev_num; i++) {
         printf("Device %d\n", i);
-        printf("ID: %d\n", dev_ptr[i].deviceID);
+        printf("ID: %lu\n", dev_ptr[i].deviceID);
         printf("Model: %s\n", dev_ptr[i].model);
         printf("Host: %s\n", dev_ptr[i].host);
         printf("IP: %s\n", dev_ptr[i].ip);

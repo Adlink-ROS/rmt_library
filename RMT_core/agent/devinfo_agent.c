@@ -38,9 +38,7 @@ static void get_device_info(void)
     // Get MAC
     get_mac(g_interface, g_mac, sizeof(g_mac));
 
-    /* TODO: Need to get real information data */
-    srand(time(NULL));
-    g_msg.deviceID = rand(); // Just for test.
+    g_msg.deviceID = get_id_from_mac(g_interface);
     g_msg.model = "ROScube-I";
     g_msg.host = g_hostname;
     g_msg.ip = g_ip;
