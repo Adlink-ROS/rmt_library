@@ -3,7 +3,7 @@
 #include <string.h>
 #include "DeviceInfo.h"
 #include "dds/dds.h"
-#include "config.h"
+#include "version.h"
 #include "network.h"
 
 #define DOMAIN_ID 0

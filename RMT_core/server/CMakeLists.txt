@@ -1,5 +1,5 @@
 # Define the version
-configure_file("config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+configure_file("version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/version.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include(../idl/add_generated.cmake)

@@ -1,6 +1,6 @@
 #include "rmt_agent.h"
 #include "devinfo_agent.h"
-#include "config.h"
+#include "version.h"
 
 int rmt_agent_init(char *interface)
 {

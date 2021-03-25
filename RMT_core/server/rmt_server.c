@@ -1,5 +1,5 @@
 #include "rmt_server.h"
-#include "config.h"
+#include "version.h"
 #include "devinfo_server.h"
 
 int rmt_server_init(void)
