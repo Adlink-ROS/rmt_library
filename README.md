@@ -9,7 +9,7 @@ The repo contains several components:
 # Install necessary packages
 
 ```bash
-sudo apt install libcunit1-dev
+sudo apt install -y libcunit1-dev swig
 ```
 
 # Donwload
