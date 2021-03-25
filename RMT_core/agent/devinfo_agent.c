@@ -34,12 +34,12 @@ static void get_device_info(void)
     gethostname(g_hostname, sizeof(g_hostname));
     g_hostname[sizeof(g_hostname) - 1] = 0;
     // Get IP
-    get_ip(g_interface, g_ip, sizeof(g_ip));
+    net_get_ip(g_interface, g_ip, sizeof(g_ip));
     // Get MAC
-    get_mac(g_interface, g_mac, sizeof(g_mac));
+    net_get_mac(g_interface, g_mac, sizeof(g_mac));
 
-    g_msg.deviceID = get_id_from_mac(g_interface);
-    g_msg.model = "ROScube-I";
+    g_msg.deviceID = net_get_id_from_mac(g_interface);
+    g_msg.model = "ROScube-I"; // TODO: get the correct model.
     g_msg.host = g_hostname;
     g_msg.ip = g_ip;
     g_msg.mac = g_mac;
@@ -61,7 +61,7 @@ int devinfo_agent_init(char *interface)
      */
     if (interface != NULL) {
         strcpy(g_interface, interface);
-    } else if (select_interface(g_interface) < 0) {
+    } else if (net_select_interface(g_interface) < 0) {
         ret = -1;
         goto exit;
     }

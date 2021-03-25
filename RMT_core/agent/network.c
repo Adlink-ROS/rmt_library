@@ -11,7 +11,7 @@
 
 #include "network.h"
 
-int select_interface(char *interface)
+int net_select_interface(char *interface)
 {
     int ret = -1;
     struct if_nameindex *if_nidxs, *intf;
@@ -35,23 +35,24 @@ int select_interface(char *interface)
         }
     }
     if_freenameindex(if_nidxs);
+
 exit:
     close(sockfd);
     return ret;
 }
 
-int get_ip(char *interface, char *ip, int ip_len)
+int net_get_ip(char *interface, char *ip, int ip_len)
 {
-    int fd;
+    int sockfd;
     struct ifreq ifr;
    
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
    
     ifr.ifr_addr.sa_family = AF_INET; // get IPv4 address
     strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get IP from certain interface
-    ioctl(fd, SIOCGIFADDR, &ifr); // get IP
+    ioctl(sockfd, SIOCGIFADDR, &ifr); // get IP
    
-    close(fd);
+    close(sockfd);
 
     strncpy(ip, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), ip_len-1);
     ip[ip_len-1] = 0;
@@ -59,17 +60,17 @@ int get_ip(char *interface, char *ip, int ip_len)
     return 0;
 }
 
-int get_mac(char *interface, char *mac, int mac_len)
+int net_get_mac(char *interface, char *mac, int mac_len)
 {
     struct ifreq ifr;
-    int fd;
+    int sockfd;
 
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
     strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
+    ioctl(sockfd, SIOCGIFHWADDR, &ifr);
 
-    close(fd);
+    close(sockfd);
 
     snprintf(mac, mac_len, "%02x:%02x:%02x:%02x:%02x:%02x", 
             (unsigned char) ifr.ifr_hwaddr.sa_data[0],
@@ -82,18 +83,18 @@ int get_mac(char *interface, char *mac, int mac_len)
     return 0;
 }
 
-uint64_t get_id_from_mac(char *interface)
+uint64_t net_get_id_from_mac(char *interface)
 {
     uint64_t id = 0;
     struct ifreq ifr;
-    int fd;
+    int sockfd;
 
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
     strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
+    ioctl(sockfd, SIOCGIFHWADDR, &ifr);
 
-    close(fd);
+    close(sockfd);
 
     for (int i = 0; i < 6; i++) {
         id <<= 8;
