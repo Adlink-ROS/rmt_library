@@ -5,8 +5,12 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include(../idl/add_generated.cmake)
 
 # Build library rmt_server
-add_library(rmt_server rmt_server.c devinfo_server.c)
+add_library(rmt_server STATIC rmt_server.c devinfo_server.c)
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
+
+# Build library rmt_server_shared for SWIG
+add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c)
+target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)
 add_executable(server_example server_example.c)
