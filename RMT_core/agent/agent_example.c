@@ -5,7 +5,7 @@
 int main(void)
 {
     printf("This is RMT Agent.\n");
-    rmt_agent_init();
+    rmt_agent_init("enp1s0");
     while (1) {
         rmt_agent_running();
         sleep(1);

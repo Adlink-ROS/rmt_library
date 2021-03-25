@@ -1,39 +1,74 @@
 #include <stdlib.h>  // used by rand()
 #include <time.h>    // used by time()
+#include <string.h>
 #include "DeviceInfo.h"
 #include "dds/dds.h"
 #include "config.h"
+#include "network.h"
 
+#define DOMAIN_ID 0
 #define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
+#define DDS_CONFIG "<CycloneDDS>" \
+                   "  <Domain id=\"any\">" \
+                   "    <General>" \
+                   "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
+                   "    </General>" \
+                   "  </Domain>" \
+                   "</CycloneDDS>"
 
+static dds_entity_t g_domain;
 static dds_entity_t g_participant;
 static dds_entity_t g_writer;
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
+static char g_hostname[1024];
+static char g_interface[40];
+static char g_ip[40];
 
 static int device_info_publisher_update(void);
 
 static void get_device_info(void)
 {
+    // Check hostname
+    gethostname(g_hostname, sizeof(g_hostname));
+    g_hostname[sizeof(g_hostname) - 1] = 0;
+    // Get IP
+    get_ip(g_interface, g_ip, sizeof(g_ip));
+
     /* TODO: Need to get real information data */
     srand(time(NULL));
     g_msg.deviceID = rand(); // Just for test.
     g_msg.model = "ROScube-I";
-    g_msg.host = "myhost";
-    g_msg.ip = "1.2.3.4";
+    g_msg.host = g_hostname;
+    g_msg.ip = g_ip;
     g_msg.mac = "00:11:22:33:44:55";
     g_msg.rmt_version = PROJECT_VERSION;
 }
 
-int devinfo_agent_init(void)
+int devinfo_agent_init(char *interface)
 {
     dds_entity_t topic;
     dds_return_t rc;
     dds_qos_t *qos;
     int ret = 0;
+    char dds_config[2048];
 
+    /* 
+     * First, use interface user assigns
+     * If no, select the interface by ourselves
+     * If fail, return error.
+     */
+    if (interface != NULL) {
+        strcpy(g_interface, interface);
+    } else if (select_interface(g_interface) < 0) {
+        ret = -1;
+        goto exit;
+    }
+
+    sprintf(dds_config, DDS_CONFIG, g_interface);
+    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
     /* Create a Participant */
-    g_participant = dds_create_participant(DDS_DOMAIN_DEFAULT, NULL, NULL);
+    g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
     if (g_participant < 0) {
         DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-g_participant));
         ret = -1;
@@ -96,6 +131,8 @@ int devinfo_agent_deinit(void)
         DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));
         ret = -1;
     }
+    /* Delete g_domain */
+    dds_delete(g_domain);
 
     return ret;
 }
