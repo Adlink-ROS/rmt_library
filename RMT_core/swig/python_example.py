@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rmt_py_wrapper
 import json
 
