@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
     }
 
     printf("This is RMT Agent. id=%lu and network interface=%s\n", myid, my_interface);
-    rmt_agent_init(my_interface, myid);
+    rmt_agent_config(my_interface, myid);
+    rmt_agent_init();
     while (1) {
         rmt_agent_running();
         sleep(1);

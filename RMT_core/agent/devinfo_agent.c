@@ -55,13 +55,9 @@ static void get_device_info(void)
     g_msg.rmt_version = PROJECT_VERSION;
 }
 
-int devinfo_agent_init(char *interface, int id)
+int devinfo_agent_config(char *interface, int id)
 {
-    dds_entity_t topic;
-    dds_return_t rc;
-    dds_qos_t *qos;
     int ret = 0;
-    char dds_config[2048];
 
     /* Parse ID */
     if (id == 0) {
@@ -81,6 +77,17 @@ int devinfo_agent_init(char *interface, int id)
         ret = -1;
         goto exit;
     }
+exit:
+    return ret;
+}
+
+int devinfo_agent_init(void)
+{
+    dds_entity_t topic;
+    dds_return_t rc;
+    dds_qos_t *qos;
+    int ret = 0;
+    char dds_config[2048];
 
     sprintf(dds_config, DDS_CONFIG, g_dev.interface);
     g_domain = dds_create_domain(DOMAIN_ID, dds_config);
