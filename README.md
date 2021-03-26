@@ -34,6 +34,16 @@ cd RMT_core
 ./build/server/server_example
 ```
 
+* You can also assign id and interface
+
+```bash
+cd RMT_core
+# Run the agent
+./build/agent/agent_example --id 6166 --net enp1s0
+# Run the server
+./build/server/server_example --net enp1s0
+```
+
 # Test
 
 * Run test
