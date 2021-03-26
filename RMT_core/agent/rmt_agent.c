@@ -2,9 +2,9 @@
 #include "devinfo_agent.h"
 #include "version.h"
 
-int rmt_agent_init(char *interface)
+int rmt_agent_init(char *interface, int id)
 {
-    return devinfo_agent_init(interface);
+    return devinfo_agent_init(interface, id);
 }
 
 int rmt_agent_running(void)
