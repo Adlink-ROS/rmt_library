@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    uint32_t dev_num;
+    int dev_num;
     device_info *dev_ptr;
 
     printf("RMT Library version is %s\n", rmt_server_version());

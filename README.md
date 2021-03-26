@@ -9,26 +9,45 @@ The repo contains several components:
 # Install necessary packages
 
 ```bash
-sudo apt install libcunit1-dev
+sudo apt install -y libcunit1-dev swig
+```
+
+# Donwload
+
+```bash
+cd $HOME
+git clone https://github.com/Adlink-ROS/RMT.git
 ```
 
 # Build
 
-* Build RMT_core
+## RMT_core:
 
 ```bash
-cd RMT_core
+cd ~/RMT/RMT_core
 cmake -Bbuild -H.
 cmake --build build
 ```
 
 # Test
 
-* Run test
-
+## CTEST:
 ```bash
-cd build
+cd ~/RMT/RMT_core/build
 ctest
 # verbose
 ctest -V
+```
+
+## Python Wrapper Test:
+Run few agents before testing
+```bash
+cd ~/RMT/RMT_core/build/agent
+./agent_example
+```
+
+Start testing
+```bash
+cd ~/RMT/RMT_core/build/swig
+python3 python_example.py
 ```
