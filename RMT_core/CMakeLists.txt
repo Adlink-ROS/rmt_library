@@ -17,6 +17,9 @@ add_subdirectory(server)
 # Build RMT Agent
 add_subdirectory(agent)
 
+# Use SWIG to generate python lib
+add_subdirectory(swig)
+
 # Add test
 add_subdirectory(test)
 enable_testing()

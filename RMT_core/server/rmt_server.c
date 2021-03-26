@@ -12,7 +12,7 @@ int rmt_server_init(void)
     return devinfo_server_init();
 }
 
-device_info* rmt_server_create_device_list(uint32_t *num)
+device_info* rmt_server_create_device_list(int *num)
 {
     device_info *dev;
     devinfo_server_create_list(&dev, num);

@@ -14,7 +14,7 @@ struct option long_options[] = {
 
 int main(int argc, char *argv[])
 {
-    uint32_t dev_num;
+    int dev_num;
     device_info *dev_ptr;
 
     // Parse argument

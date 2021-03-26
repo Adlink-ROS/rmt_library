@@ -9,15 +9,22 @@ The repo contains several components:
 # Install necessary packages
 
 ```bash
-sudo apt install libcunit1-dev
+sudo apt install -y libcunit1-dev swig
+```
+
+# Donwload
+
+```bash
+cd $HOME
+git clone https://github.com/Adlink-ROS/RMT.git
 ```
 
 # Build
 
-* Build RMT_core
+## RMT_core:
 
 ```bash
-cd RMT_core
+cd ~/RMT/RMT_core
 cmake -Bbuild -H.
 cmake --build build
 ```
@@ -27,30 +34,48 @@ cmake --build build
 * Run RMT_core example
   
 ```bash
-cd RMT_core
-# Run the agent
-./build/agent/agent_example
-# Run the server
-./build/server/server_example
+# 1st terminal: Run the agent
+cd ~/RMT/RMT_core/build/agent
+./agent_example
+# 2nd terminal: Run the server
+cd ~/RMT/RMT_core/build/server
+./server_example
 ```
 
 * You can also assign id and interface
 
 ```bash
-cd RMT_core
-# Run the agent
-./build/agent/agent_example --id 6166 --net enp1s0
-# Run the server
-./build/server/server_example --net enp1s0
+# 1st terminal: Run the agent
+cd ~/RMT/RMT_core/build/agent
+./agent_example --id 6166 --net enp1s0
+# 2nd terminal: Run the server
+cd ~/RMT/RMT_core/build/server
+./server_example --net enp1s0
 ```
 
 # Test
 
-* Run test
+## CUnit:
 
 ```bash
-cd build
+cd ~/RMT/RMT_core/build
 ctest
 # verbose
 ctest -V
+```
+
+## Python Wrapper Test:
+
+* Run few agents before testing
+
+```bash
+cd ~/RMT/RMT_core/build/agent
+./agent_example
+```
+
+* Start testing
+
+```bash
+cd ~/RMT/RMT_core/build/swig
+python3 python_example.py
 ```

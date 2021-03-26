@@ -5,7 +5,7 @@
 
 // TODO: use char[] instead of char* in the future, or it'll cause memory leak.
 typedef struct _device_info {
-    uint64_t deviceID;
+    unsigned long deviceID;
     char *model;
     char *host;
     char *ip;
@@ -15,7 +15,7 @@ typedef struct _device_info {
 
 int rmt_server_config(char *interface);
 int rmt_server_init(void);
-device_info *rmt_server_create_device_list(uint32_t *num);
+device_info *rmt_server_create_device_list(int *num);
 int rmt_server_free_device_list(device_info **dev);
 int rmt_server_get_info(char *key, char *value);
 int rmt_server_set_info(char *key, char *value);

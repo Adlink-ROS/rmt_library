@@ -60,13 +60,6 @@ int devinfo_agent_config(char *interface, int id)
     int ret = 0;
     char dds_config[2048];
 
-    /* Parse ID */
-    if (id == 0) {
-        g_msg.deviceID = net_get_id_from_mac(g_dev.interface);
-    } else {
-        g_msg.deviceID = id;
-    }
-
     /* 
      * First, use interface user assigns
      * If no, select the interface by ourselves
@@ -79,6 +72,14 @@ int devinfo_agent_config(char *interface, int id)
         goto exit;
     }
 
+    /* Parse ID */
+    if (id == 0) {
+        g_msg.deviceID = net_get_id_from_mac(g_dev.interface);
+    } else {
+        g_msg.deviceID = id;
+    }
+
+    /* Create config */
     sprintf(dds_config, DDS_CONFIG, g_dev.interface);
     g_domain = dds_create_domain(DOMAIN_ID, dds_config);
 exit:
