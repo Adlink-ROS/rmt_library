@@ -1,8 +1,13 @@
 #include "rmt_agent.h"
 #include "devinfo_agent.h"
-#include "config.h"
+#include "version.h"
 
-int rmt_agent_init(void)
+int rmt_agent_config(char *interface, int id)
+{
+    return devinfo_agent_config(interface, id);
+}
+
+int rmt_agent_init()
 {
     return devinfo_agent_init();
 }

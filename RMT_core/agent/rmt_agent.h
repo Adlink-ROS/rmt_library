@@ -1,6 +1,7 @@
 #ifndef _RMT_AGENT_
 #define _RMT_AGENT_
 
+int rmt_agent_config(char *interface, int id);
 int rmt_agent_init(void);
 int rmt_agent_running(void);
 int rmt_agent_deinit(void);

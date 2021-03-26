@@ -4,9 +4,17 @@
 #include "dds/dds.h"
 #include "DeviceInfo.h"
 #include "rmt_server.h" // TODO: we only want to use the structure device_info
+#include "network.h"
 
+#define DOMAIN_ID 0
 #define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
-
+#define DDS_CONFIG "<CycloneDDS>" \
+                   "  <Domain id=\"any\">" \
+                   "    <General>" \
+                   "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
+                   "    </General>" \
+                   "  </Domain>" \
+                   "</CycloneDDS>"
 #define MAX_SAMPLES 1
 
 typedef struct _dev_list {
@@ -16,8 +24,11 @@ typedef struct _dev_list {
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
+static dds_entity_t g_domain = 0;
 static dds_entity_t g_participant;
 static dds_entity_t g_reader;
+
+static char g_interface[40];
 
 static int add_device(DeviceInfo_Msg *msg)
 {
@@ -90,6 +101,24 @@ exit:
     return 0;
 }
 
+int devinfo_server_config(char *interface)
+{
+    char dds_config[2048];
+
+    int ret = 0;
+    if (interface != NULL) {
+        strcpy(g_interface, interface);
+    } else if (net_select_interface(g_interface) < 0) {
+        ret = -1;
+        goto exit;
+    }
+
+    sprintf(dds_config, DDS_CONFIG, g_interface);
+    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
+exit:
+    return ret;
+}
+
 int devinfo_server_init(void)
 {
     dds_entity_t topic;
@@ -98,7 +127,7 @@ int devinfo_server_init(void)
     int ret = 0;
 
     /* Create a Participant. */
-    g_participant = dds_create_participant(DDS_DOMAIN_DEFAULT, NULL, NULL);
+    g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
     if (g_participant < 0) {
         DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-g_participant));
         ret = -1;
@@ -208,6 +237,11 @@ int devinfo_server_deinit(void)
     if (rc != DDS_RETCODE_OK) {
         DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));
         ret = -1;
+    }
+    /* Delete g_domain */
+    if (g_domain > 0) {
+        dds_delete(g_domain);
+        g_domain = 0;
     }
 
     // Remove all device

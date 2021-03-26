@@ -5,8 +5,8 @@ find_package(PythonLibs)
 include_directories(${PYTHON_INCLUDE_PATH})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-configure_file("${CMAKE_SOURCE_DIR}/server/config.h.in" "${CMAKE_BINARY_DIR}/server/config.h")
-include_directories("${CMAKE_BINARY_DIR}/server") # include config.h
+configure_file("${CMAKE_SOURCE_DIR}/server/version.h.in" "${CMAKE_BINARY_DIR}/server/version.h")
+include_directories("${CMAKE_BINARY_DIR}/server") # include version.h
 include_directories("${CMAKE_SOURCE_DIR}/server") # include rmt_server.h
 set(CMAKE_SWIG_FLAGS "")
 

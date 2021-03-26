@@ -1,15 +1,18 @@
 # Define the version
-configure_file("config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+configure_file("version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/version.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include(../idl/add_generated.cmake)
 
+# Include common function
+include_directories(${PROJECT_SOURCE_DIR}/common)
+
 # Build library rmt_server
-add_library(rmt_server STATIC rmt_server.c devinfo_server.c)
+add_library(rmt_server STATIC rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Build library rmt_server_shared for SWIG
-add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c)
+add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
 target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)
