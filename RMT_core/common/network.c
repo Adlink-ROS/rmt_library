@@ -32,6 +32,8 @@ int net_select_interface(char *interface)
         if ((ifr.ifr_flags & IFF_UP) && (ifr.ifr_flags & IFF_RUNNING) && !(ifr.ifr_flags & IFF_LOOPBACK)) {
             strcpy(interface, intf->if_name);
             ret = 0;
+            // Use the first wireless interface.
+            if (interface[0] == 'w') break;
         }
     }
     if_freenameindex(if_nidxs);
