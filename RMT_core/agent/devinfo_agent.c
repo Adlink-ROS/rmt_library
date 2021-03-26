@@ -16,7 +16,7 @@
                    "  </Domain>" \
                    "</CycloneDDS>"
 
-static dds_entity_t g_domain;
+static dds_entity_t g_domain = 0;
 static dds_entity_t g_participant;
 static dds_entity_t g_writer;
 static DeviceInfo_Msg g_msg;
@@ -58,6 +58,7 @@ static void get_device_info(void)
 int devinfo_agent_config(char *interface, int id)
 {
     int ret = 0;
+    char dds_config[2048];
 
     /* Parse ID */
     if (id == 0) {
@@ -77,6 +78,9 @@ int devinfo_agent_config(char *interface, int id)
         ret = -1;
         goto exit;
     }
+
+    sprintf(dds_config, DDS_CONFIG, g_dev.interface);
+    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
 exit:
     return ret;
 }
@@ -87,10 +91,7 @@ int devinfo_agent_init(void)
     dds_return_t rc;
     dds_qos_t *qos;
     int ret = 0;
-    char dds_config[2048];
 
-    sprintf(dds_config, DDS_CONFIG, g_dev.interface);
-    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
     /* Create a Participant */
     g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
     if (g_participant < 0) {
@@ -156,7 +157,10 @@ int devinfo_agent_deinit(void)
         ret = -1;
     }
     /* Delete g_domain */
-    dds_delete(g_domain);
+    if (g_domain > 0) {
+        dds_delete(g_domain);
+        g_domain = 0;
+    }
 
     return ret;
 }
