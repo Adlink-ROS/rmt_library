@@ -2,6 +2,11 @@
 #include "version.h"
 #include "devinfo_server.h"
 
+int rmt_server_config(char *interface)
+{
+    return devinfo_server_config(interface);
+}
+
 int rmt_server_init(void)
 {
     return devinfo_server_init();

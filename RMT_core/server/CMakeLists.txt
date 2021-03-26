@@ -4,8 +4,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include(../idl/add_generated.cmake)
 
+# Include common function
+include_directories(${PROJECT_SOURCE_DIR}/common)
+
 # Build library rmt_server
-add_library(rmt_server rmt_server.c devinfo_server.c)
+add_library(rmt_server rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)

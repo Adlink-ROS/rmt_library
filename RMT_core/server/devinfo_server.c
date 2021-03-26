@@ -4,9 +4,17 @@
 #include "dds/dds.h"
 #include "DeviceInfo.h"
 #include "rmt_server.h" // TODO: we only want to use the structure device_info
+#include "network.h"
 
+#define DOMAIN_ID 0
 #define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
-
+#define DDS_CONFIG "<CycloneDDS>" \
+                   "  <Domain id=\"any\">" \
+                   "    <General>" \
+                   "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
+                   "    </General>" \
+                   "  </Domain>" \
+                   "</CycloneDDS>"
 #define MAX_SAMPLES 1
 
 typedef struct _dev_list {
@@ -16,8 +24,11 @@ typedef struct _dev_list {
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
+static dds_entity_t g_domain;
 static dds_entity_t g_participant;
 static dds_entity_t g_reader;
+
+static char g_interface[40];
 
 static int add_device(DeviceInfo_Msg *msg)
 {
@@ -90,13 +101,29 @@ exit:
     return 0;
 }
 
+int devinfo_server_config(char *interface)
+{
+    int ret = 0;
+    if (interface != NULL) {
+        strcpy(g_interface, interface);
+    } else if (net_select_interface(g_interface) < 0) {
+        ret = -1;
+        goto exit;
+    }
+exit:
+    return ret;
+}
+
 int devinfo_server_init(void)
 {
     dds_entity_t topic;
     dds_qos_t *qos;
     dds_return_t rc;
     int ret = 0;
+    char dds_config[2048];
 
+    sprintf(dds_config, DDS_CONFIG, g_interface);
+    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
     /* Create a Participant. */
     g_participant = dds_create_participant(DDS_DOMAIN_DEFAULT, NULL, NULL);
     if (g_participant < 0) {
@@ -209,6 +236,8 @@ int devinfo_server_deinit(void)
         DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));
         ret = -1;
     }
+    /* Delete g_domain */
+    dds_delete(g_domain);
 
     // Remove all device
     while (g_dev_head) {

@@ -1,12 +1,39 @@
 #include <stdio.h>
+#include <string.h>
+#include <getopt.h>
 #include "rmt_server.h"
 
-int main(void)
+static char *my_interface = NULL;
+static char interface[50];
+
+char *short_options = "n:";
+struct option long_options[] = {
+    {"net", required_argument, NULL, 'n'},
+    { 0, 0, 0, 0},
+};
+
+int main(int argc, char *argv[])
 {
     uint32_t dev_num;
     device_info *dev_ptr;
 
+    // Parse argument
+    int cmd_opt = 0;
+    while ((cmd_opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
+        switch (cmd_opt) {
+            case 'n':
+                strcpy(interface, optarg);
+                my_interface = interface;
+                break;
+            case '?':
+            default:
+                printf("Not supported option\n");
+                return 1;
+        }
+    }
+
     printf("RMT Library version is %s\n", rmt_server_version());
+    rmt_server_config(my_interface);
     rmt_server_init();
     dev_ptr = rmt_server_create_device_list(&dev_num);
     for (int i = 0; i < dev_num; i++) {
