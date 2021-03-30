@@ -1,21 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
-/* Used by DDS */
-#include "dds/dds.h"
+
+#include "dds_transport.h"
 #include "DeviceInfo.h"
 #include "rmt_server.h" // TODO: we only want to use the structure device_info
-#include "network.h"
-
-#define DOMAIN_ID 0
-#define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
-#define DDS_CONFIG "<CycloneDDS>" \
-                   "  <Domain id=\"any\">" \
-                   "    <General>" \
-                   "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
-                   "    </General>" \
-                   "  </Domain>" \
-                   "</CycloneDDS>"
-#define MAX_SAMPLES 1
 
 typedef struct _dev_list {
     struct _dev_list *next;
@@ -23,12 +11,6 @@ typedef struct _dev_list {
 } dev_list;
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
-
-static dds_entity_t g_domain = 0;
-static dds_entity_t g_participant;
-static dds_entity_t g_reader;
-
-static char g_interface[40];
 
 static int add_device(DeviceInfo_Msg *msg)
 {
@@ -101,97 +83,9 @@ exit:
     return 0;
 }
 
-int devinfo_server_config(char *interface)
-{
-    char dds_config[2048];
-
-    int ret = 0;
-    if (interface != NULL) {
-        strcpy(g_interface, interface);
-    } else if (net_select_interface(g_interface) < 0) {
-        ret = -1;
-        goto exit;
-    }
-
-    sprintf(dds_config, DDS_CONFIG, g_interface);
-    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
-exit:
-    return ret;
-}
-
-int devinfo_server_init(void)
-{
-    dds_entity_t topic;
-    dds_qos_t *qos;
-    dds_return_t rc;
-    int ret = 0;
-
-    /* Create a Participant. */
-    g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
-    if (g_participant < 0) {
-        DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-g_participant));
-        ret = -1;
-        goto exit; 
-    }
-
-    /* Create a Topic. */
-    topic = dds_create_topic(g_participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
-    if (topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));    
-        ret = -1;
-        goto exit; 
-    }
-
-    /* Create a reliable Reader. */
-    qos = dds_create_qos();
-    dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS (10));
-    dds_qset_durability(qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    g_reader = dds_create_reader(g_participant, topic, qos, NULL);
-    if (g_reader < 0) {
-        DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-g_reader));
-        ret = -1;
-        goto exit; 
-    }
-    dds_delete_qos(qos);
-
-    /* Waiting */
-    dds_sleepfor(DDS_MSECS(1000));
-
-exit:
-    return ret;
-}
-
 int devinfo_server_update(void)
 {
-    dds_sample_info_t infos[MAX_SAMPLES];
-    void *samples[MAX_SAMPLES];
-    DeviceInfo_Msg *msg;
-    dds_return_t rc;
-    int ret = 0;
-
-    samples[0] = DeviceInfo_Msg__alloc();
-
-    while(true) {
-        rc = dds_take(g_reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
-        if (rc < 0) {
-            DDS_FATAL("dds_read: %s\n", dds_strretcode(-rc));
-            ret = -1;
-            break;
-        }
-
-        /* Check if we read some data and it is valid. */
-        if ((rc > 0) && (infos[0].valid_data)) {
-            msg = (DeviceInfo_Msg *) samples[0];
-            add_device(msg);
-        } else {
-            // If there is no other device
-            break;
-        }
-    }
-
-    DeviceInfo_Msg_free(samples[0], DDS_FREE_ALL);
-
-    return ret;
+    return dds_transport_try_get_devinfo(add_device);
 }
 
 int devinfo_server_create_list(device_info **dev, uint32_t *num)
@@ -230,20 +124,6 @@ int devinfo_server_free_list(device_info **dev)
 
 int devinfo_server_deinit(void)
 {
-    dds_return_t rc;
-    int ret = 0;
-
-    rc = dds_delete(g_participant);
-    if (rc != DDS_RETCODE_OK) {
-        DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));
-        ret = -1;
-    }
-    /* Delete g_domain */
-    if (g_domain > 0) {
-        dds_delete(g_domain);
-        g_domain = 0;
-    }
-
     // Remove all device
     while (g_dev_head) {
         dev_list *dev_ptr = g_dev_head;
@@ -251,6 +131,4 @@ int devinfo_server_deinit(void)
         free_dev_list(dev_ptr);
         g_dev_num--;
     }
-
-    return ret;
 }
