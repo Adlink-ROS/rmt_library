@@ -18,6 +18,7 @@
 static dds_entity_t g_domain = 0;
 static dds_entity_t g_participant;
 static dds_entity_t g_devinfo_reader;
+static dds_entity_t g_devinfo_writer;
 
 static char g_interface[40];
 
@@ -39,7 +40,7 @@ exit:
     return ret;
 }
 
-int dds_transport_init(void)
+int dds_transport_server_init(void)
 {
     dds_entity_t topic;
     dds_qos_t *qos;
@@ -64,7 +65,7 @@ int dds_transport_init(void)
 
     /* Create a reliable Reader. */
     qos = dds_create_qos();
-    dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS (10));
+    dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(qos, DDS_DURABILITY_TRANSIENT_LOCAL);
     g_devinfo_reader = dds_create_reader(g_participant, topic, qos, NULL);
     if (g_devinfo_reader < 0) {
@@ -78,6 +79,58 @@ int dds_transport_init(void)
     dds_sleepfor(DDS_MSECS(1000));
 
 exit:
+    return ret;
+}
+
+int dds_transport_agent_init(void)
+{
+    dds_entity_t topic;
+    dds_return_t rc;
+    dds_qos_t *qos;
+    int ret = 0;
+
+    /* Create a Participant */
+    g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
+    if (g_participant < 0) {
+        DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-g_participant));
+        ret = -1;
+        goto exit;
+    }
+
+    /* Create a Topic. */
+    topic = dds_create_topic(g_participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
+    if (topic < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));
+        ret = -1;
+        goto exit;
+    }
+    
+    /* Create a Writer. */
+    qos = dds_create_qos();
+    dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    dds_qset_durability(qos, DDS_DURABILITY_TRANSIENT_LOCAL);
+    g_devinfo_writer = dds_create_writer(g_participant, topic, qos, NULL);
+    if (g_devinfo_writer < 0) {
+        DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-g_devinfo_writer));
+        ret = -1;
+        goto exit;
+    }
+    dds_delete_qos(qos);
+    
+exit:
+    return ret;
+}
+
+int dds_transport_send_devinfo(struct DeviceInfo_Msg *msg)
+{
+    int ret = 0;
+    dds_return_t rc;
+    dds_sleepfor(DDS_MSECS(1000)); // Wait for data ready
+    rc = dds_write(g_devinfo_writer, msg);
+    if (rc != DDS_RETCODE_OK) {
+        DDS_FATAL("dds_write: %s\n", dds_strretcode(-rc));
+        ret = -1;
+    }
     return ret;
 }
 
@@ -119,6 +172,7 @@ int dds_transport_deinit(void)
     dds_return_t rc;
     int ret = 0;
 
+    /* Deleting the g_participant will delete all its children recursively as well. */
     rc = dds_delete(g_participant);
     if (rc != DDS_RETCODE_OK) {
         DDS_FATAL("dds_delete: %s\n", dds_strretcode(-rc));

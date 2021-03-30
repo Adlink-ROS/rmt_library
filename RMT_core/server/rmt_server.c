@@ -11,7 +11,7 @@ int rmt_server_config(char *interface)
 
 int rmt_server_init(void)
 {
-    return dds_transport_init();
+    return dds_transport_server_init();
 }
 
 device_info* rmt_server_create_device_list(int *num)
