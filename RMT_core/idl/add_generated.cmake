@@ -12,3 +12,4 @@ function(add_generated _target)
 endfunction()
 
 add_generated("DeviceInfo")
+add_generated("DataInfo")

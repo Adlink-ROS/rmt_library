@@ -1,0 +1,17 @@
+module DataRequest
+{
+    struct Request
+    {
+       unsigned long long deviceID;
+       unsigned long type;
+       string msg;
+    };
+    #pragma keylist Request deviceID
+    struct Reply
+    {
+        unsigned long long deviceID;
+        unsigned long type;
+        string msg;
+    };
+    #pragma keylist Reply deviceID
+};
