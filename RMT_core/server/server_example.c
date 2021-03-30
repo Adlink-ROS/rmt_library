@@ -6,11 +6,19 @@
 static char *my_interface = NULL;
 static char interface[50];
 
-char *short_options = "n:";
+char *short_options = "n:h";
 struct option long_options[] = {
-    {"net", required_argument, NULL, 'n'},
+    {"net",  required_argument, NULL, 'n'},
+    {"help", no_argument,       NULL, 'h'},
     { 0, 0, 0, 0},
 };
+
+void print_help(void)
+{
+    printf("Usage: ./server_example [options]\n");
+    printf("* --help: Showing this messages.\n");
+    printf("* --net [interface]: Decide which interface agent uses.\n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +33,9 @@ int main(int argc, char *argv[])
                 strcpy(interface, optarg);
                 my_interface = interface;
                 break;
+            case 'h':
+                print_help();
+                return 0;
             case '?':
             default:
                 printf("Not supported option\n");

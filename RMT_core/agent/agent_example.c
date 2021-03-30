@@ -9,12 +9,21 @@ static unsigned long myid = 0;
 static char *my_interface = NULL;
 static char interface[50];
 
-char *short_options = "i:n:";
+char *short_options = "i:n:h";
 struct option long_options[] = {
-    {"id",  required_argument, NULL, 'i'},
-    {"net", required_argument, NULL, 'n'},
+    {"id",   required_argument, NULL, 'i'},
+    {"net",  required_argument, NULL, 'n'},
+    {"help", no_argument,       NULL, 'h'},
     { 0, 0, 0, 0},
 };
+
+void print_help(void)
+{
+    printf("Usage: ./agent_example [options]\n");
+    printf("* --help: Showing this messages.\n");
+    printf("* --id [myID]: Use myID as the ID.\n");
+    printf("* --net [interface]: Decide which interface agent uses.\n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -29,9 +38,13 @@ int main(int argc, char *argv[])
                 strcpy(interface, optarg);
                 my_interface = interface;
                 break;
+            case 'h':
+                print_help();
+                return 0;
             case '?':
             default:
                 printf("Not supported option\n");
+                print_help();
                 return 1;
         }
     }
