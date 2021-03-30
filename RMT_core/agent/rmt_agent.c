@@ -7,7 +7,7 @@ int rmt_agent_config(char *interface, int id)
     return devinfo_agent_config(interface, id);
 }
 
-int rmt_agent_init()
+int rmt_agent_init(void)
 {
     return devinfo_agent_init();
 }

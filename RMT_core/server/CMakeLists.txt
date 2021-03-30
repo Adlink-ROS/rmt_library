@@ -8,11 +8,11 @@ include(../idl/add_generated.cmake)
 include_directories(${PROJECT_SOURCE_DIR}/common)
 
 # Build library rmt_server
-add_library(rmt_server STATIC rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
+add_library(rmt_server STATIC rmt_server.c devinfo_server.c datainfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Build library rmt_server_shared for SWIG
-add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
+add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c datainfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
 target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)

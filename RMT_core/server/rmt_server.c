@@ -24,12 +24,12 @@ int rmt_server_free_device_list(device_info **dev)
     return devinfo_server_free_list(dev);
 }
 
-int rmt_server_get_info(char *key, char *value)
+data_info* rmt_server_get_info(unsigned long *id_list, char *key_list, int dev_num)
 {
     return 0;
 }
 
-int rmt_server_set_info(char *key, char *value)
+int* rmt_server_set_info(unsigned long *id_list, char *key_list, data_info *dev_list, int dev_num)
 {
     return 0;
 }

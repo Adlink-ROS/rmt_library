@@ -1,0 +1,4 @@
+#ifndef _DATAINFO_SERVER_
+#define _DATAINFO_SERVER_
+
+#endif /*_DATAINFO_SERVER_*/
