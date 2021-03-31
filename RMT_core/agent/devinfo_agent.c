@@ -68,7 +68,7 @@ exit:
     return ret;
 }
 
-int devinfo_agent_update(void)
+int devinfo_agent_update(struct dds_transport *transport)
 {
     int ret = 0;
 
@@ -76,7 +76,7 @@ int devinfo_agent_update(void)
 
     /* If info mation changes */
     if (g_info_change) {
-        dds_transport_send_devinfo(&g_msg);
+        dds_transport_send_devinfo(transport, &g_msg);
         g_info_change = 0;
     }
 

@@ -83,16 +83,16 @@ exit:
     return 0;
 }
 
-int devinfo_server_update(void)
+int devinfo_server_update(struct dds_transport *transport)
 {
-    return dds_transport_try_get_devinfo(add_device);
+    return dds_transport_try_get_devinfo(transport, add_device);
 }
 
-int devinfo_server_create_list(device_info **dev, uint32_t *num)
+int devinfo_server_create_list(struct dds_transport *transport, device_info **dev, uint32_t *num)
 {
     int ret = 0;
 
-    ret = devinfo_server_update();
+    ret = devinfo_server_update(transport);
     if (ret != 0) {
         goto exit;
     }

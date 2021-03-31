@@ -4,20 +4,26 @@
 #include "devinfo_server.h"
 #include "datainfo_server.h"
 
+static struct dds_transport *g_transport;
+
 int rmt_server_config(char *interface)
 {
-    return dds_transport_domain_init(interface);
+    return dds_transport_config_init(interface);
 }
 
 int rmt_server_init(void)
 {
-    return dds_transport_server_init();
+    g_transport = dds_transport_server_init();
+    if (g_transport)
+        return 0;
+    else
+        return -1;
 }
 
 device_info* rmt_server_create_device_list(int *num)
 {
     device_info *dev;
-    devinfo_server_create_list(&dev, num);
+    devinfo_server_create_list(g_transport, &dev, num);
     return dev;
 }
 
@@ -48,7 +54,7 @@ int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len)
 
 int rmt_server_deinit(void)
 {
-    int ret = dds_transport_deinit();
+    int ret = dds_transport_deinit(g_transport);
     devinfo_server_deinit();
     return ret;
 }

@@ -3,25 +3,31 @@
 #include "devinfo_agent.h"
 #include "version.h"
 
+static struct dds_transport *g_transport;
+
 int rmt_agent_config(char *interface, int id)
 {
-    dds_transport_domain_init(interface);
+    dds_transport_config_init(interface);
     devinfo_agent_config(interface, id);
 }
 
 int rmt_agent_init(void)
 {
-    return dds_transport_agent_init();
+    g_transport = dds_transport_agent_init();
+    if (g_transport)
+        return 0;
+    else
+        return -1;
 }
 
 int rmt_agent_running(void)
 {
-    return devinfo_agent_update();
+    return devinfo_agent_update(g_transport);
 }
 
 int rmt_agent_deinit(void)
 {
-    return dds_transport_deinit();
+    return dds_transport_deinit(g_transport);
 }
 
 char* rmt_agent_version(void)
