@@ -19,6 +19,7 @@ static dds_entity_t g_domain = 0;
 static dds_entity_t g_participant;
 static dds_entity_t g_devinfo_reader;
 static dds_entity_t g_devinfo_writer;
+static dds_entity_t g_devinfo_topic;
 
 static char g_interface[40];
 
@@ -40,11 +41,8 @@ exit:
     return ret;
 }
 
-int dds_transport_server_init(void)
+int dds_transport_init(void)
 {
-    dds_entity_t topic;
-    dds_qos_t *qos;
-    dds_return_t rc;
     int ret = 0;
 
     /* Create a Participant. */
@@ -56,18 +54,32 @@ int dds_transport_server_init(void)
     }
 
     /* Create a Topic. */
-    topic = dds_create_topic(g_participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
-    if (topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));    
+    g_devinfo_topic = dds_create_topic(g_participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
+    if (g_devinfo_topic < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-g_devinfo_topic));    
         ret = -1;
         goto exit; 
+    }
+
+exit:
+    return ret;
+}
+
+int dds_transport_server_init(void)
+{
+    dds_qos_t *qos;
+    int ret = 0;
+
+    if (dds_transport_init() < 0) {
+        ret = -1;
+        goto exit;
     }
 
     /* Create a reliable Reader. */
     qos = dds_create_qos();
     dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    g_devinfo_reader = dds_create_reader(g_participant, topic, qos, NULL);
+    g_devinfo_reader = dds_create_reader(g_participant, g_devinfo_topic, qos, NULL);
     if (g_devinfo_reader < 0) {
         DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-g_devinfo_reader));
         ret = -1;
@@ -84,32 +96,19 @@ exit:
 
 int dds_transport_agent_init(void)
 {
-    dds_entity_t topic;
-    dds_return_t rc;
     dds_qos_t *qos;
     int ret = 0;
 
-    /* Create a Participant */
-    g_participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
-    if (g_participant < 0) {
-        DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-g_participant));
+    if (dds_transport_init() < 0) {
         ret = -1;
         goto exit;
     }
 
-    /* Create a Topic. */
-    topic = dds_create_topic(g_participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
-    if (topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic));
-        ret = -1;
-        goto exit;
-    }
-    
     /* Create a Writer. */
     qos = dds_create_qos();
     dds_qset_reliability(qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    g_devinfo_writer = dds_create_writer(g_participant, topic, qos, NULL);
+    g_devinfo_writer = dds_create_writer(g_participant, g_devinfo_topic, qos, NULL);
     if (g_devinfo_writer < 0) {
         DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-g_devinfo_writer));
         ret = -1;
