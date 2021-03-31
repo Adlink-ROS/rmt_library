@@ -12,12 +12,13 @@ typedef struct _dev_list {
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
-static int add_device(DeviceInfo_Msg *msg)
+static int add_device(void *msg)
 {
+    DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     // Check whether the device exist or not.
     dev_list *dev_ptr = g_dev_head;
     while (dev_ptr) {
-        if (dev_ptr->info->deviceID == msg->deviceID)
+        if (dev_ptr->info->deviceID == devinfo_msg->deviceID)
             break;
         dev_ptr = dev_ptr->next;
     }
@@ -34,12 +35,12 @@ static int add_device(DeviceInfo_Msg *msg)
         // The device exist. Update it.
         selected_dev = dev_ptr;
     }
-    selected_dev->info->deviceID = msg->deviceID;
-    selected_dev->info->host = strdup(msg->host);
-    selected_dev->info->ip = strdup(msg->ip);
-    selected_dev->info->mac = strdup(msg->mac);
-    selected_dev->info->model = strdup(msg->model);
-    selected_dev->info->rmt_version = strdup(msg->rmt_version);
+    selected_dev->info->deviceID = devinfo_msg->deviceID;
+    selected_dev->info->host = strdup(devinfo_msg->host);
+    selected_dev->info->ip = strdup(devinfo_msg->ip);
+    selected_dev->info->mac = strdup(devinfo_msg->mac);
+    selected_dev->info->model = strdup(devinfo_msg->model);
+    selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
     
     return 0;
 }
@@ -85,7 +86,7 @@ exit:
 
 int devinfo_server_update(struct dds_transport *transport)
 {
-    return dds_transport_try_get_devinfo(transport, add_device);
+    return dds_transport_try_recv(PAIR_DEV_INFO, transport, add_device);
 }
 
 int devinfo_server_create_list(struct dds_transport *transport, device_info **dev, uint32_t *num)

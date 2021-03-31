@@ -1,4 +1,4 @@
-module DataRequest
+module DataInfo
 {
     struct Request
     {

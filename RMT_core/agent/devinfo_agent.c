@@ -76,7 +76,7 @@ int devinfo_agent_update(struct dds_transport *transport)
 
     /* If info mation changes */
     if (g_info_change) {
-        dds_transport_send_devinfo(transport, &g_msg);
+        dds_transport_send(PAIR_DEV_INFO, transport, &g_msg);
         g_info_change = 0;
     }
 
