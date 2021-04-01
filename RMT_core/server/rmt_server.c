@@ -34,7 +34,7 @@ int rmt_server_free_device_list(device_info **dev)
 
 data_info* rmt_server_get_info(unsigned long *id_list, char *key_list, int dev_num)
 {
-    return datainfo_server_get_info(id_list, key_list, dev_num);
+    return datainfo_server_get_info(g_transport, id_list, key_list, dev_num);
 }
 
 int* rmt_server_set_info(unsigned long *id_list, char *key_list, data_info *dev_list, int dev_num)

@@ -7,8 +7,9 @@
 #include "network.h"
 
 #define DOMAIN_ID 0
-#define TOPIC_DEVICE_INFO "DeviceInfo_Msg"
+#define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
 #define TOPIC_PAIR_DATA_REQ    "DataReq_Msg"
+#define TOPIC_PAIR_DATA_REPLY  "DataReply_Msg"
 #define DDS_CONFIG "<CycloneDDS>" \
                    "  <Domain id=\"any\">" \
                    "    <General>" \
@@ -90,6 +91,16 @@ static struct dds_transport *dds_transport_init(void)
     transport->pairs[PAIR_DATA_REQ].desc = &DataInfo_Request_desc;
     transport->pairs[PAIR_DATA_REQ].size = sizeof(DataInfo_Request);
 
+    /* Create topic TOPIC_PAIR_DATA_REPLY */
+    transport->pairs[PAIR_DATA_REPLY].topic = dds_create_topic(transport->participant, &DataInfo_Reply_desc, TOPIC_PAIR_DATA_REPLY, NULL, NULL);
+    if (transport->pairs[PAIR_DATA_REPLY].topic < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].topic)); 
+        ret = -1;
+        goto exit;
+    }
+    transport->pairs[PAIR_DATA_REPLY].desc = &DataInfo_Reply_desc;
+    transport->pairs[PAIR_DATA_REPLY].size = sizeof(DataInfo_Reply);
+
 exit:
     return transport;
 }
@@ -117,12 +128,19 @@ struct dds_transport *dds_transport_server_init(void)
     }
     dds_delete_qos(devinfo_qos);
 
-    /* Create a datainfo Writer. */
     dds_qos_t *datainfo_qos = dds_create_qos();
     dds_qset_reliability(datainfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    /* Create a datainfo Writer. */
     transport->pairs[PAIR_DATA_REQ].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DATA_REQ].topic, datainfo_qos, NULL);
     if (transport->pairs[PAIR_DATA_REQ].writer < 0) {
         DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REQ].writer));
+        ret = -1;
+        goto exit;
+    }
+    /* Create a datainfo Reader*/
+    transport->pairs[PAIR_DATA_REPLY].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DATA_REPLY].topic, datainfo_qos, NULL);
+    if (transport->pairs[PAIR_DATA_REPLY].reader < 0) {
+        DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].reader));
         ret = -1;
         goto exit;
     }
@@ -158,12 +176,19 @@ struct dds_transport *dds_transport_agent_init(void)
     }
     dds_delete_qos(devinfo_qos);
 
-    /* Create a datainfo Reader*/
     dds_qos_t *datainfo_qos = dds_create_qos();
     dds_qset_reliability(datainfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    /* Create a datainfo Reader*/
     transport->pairs[PAIR_DATA_REQ].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DATA_REQ].topic, datainfo_qos, NULL);
     if (transport->pairs[PAIR_DATA_REQ].reader < 0) {
         DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REQ].reader));
+        ret = -1;
+        goto exit;
+    }
+    /* Create a datainfo Writer. */
+    transport->pairs[PAIR_DATA_REPLY].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DATA_REPLY].topic, datainfo_qos, NULL);
+    if (transport->pairs[PAIR_DATA_REPLY].writer < 0) {
+        DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].writer));
         ret = -1;
         goto exit;
     }

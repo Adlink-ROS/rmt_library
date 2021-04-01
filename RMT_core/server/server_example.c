@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
 {
     int dev_num;
     device_info *dev_ptr;
+    unsigned long *id_list;
 
     // Parse argument
     int cmd_opt = 0;
@@ -57,6 +59,13 @@ int main(int argc, char *argv[])
         printf("RMT version: %s\n", dev_ptr[i].rmt_version);
         fflush (stdout);
     }
+    // assign id to id_list
+    id_list = (unsigned long *) malloc(sizeof(unsigned long) * dev_num);
+    for (int i = 0; i < dev_num; i++) {
+        id_list[i] = dev_ptr[i].deviceID;
+    }
+    rmt_server_get_info(id_list, "cpu", dev_num);
+    free(id_list);
     rmt_server_free_device_list(&dev_ptr);
     rmt_server_deinit();
 

@@ -1,16 +1,23 @@
 module DataInfo
 {
+    typedef sequence<unsigned long long> ID_LIST; 
+    enum TYPE {
+        GET,
+        SET
+    };
     struct Request
     {
-       unsigned long long deviceID;
-       unsigned long type;
-       string msg;
+        DataInfo::ID_LIST id_list;
+        TYPE type;
+        string msg;
     };
-    #pragma keylist Request deviceID
+    #pragma keylist Request type
+    // it seems like we can't use unbounded array as keylist
+    //#pragma keylist Request id_list
     struct Reply
     {
         unsigned long long deviceID;
-        unsigned long type;
+        TYPE type;
         string msg;
     };
     #pragma keylist Reply deviceID

@@ -1,6 +1,7 @@
 #include "rmt_agent.h"
 #include "dds_transport.h"
 #include "devinfo_agent.h"
+#include "datainfo_agent.h"
 #include "version.h"
 
 static struct dds_transport *g_transport;
@@ -22,7 +23,9 @@ int rmt_agent_init(void)
 
 int rmt_agent_running(void)
 {
-    return devinfo_agent_update(g_transport);
+    devinfo_agent_update(g_transport);
+    datainfo_agent_update(g_transport);
+    return 0;
 }
 
 int rmt_agent_deinit(void)

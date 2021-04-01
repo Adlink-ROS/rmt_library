@@ -1,7 +1,29 @@
 #include <stdlib.h>
+#include "dds_transport.h"
 #include "rmt_server.h"
+#include "DataInfo.h"
 
-data_info* datainfo_server_get_info(unsigned long *id_list, char *key_list, int dev_num)
+static DataInfo_Request g_msg;
+
+static int recv_reply(void *msg)
 {
+    // TODO: parse the correct format
+    DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
+    printf("type: %d\n", datainfo_msg->type);
+    printf("id: %d\n", datainfo_msg->deviceID);
+    printf("msg: %s\n", datainfo_msg->msg);
+    return 0;
+}
+
+data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, char *key_list, int dev_num)
+{
+    g_msg.id_list._maximum = g_msg.id_list._length = dev_num;
+    g_msg.id_list._buffer = id_list; 
+    g_msg.msg = key_list;
+    g_msg.type = DataInfo_GET;
+    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    // TODO: setup timeout
+    sleep(3);
+    dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
     return NULL;
 }

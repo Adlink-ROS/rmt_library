@@ -4,7 +4,8 @@
 typedef enum _PAIR_KIND {
     PAIR_DEV_INFO,   // 0
     PAIR_DATA_REQ,   // 1
-    PAIR_TOTAL  // 2
+    PAIR_DATA_REPLY, // 2
+    PAIR_TOTAL       // 3
 } PAIR_KIND;
 
 struct DeviceInfo_Msg;
