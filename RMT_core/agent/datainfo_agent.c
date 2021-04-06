@@ -1,8 +1,13 @@
+#include <stdlib.h>
+#include <string.h>
 #include "dds_transport.h"
+#include "rmt_agent.h"
 #include "devinfo_agent.h"
 #include "datainfo_agent.h"
 #include "DataInfo.h"
 #include "logger.h"
+
+static datainfo_func *g_datainfo_func_maps;
 
 // RMT_TODO: This should be a queue
 DataInfo_Reply datainfo_reply;
@@ -11,6 +16,7 @@ static int recv_request(void *msg)
 {
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
+    datainfo_reply.msg = malloc(1024);
 
     RMT_LOG("key_list: %s\n", datainfo_msg->msg);
     RMT_LOG("type: %d\n", datainfo_msg->type);
@@ -35,7 +41,21 @@ static int recv_request(void *msg)
         // parse keylist and the return with value
         // RMT_TODO: need to fill out the corect reply message
         // RMT_TODO: we need to able to pass the handling function into here
-        datainfo_reply.msg = "cpu:20";
+        char *keys = strtok(datainfo_msg->msg, ":");
+        while (keys != NULL) {
+            for (int i = 0; g_datainfo_func_maps != NULL && g_datainfo_func_maps[i].key != 0; i++) {
+                if (strcmp(keys, g_datainfo_func_maps[i].key) == 0) {
+                    char value[256];
+                    g_datainfo_func_maps[i].get_func(value);
+                    strcat(datainfo_reply.msg, keys);
+                    strcat(datainfo_reply.msg, ":");
+                    strcat(datainfo_reply.msg, value);
+                    strcat(datainfo_reply.msg, ";");
+                }
+            }
+            keys = strtok(NULL, ":");
+        }
+        RMT_LOG("reply message: %s\n", datainfo_reply.msg);
     } else if (datainfo_msg->type == DataInfo_SET) {
         // set the info
     } else {
@@ -49,7 +69,11 @@ static int recv_request(void *msg)
 static int datainfo_agent_send_data(struct dds_transport *transport)
 {
     // reply the data
-    dds_transport_send(PAIR_DATA_REPLY, transport, &datainfo_reply);
+    if (datainfo_reply.msg) {
+        dds_transport_send(PAIR_DATA_REPLY, transport, &datainfo_reply);
+        free(datainfo_reply.msg);
+        datainfo_reply.msg = NULL;
+    }
     return 0;
 }
 
@@ -57,5 +81,12 @@ int datainfo_agent_update(struct dds_transport *transport)
 {
     dds_transport_try_recv(PAIR_DATA_REQ, transport, recv_request);
     datainfo_agent_send_data(transport);
+    return 0;
+}
+
+int datainfo_agent_init(datainfo_func *func_maps)
+{
+    g_datainfo_func_maps = func_maps;
+    datainfo_reply.msg = NULL;
     return 0;
 }
