@@ -1,4 +1,5 @@
 #include "dds_transport.h"
+#include "devinfo_agent.h"
 #include "datainfo_agent.h"
 #include "DataInfo.h"
 
@@ -7,24 +8,37 @@ DataInfo_Reply datainfo_reply;
 
 static int recv_request(void *msg)
 {
+    unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
 
     printf("key_list: %s\n", datainfo_msg->msg);
     printf("type: %d\n", datainfo_msg->type);
     printf("id_list.length: %d\n", datainfo_msg->id_list._length);
-    // RMT_TODO: check whether the ID matches or not
+    // check whether the ID matches or not
+    int dev_found = 0;
     for (int i = 0; i < datainfo_msg->id_list._length; i++) {
         printf("id_list.id %d:%lu\n", i, datainfo_msg->id_list._buffer[i]);
+        if (myid == datainfo_msg->id_list._buffer[i]) {
+            dev_found = 1;
+            break;
+        }
     }
+    // The request is not for me.
+    if (!dev_found) return 1;
 
-    // RMT_TODO: need to parse the type
-    if (datainfo_msg->type != DataInfo_GET)
+    if (datainfo_msg->type == DataInfo_GET) {
+        // return the get info back
+        datainfo_reply.type = DataInfo_GET;
+        datainfo_reply.deviceID = myid;
+        // parse keylist and the return with value
+        // RMT_TODO: need to fill out the corect reply message
+        datainfo_reply.msg = "cpu:20";
+    } else if (datainfo_msg->type == DataInfo_SET) {
+        // set the info
+    } else {
+        // wrong type
         return 1;
-
-    // RMT_TODO: need to fill out the corect reply message
-    datainfo_reply.type = DataInfo_GET;
-    datainfo_reply.deviceID = 1;
-    datainfo_reply.msg = "cpu:20";
+    }
 
     return 0;
 }

@@ -82,3 +82,8 @@ int devinfo_agent_update(struct dds_transport *transport)
 
     return ret;
 }
+
+unsigned long devinfo_get_id(void)
+{
+    return g_msg.deviceID;
+}

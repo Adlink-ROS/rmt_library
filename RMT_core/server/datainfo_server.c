@@ -13,6 +13,7 @@ static int recv_reply(void *msg)
     printf("type: %d\n", datainfo_msg->type);
     printf("id: %d\n", datainfo_msg->deviceID);
     printf("msg: %s\n", datainfo_msg->msg);
+    // RMT_TODO: return the data back to user
     return 0;
 }
 
