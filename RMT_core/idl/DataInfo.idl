@@ -13,6 +13,7 @@ module DataInfo
     };
     #pragma keylist Request type
     // it seems like we can't use unbounded array as keylist
+    // RMT_TODO: I need to know what keylist means.
     //#pragma keylist Request id_list
     struct Reply
     {

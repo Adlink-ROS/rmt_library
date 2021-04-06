@@ -3,7 +3,7 @@
 
 #include "dds_transport.h"
 #include "DeviceInfo.h"
-#include "rmt_server.h" // TODO: we only want to use the structure device_info
+#include "rmt_server.h" // RMT_TODO: we only want to use the structure device_info
 
 typedef struct _dev_list {
     struct _dev_list *next;

@@ -34,7 +34,7 @@ static void get_device_info(void)
         g_info_change = 1;
     }
 
-    g_msg.model = "ROScube-I"; // TODO: get the correct model.
+    g_msg.model = "ROScube-I"; // RMT_TODO: get the correct model.
     g_msg.host = g_dev.hostname;
     g_msg.ip = g_dev.ip;
     g_msg.mac = g_dev.mac;
@@ -74,7 +74,7 @@ int devinfo_agent_update(struct dds_transport *transport)
 
     get_device_info();
 
-    /* If info mation changes */
+    /* If information changes */
     if (g_info_change) {
         dds_transport_send(PAIR_DEV_INFO, transport, &g_msg);
         g_info_change = 0;

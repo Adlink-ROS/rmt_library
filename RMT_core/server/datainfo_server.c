@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include "dds_transport.h"
 #include "rmt_server.h"
 #include "DataInfo.h"
@@ -7,7 +8,7 @@ static DataInfo_Request g_msg;
 
 static int recv_reply(void *msg)
 {
-    // TODO: parse the correct format
+    // RMT_TODO: parse the correct format
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
     printf("type: %d\n", datainfo_msg->type);
     printf("id: %d\n", datainfo_msg->deviceID);
@@ -22,7 +23,7 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     g_msg.msg = key_list;
     g_msg.type = DataInfo_GET;
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
-    // TODO: setup timeout
+    // RMT_TODO: setup timeout
     sleep(3);
     dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
     return NULL;

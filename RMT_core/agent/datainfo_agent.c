@@ -2,7 +2,7 @@
 #include "datainfo_agent.h"
 #include "DataInfo.h"
 
-// TODO: This should be a queue
+// RMT_TODO: This should be a queue
 DataInfo_Reply datainfo_reply;
 
 static int recv_request(void *msg)
@@ -12,16 +12,16 @@ static int recv_request(void *msg)
     printf("key_list: %s\n", datainfo_msg->msg);
     printf("type: %d\n", datainfo_msg->type);
     printf("id_list.length: %d\n", datainfo_msg->id_list._length);
-    // TODO: check whether the ID matches or not
+    // RMT_TODO: check whether the ID matches or not
     for (int i = 0; i < datainfo_msg->id_list._length; i++) {
         printf("id_list.id %d:%lu\n", i, datainfo_msg->id_list._buffer[i]);
     }
 
-    // TODO: need to parse the type
+    // RMT_TODO: need to parse the type
     if (datainfo_msg->type != DataInfo_GET)
         return 1;
 
-    // TODO: need to fill out the corect reply message
+    // RMT_TODO: need to fill out the corect reply message
     datainfo_reply.type = DataInfo_GET;
     datainfo_reply.deviceID = 1;
     datainfo_reply.msg = "cpu:20";
