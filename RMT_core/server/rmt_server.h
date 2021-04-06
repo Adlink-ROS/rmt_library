@@ -33,14 +33,12 @@ int rmt_server_free_device_list(device_info **dev);
 data_info* rmt_server_get_info(unsigned long *id_list, char *key_list, int dev_num);
 /*
  * argument:
- *   id_list: unsigned long array
- *   key_list: the string of key and each key is splitted with comma, for example "cpu,ram,..."
  *   data_info: data_info array. value_list is the string of value and each value is splitted with comma, for example "50,2048"
  *   dev_num: the number of device
  * return value:
  *   return the result of each settings.
  */
-int* rmt_server_set_info(unsigned long *id_list, char *key_list, data_info *dev_list, int dev_num);
+int* rmt_server_set_info(data_info *dev_list, int dev_num);
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len);
 int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len);
 int rmt_server_deinit(void);
