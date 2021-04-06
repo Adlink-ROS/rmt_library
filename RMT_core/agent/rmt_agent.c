@@ -21,6 +21,7 @@ int rmt_agent_init(void)
         return -1;
 }
 
+// RMT_TODO: users can add their own config
 int rmt_agent_running(void)
 {
     devinfo_agent_update(g_transport);

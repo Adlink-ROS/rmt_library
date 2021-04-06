@@ -58,6 +58,7 @@ static void free_dev_list(dev_list *dev_ptr)
     }
 }
 
+// RMT_TODO: Use liveliness and get config to remove device
 static int del_device(int32_t id)
 {
     dev_list *dev_ptr = g_dev_head;
