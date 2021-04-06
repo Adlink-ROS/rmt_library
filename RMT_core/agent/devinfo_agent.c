@@ -4,6 +4,7 @@
 #include "dds_transport.h"
 #include "version.h"
 #include "network.h"
+#include "logger.h"
 
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
@@ -53,6 +54,7 @@ int devinfo_agent_config(char *interface, int id)
     if (interface != NULL) {
         strcpy(g_dev.interface, interface);
     } else if (net_select_interface(g_dev.interface) < 0) {
+        RMT_ERROR("Unable to select interface.\n");
         ret = -1;
         goto exit;
     }

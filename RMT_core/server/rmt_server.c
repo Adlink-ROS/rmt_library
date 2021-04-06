@@ -3,6 +3,7 @@
 #include "dds_transport.h"
 #include "devinfo_server.h"
 #include "datainfo_server.h"
+#include "logger.h"
 
 static struct dds_transport *g_transport;
 
@@ -14,10 +15,12 @@ int rmt_server_config(char *interface)
 int rmt_server_init(void)
 {
     g_transport = dds_transport_server_init();
-    if (g_transport)
+    if (g_transport) {
         return 0;
-    else
+    } else {
+        RMT_ERROR("Unable to init server\n");
         return -1;
+    }
 }
 
 device_info* rmt_server_create_device_list(int *num)

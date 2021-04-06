@@ -2,6 +2,7 @@
 #include "devinfo_agent.h"
 #include "datainfo_agent.h"
 #include "DataInfo.h"
+#include "logger.h"
 
 // RMT_TODO: This should be a queue
 DataInfo_Reply datainfo_reply;
@@ -11,14 +12,15 @@ static int recv_request(void *msg)
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
 
-    printf("key_list: %s\n", datainfo_msg->msg);
-    printf("type: %d\n", datainfo_msg->type);
-    printf("id_list.length: %d\n", datainfo_msg->id_list._length);
+    RMT_LOG("key_list: %s\n", datainfo_msg->msg);
+    RMT_LOG("type: %d\n", datainfo_msg->type);
+    RMT_LOG("id_list.length: %d\n", datainfo_msg->id_list._length);
     // check whether the ID matches or not
     int dev_found = 0;
     for (int i = 0; i < datainfo_msg->id_list._length; i++) {
-        printf("id_list.id %d:%lu\n", i, datainfo_msg->id_list._buffer[i]);
+        RMT_LOG("id_list.id %d:%lu\n", i, datainfo_msg->id_list._buffer[i]);
         if (myid == datainfo_msg->id_list._buffer[i]) {
+            RMT_LOG("The ID matches!\n");
             dev_found = 1;
             break;
         }
@@ -32,6 +34,7 @@ static int recv_request(void *msg)
         datainfo_reply.deviceID = myid;
         // parse keylist and the return with value
         // RMT_TODO: need to fill out the corect reply message
+        // RMT_TODO: we need to able to pass the handling function into here
         datainfo_reply.msg = "cpu:20";
     } else if (datainfo_msg->type == DataInfo_SET) {
         // set the info

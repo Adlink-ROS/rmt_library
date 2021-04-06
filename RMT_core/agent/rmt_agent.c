@@ -3,6 +3,7 @@
 #include "devinfo_agent.h"
 #include "datainfo_agent.h"
 #include "version.h"
+#include "logger.h"
 
 static struct dds_transport *g_transport;
 
@@ -15,10 +16,12 @@ int rmt_agent_config(char *interface, int id)
 int rmt_agent_init(void)
 {
     g_transport = dds_transport_agent_init();
-    if (g_transport)
+    if (g_transport) {
         return 0;
-    else
+    } else {
+        RMT_ERROR("Unable to init agent\n");
         return -1;
+    }
 }
 
 // RMT_TODO: users can add their own config
