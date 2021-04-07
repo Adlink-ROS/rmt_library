@@ -1,9 +1,8 @@
-#ifndef _DEVICE_INFO_
-#define _DEVICE_INFO_
+#ifndef _DEVICEINFO_AGENT_
+#define _DEVICEINFO_AGENT_
 
 int devinfo_agent_config(char *interface, int id);
-int devinfo_agent_init(void);
-int devinfo_agent_update(void);
-int devinfo_agent_deinit(void);
+int devinfo_agent_update(struct dds_transport *transport);
+unsigned long devinfo_get_id(void);
 
-#endif /*_DEVICE_INFO*/
+#endif /*_DEVICEINFO_AGENT_*/

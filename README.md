@@ -10,6 +10,8 @@ The repo contains several components:
 
 ```bash
 sudo apt install -y libcunit1-dev swig
+# Used by CycloneDDS
+sudo apt install maven default-jdk
 ```
 
 # Donwload

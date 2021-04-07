@@ -8,6 +8,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 configure_file("${CMAKE_SOURCE_DIR}/server/version.h.in" "${CMAKE_BINARY_DIR}/server/version.h")
 include_directories("${CMAKE_BINARY_DIR}/server") # include version.h
 include_directories("${CMAKE_SOURCE_DIR}/server") # include rmt_server.h
+include_directories("${CMAKE_SOURCE_DIR}/common") # include common/*.h
 set(CMAKE_SWIG_FLAGS "")
 
 if (CMAKE_VERSION VERSION_LESS "3.8")

@@ -7,12 +7,20 @@ include(../idl/add_generated.cmake)
 # Include common function
 include_directories(${PROJECT_SOURCE_DIR}/common)
 
+# Source Code List
+set(SOURCE_CODE rmt_server.c
+                devinfo_server.c
+                datainfo_server.c
+                ${PROJECT_SOURCE_DIR}/common/network.c
+                ${PROJECT_SOURCE_DIR}/common/dds_transport.c
+   )
+
 # Build library rmt_server
-add_library(rmt_server STATIC rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
+add_library(rmt_server STATIC ${SOURCE_CODE})
 target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Build library rmt_server_shared for SWIG
-add_library(rmt_server_shared SHARED rmt_server.c devinfo_server.c ${PROJECT_SOURCE_DIR}/common/network.c)
+add_library(rmt_server_shared SHARED ${SOURCE_CODE})
 target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)

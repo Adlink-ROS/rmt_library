@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
@@ -6,16 +7,25 @@
 static char *my_interface = NULL;
 static char interface[50];
 
-char *short_options = "n:";
+char *short_options = "n:h";
 struct option long_options[] = {
-    {"net", required_argument, NULL, 'n'},
+    {"net",  required_argument, NULL, 'n'},
+    {"help", no_argument,       NULL, 'h'},
     { 0, 0, 0, 0},
 };
+
+void print_help(void)
+{
+    printf("Usage: ./server_example [options]\n");
+    printf("* --help: Showing this messages.\n");
+    printf("* --net [interface]: Decide which interface agent uses.\n");
+}
 
 int main(int argc, char *argv[])
 {
     int dev_num;
     device_info *dev_ptr;
+    unsigned long *id_list;
 
     // Parse argument
     int cmd_opt = 0;
@@ -25,6 +35,9 @@ int main(int argc, char *argv[])
                 strcpy(interface, optarg);
                 my_interface = interface;
                 break;
+            case 'h':
+                print_help();
+                return 0;
             case '?':
             default:
                 printf("Not supported option\n");
@@ -46,7 +59,21 @@ int main(int argc, char *argv[])
         printf("RMT version: %s\n", dev_ptr[i].rmt_version);
         fflush (stdout);
     }
-    rmt_server_free_device_list(&dev_ptr);
+    // assign id to id_list
+    id_list = (unsigned long *) malloc(sizeof(unsigned long) * dev_num);
+    for (int i = 0; i < dev_num; i++) {
+        id_list[i] = dev_ptr[i].deviceID;
+    }
+    int info_list_num;
+    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;ram;", &info_list_num);
+    printf("Try to get info from %d device\n", info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
+    free(id_list);
+    rmt_server_free_info(info_list, info_list_num);
+    rmt_server_free_device_list(dev_ptr);
     rmt_server_deinit();
 
     return 0;
