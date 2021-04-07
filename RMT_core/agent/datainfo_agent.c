@@ -39,8 +39,6 @@ static int recv_request(void *msg)
         datainfo_reply.type = DataInfo_GET;
         datainfo_reply.deviceID = myid;
         // parse keylist and the return with value
-        // RMT_TODO: need to fill out the corect reply message
-        // RMT_TODO: we need to able to pass the handling function into here
         char *keys = strtok(datainfo_msg->msg, ";");
         while (keys != NULL) {
             RMT_LOG("The key is %s\n", keys)
