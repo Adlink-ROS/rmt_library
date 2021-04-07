@@ -115,12 +115,11 @@ exit:
     return ret;
 }
 
-int devinfo_server_free_list(device_info **dev)
+int devinfo_server_free_list(device_info *dev)
 {
-    if (dev == NULL || *dev == NULL)
+    if (dev == NULL)
         return -1;
-    free(*dev);
-    *dev = NULL;
+    free(dev);
     return 0;
 }
 

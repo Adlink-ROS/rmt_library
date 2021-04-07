@@ -64,9 +64,16 @@ int main(int argc, char *argv[])
     for (int i = 0; i < dev_num; i++) {
         id_list[i] = dev_ptr[i].deviceID;
     }
-    rmt_server_get_info(id_list, "cpu", dev_num);
+    int info_list_num;
+    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu", &info_list_num);
+    printf("Try to get info from %d device\n", info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
     free(id_list);
-    rmt_server_free_device_list(&dev_ptr);
+    rmt_server_free_info(info_list, info_list_num);
+    rmt_server_free_device_list(dev_ptr);
     rmt_server_deinit();
 
     return 0;

@@ -30,14 +30,19 @@ device_info* rmt_server_create_device_list(int *num)
     return dev;
 }
 
-int rmt_server_free_device_list(device_info **dev)
+int rmt_server_free_device_list(device_info *dev)
 {
     return devinfo_server_free_list(dev);
 }
 
-data_info* rmt_server_get_info(unsigned long *id_list, char *key_list, int dev_num)
+data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
-    return datainfo_server_get_info(g_transport, id_list, key_list, dev_num);
+    return datainfo_server_get_info(g_transport, id_list, id_num, key_list, info_num);
+}
+
+int rmt_server_free_info(data_info* info_list, int info_num)
+{
+    return datainfo_server_free_info(info_list, info_num);
 }
 
 int* rmt_server_set_info(data_info *dev_list, int dev_num)

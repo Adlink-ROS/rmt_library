@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "dds_transport.h"
 #include "rmt_server.h"
 #include "DataInfo.h"
@@ -8,27 +9,51 @@
 #define DEFAULT_TIMEOUT 3
 
 static DataInfo_Request g_msg;
+static data_info *g_reply_list;
+static int g_reply_num;
 
 static int recv_reply(void *msg)
 {
-    // RMT_TODO: parse the correct format
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
-    RMT_LOG("type: %d\n", datainfo_msg->type);
-    RMT_LOG("id: %ld\n", datainfo_msg->deviceID);
-    RMT_LOG("msg: %s\n", datainfo_msg->msg);
-    // RMT_TODO: return the data back to user
+    g_reply_list[g_reply_num].deviceID = datainfo_msg->deviceID;
+    g_reply_list[g_reply_num].value_list = strdup(datainfo_msg->msg);
+    g_reply_num++;
     return 0;
 }
 
-data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, char *key_list, int dev_num)
+data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
-    g_msg.id_list._maximum = g_msg.id_list._length = dev_num;
-    g_msg.id_list._buffer = id_list; 
+    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
+    g_msg.id_list._buffer = id_list;
     g_msg.msg = key_list;
     g_msg.type = DataInfo_GET;
+
+    // clean the reply queue
+    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
+    g_reply_num = 0;
+
+    // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
-    // RMT_TODO: setup timeout
-    sleep(DEFAULT_TIMEOUT);
-    dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
-    return NULL;
+
+    // wait for all the reply
+    while (g_reply_num != id_num) {
+        // RMT_TODO: receive all the reply and wait for timeout
+        sleep(DEFAULT_TIMEOUT);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+    }
+    *info_num = g_reply_num;
+
+    return g_reply_list;
+}
+
+int datainfo_server_free_info(data_info* info_list, int info_num)
+{
+    for (int i = 0; i < info_num; i++) {
+        if (info_list[i].value_list) {
+            free(info_list[i].value_list);
+            info_list[i].value_list = NULL;
+        }
+    }
+    free(info_list);
+    return 0;
 }
