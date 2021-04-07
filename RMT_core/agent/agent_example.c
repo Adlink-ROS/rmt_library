@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     rmt_agent_init(func_maps);
     while (1) {
         rmt_agent_running();
-        sleep(1);
+        usleep(10000); // sleep 10ms
     }
     rmt_agent_deinit();
     return 0;
