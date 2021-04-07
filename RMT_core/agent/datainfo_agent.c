@@ -7,16 +7,38 @@
 #include "DataInfo.h"
 #include "logger.h"
 
+#define QUEUE_SIZE 16
+
 static datainfo_func *g_datainfo_func_maps;
 
-// RMT_TODO: This should be a queue
-DataInfo_Reply datainfo_reply;
+static DataInfo_Reply datainfo_replys[QUEUE_SIZE];
+static int q_front = 0;
+static int q_rear = 0;
+
+static int q_enqueue(void)
+{
+    // queue is full
+    if ((q_rear+1) % QUEUE_SIZE == q_front)
+        return -1;
+    q_rear = (q_rear+1) % QUEUE_SIZE;
+    return q_rear;
+}
+
+static int q_dequeue(void)
+{
+    // queue is empty
+    if (q_front == q_rear)
+        return -1;
+    q_front = (q_front+1) % QUEUE_SIZE;
+    return q_front;
+}
 
 static int recv_request(void *msg)
 {
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
-    datainfo_reply.msg = malloc(1024);
+    int q_idx = q_enqueue();
+    datainfo_replys[q_idx].msg = malloc(1024);
 
     RMT_LOG("key_list: %s\n", datainfo_msg->msg);
     RMT_LOG("type: %d\n", datainfo_msg->type);
@@ -36,8 +58,8 @@ static int recv_request(void *msg)
 
     if (datainfo_msg->type == DataInfo_GET) {
         // return the get info back
-        datainfo_reply.type = DataInfo_GET;
-        datainfo_reply.deviceID = myid;
+        datainfo_replys[q_idx].type = DataInfo_GET;
+        datainfo_replys[q_idx].deviceID = myid;
         // parse keylist and the return with value
         char *keys = strtok(datainfo_msg->msg, ";");
         while (keys != NULL) {
@@ -47,16 +69,16 @@ static int recv_request(void *msg)
                     char value[256];
                     RMT_LOG("match the key!!\n");
                     g_datainfo_func_maps[i].get_func(value);
-                    strcat(datainfo_reply.msg, keys);
-                    strcat(datainfo_reply.msg, ":");
-                    strcat(datainfo_reply.msg, value);
-                    strcat(datainfo_reply.msg, ";");
+                    strcat(datainfo_replys[q_idx].msg, keys);
+                    strcat(datainfo_replys[q_idx].msg, ":");
+                    strcat(datainfo_replys[q_idx].msg, value);
+                    strcat(datainfo_replys[q_idx].msg, ";");
                     break;
                 }
             }
             keys = strtok(NULL, ";");
         }
-        RMT_LOG("reply message: %s\n", datainfo_reply.msg);
+        RMT_LOG("reply message: %s\n", datainfo_replys[q_idx].msg);
     } else if (datainfo_msg->type == DataInfo_SET) {
         // set the info
     } else {
@@ -69,11 +91,14 @@ static int recv_request(void *msg)
 
 static int datainfo_agent_send_data(struct dds_transport *transport)
 {
-    // reply the data
-    if (datainfo_reply.msg) {
-        dds_transport_send(PAIR_DATA_REPLY, transport, &datainfo_reply);
-        free(datainfo_reply.msg);
-        datainfo_reply.msg = NULL;
+    int q_idx;
+    while ((q_idx = q_dequeue()) != -1) {
+        // reply the data
+        if (datainfo_replys[q_idx].msg) {
+            dds_transport_send(PAIR_DATA_REPLY, transport, &datainfo_replys[q_idx]);
+            free(datainfo_replys[q_idx].msg);
+            datainfo_replys[q_idx].msg = NULL;
+        }
     }
     return 0;
 }
@@ -88,6 +113,8 @@ int datainfo_agent_update(struct dds_transport *transport)
 int datainfo_agent_init(datainfo_func *func_maps)
 {
     g_datainfo_func_maps = func_maps;
-    datainfo_reply.msg = NULL;
+    for (int i = 0; i < QUEUE_SIZE; i++) {
+        datainfo_replys[i].msg = NULL;
+    }
     return 0;
 }
