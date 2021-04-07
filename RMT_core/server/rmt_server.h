@@ -26,16 +26,16 @@ int rmt_server_free_device_list(device_info *dev);
  * argument:
  *   id_list: unsigned long array
  *   id_num: the number of id
- *   key_list: the string of key and each key is splitted with comma, for example "cpu,ram,..."
+ *   key_list: the string of key and each key is splitted with ";", for example "cpu;ram;..."
  *   info_num: the number of return data_info
  * return value:
- *   data_info: data_info array. value_list is the string of value and each value is splitted with comma, for example "50,2048"
+ *   data_info: data_info array. value_list is the string of key-value pairs, for example "cpu:20;ram:30;..."
  */
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num);
 int rmt_server_free_info(data_info* info_list, int info_num);
 /*
  * argument:
- *   data_info: data_info array. value_list is the string of value and each value is splitted with comma, for example "50,2048"
+ *   data_info: data_info array. value_list is the string of key-value pairs, for example "cpu:20;ram:30;..."
  *   dev_num: the number of device
  * return value:
  *   return the result of each settings.

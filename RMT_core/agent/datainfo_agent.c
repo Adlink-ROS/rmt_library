@@ -41,19 +41,22 @@ static int recv_request(void *msg)
         // parse keylist and the return with value
         // RMT_TODO: need to fill out the corect reply message
         // RMT_TODO: we need to able to pass the handling function into here
-        char *keys = strtok(datainfo_msg->msg, ":");
+        char *keys = strtok(datainfo_msg->msg, ";");
         while (keys != NULL) {
+            RMT_LOG("The key is %s\n", keys)
             for (int i = 0; g_datainfo_func_maps != NULL && g_datainfo_func_maps[i].key != 0; i++) {
                 if (strcmp(keys, g_datainfo_func_maps[i].key) == 0) {
                     char value[256];
+                    RMT_LOG("match the key!!\n");
                     g_datainfo_func_maps[i].get_func(value);
                     strcat(datainfo_reply.msg, keys);
                     strcat(datainfo_reply.msg, ":");
                     strcat(datainfo_reply.msg, value);
                     strcat(datainfo_reply.msg, ";");
+                    break;
                 }
             }
-            keys = strtok(NULL, ":");
+            keys = strtok(NULL, ";");
         }
         RMT_LOG("reply message: %s\n", datainfo_reply.msg);
     } else if (datainfo_msg->type == DataInfo_SET) {
