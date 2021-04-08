@@ -14,7 +14,7 @@ sudo apt install -y libcunit1-dev swig
 sudo apt install maven default-jdk
 ```
 
-# Donwload
+# Download
 
 ```bash
 cd $HOME
