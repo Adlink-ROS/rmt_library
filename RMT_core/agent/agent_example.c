@@ -9,6 +9,7 @@ static unsigned long myid = 0;
 static char *my_interface = NULL;
 static char interface[50];
 
+// RMT_TODO: show correct data
 int get_cpu(char *payload)
 {
     int cpu_usage = 20;
