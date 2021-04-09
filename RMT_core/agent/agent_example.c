@@ -47,16 +47,47 @@ exit:
     return ret;
 }
 
-// RMT_TODO: show correct data
 int get_ram(char *payload)
 {
-    int ram_usage = 30;
+    int ret = 0;
+    char column[20], dummy[20];
+    unsigned int mem_value[5];
+    unsigned int total_mem, free_mem, buffer_mem, cached_mem;
+    FILE *fp;
+    int ram_usage;
+
+    fp = fopen("/proc/meminfo", "r");
+    if (!fp) {
+        ret = -1;
+        goto exit;
+    }
+    for (int i = 0; i < 5; i++) {
+        ret = fscanf(fp, "%s %u %s", column, &mem_value[i], dummy);
+        if (ret < 0) {
+            ret = -1;
+            fclose(fp);
+            goto exit;
+        }
+    }
+    total_mem = mem_value[0];
+    free_mem = mem_value[1];
+    buffer_mem = mem_value[3];
+    cached_mem = mem_value[4];
+    fclose(fp);
+
+    printf("Total memory: %d\n", total_mem);
+    printf("Available memory: %d\n", free_mem + buffer_mem + cached_mem);
+    printf("Used memory: %d\n", total_mem - free_mem - buffer_mem - cached_mem);
+
+    ram_usage = (total_mem - free_mem - buffer_mem - cached_mem) * 100 / total_mem;
 
     printf("RAM usage: %d\n", ram_usage);
     if (payload) {
         sprintf(payload, "%d", ram_usage);
     }
-    return 0;
+
+exit:
+    return ret;
 }
 
 int get_hostname(char *payload)
