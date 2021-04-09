@@ -59,11 +59,11 @@ int get_ram(char *payload)
     return 0;
 }
 
-// RMT_TODO: show correct data
 int get_hostname(char *payload)
 {
-    char *hostname = "myhostname";
+    char hostname[1024];
 
+    gethostname(hostname, sizeof(hostname));
     printf("hostname: %s\n", hostname);
     if (payload) {
         sprintf(payload, "%s", hostname);
@@ -72,7 +72,7 @@ int get_hostname(char *payload)
 }
 
 // RMT_TODO: show correct data
-int get_ssid(char *payload)
+int get_wifi(char *payload)
 {
     char *ssid = "myssid";
 
@@ -87,7 +87,7 @@ static datainfo_func func_maps[] = {
     {"cpu",      get_cpu,      NULL},
     {"ram",      get_ram,      NULL},
     {"hostname", get_hostname, NULL},
-    {"ssid",     get_ssid,     NULL},
+    {"wifi",     get_wifi,     NULL},
     {0,          0,            0   },
 };
 
