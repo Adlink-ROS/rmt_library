@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install necessary packages
-        run: sudo apt-get install libcunit1-dev
+        run: sudo apt-get install libcunit1-dev uncrustify
       - name: Build
         working-directory: ./RMT_core
         run: cmake -Bbuild -H. && cmake --build build
