@@ -11,7 +11,7 @@ char *short_options = "n:h";
 struct option long_options[] = {
     {"net",  required_argument, NULL, 'n'},
     {"help", no_argument,       NULL, 'h'},
-    { 0, 0, 0, 0},
+    { 0,     0,                 0,    0  },
 };
 
 void print_help(void)
@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     int dev_num;
     device_info *dev_ptr;
     unsigned long *id_list;
+    int cmd_opt = 0;
 
     // Parse argument
-    int cmd_opt = 0;
     while ((cmd_opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
         switch (cmd_opt) {
             case 'n':
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         id_list[i] = dev_ptr[i].deviceID;
     }
     int info_list_num;
-    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;ram;", &info_list_num);
+    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;hostname;wifi;", &info_list_num);
     printf("Try to get info from %d device\n", info_list_num);
     for (int i = 0; i < info_list_num; i++) {
         printf("ID: %ld\n", info_list[i].deviceID);

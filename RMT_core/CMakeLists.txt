@@ -21,7 +21,22 @@ add_subdirectory(agent)
 # Use SWIG to generate python lib
 add_subdirectory(swig)
 
+# Add uncrustify tools
+file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h
+                    ${CMAKE_SOURCE_DIR}/agent/*.c
+                    ${CMAKE_SOURCE_DIR}/common/*.h
+                    ${CMAKE_SOURCE_DIR}/common/*.c
+                    ${CMAKE_SOURCE_DIR}/server/*.h
+                    ${CMAKE_SOURCE_DIR}/server/*.c
+                    ${CMAKE_SOURCE_DIR}/test/*.h
+                    ${CMAKE_SOURCE_DIR}/test/*.c)
+
+set(MYCFG "linux_c.cfg")
+add_custom_target(sh_target ALL
+                  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/tools/uncrustify.sh" "${CMAKE_BINARY_DIR}/uncrustify.sh"
+                  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/tools/${MYCFG}" "${CMAKE_BINARY_DIR}/${MYCFG}")
 # Add test
 add_subdirectory(test)
 enable_testing()
 add_test("RMT_library_API_test" test/rmt_test)
+add_test("lint_test" ./uncrustify.sh ${SRC_FILES})

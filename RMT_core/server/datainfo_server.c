@@ -16,6 +16,7 @@ static int g_reply_num;
 static int recv_reply(void *msg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
+
     g_reply_list[g_reply_num].deviceID = datainfo_msg->deviceID;
     g_reply_list[g_reply_num].value_list = strdup(datainfo_msg->msg);
     g_reply_num++;

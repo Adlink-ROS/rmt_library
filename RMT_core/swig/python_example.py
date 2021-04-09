@@ -25,6 +25,18 @@ def search():
     result = json.dumps(data, indent=4)
     print(result)
 
+    # put search ID into array
+    id_list = rmt_py_wrapper.ulong_array(num)
+    for i in range(0, num):
+        id_list[i] = dev_list[i].deviceID
+    info_num_ptr = rmt_py_wrapper.new_intptr()
+    info_list = rmt_py_wrapper.data_info_list.frompointer(rmt_py_wrapper.rmt_server_get_info(id_list, num, "cpu", info_num_ptr))
+    info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
+    rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
+    for i in range(0, info_num):
+        print("ID %d" % info_list[i].deviceID)
+        print("value list: %s" % info_list[i].value_list)
+
 def main():
     print("RMT_VERSION=%s" % rmt_py_wrapper.rmt_server_version())
 

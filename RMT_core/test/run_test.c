@@ -11,16 +11,19 @@ int suite_init(void)
     rmt_agent_init(NULL);
     return 0;
 }
+
 int suite_clean(void)
 {
     rmt_server_deinit();
     rmt_agent_deinit();
     return 0;
 }
+
 void suite_setup(void)
 {
     return;
 }
+
 void suite_teardown(void)
 {
     return;
