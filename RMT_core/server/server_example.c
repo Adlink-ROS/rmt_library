@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         id_list[i] = dev_ptr[i].deviceID;
     }
     int info_list_num;
-    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;ram;", &info_list_num);
+    data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;hostname;ssid;", &info_list_num);
     printf("Try to get info from %d device\n", info_list_num);
     for (int i = 0; i < info_list_num; i++) {
         printf("ID: %ld\n", info_list[i].deviceID);

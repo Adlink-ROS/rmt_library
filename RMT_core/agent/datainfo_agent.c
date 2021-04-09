@@ -42,6 +42,7 @@ static int recv_request(void *msg)
     int q_idx = q_enqueue();
 
     datainfo_replys[q_idx].msg = malloc(1024);
+    datainfo_replys[q_idx].msg[0] = 0;
 
     RMT_LOG("key_list: %s\n", datainfo_msg->msg);
     RMT_LOG("type: %d\n", datainfo_msg->type);
