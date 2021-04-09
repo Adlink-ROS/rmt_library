@@ -18,18 +18,20 @@ static int q_rear = 0;
 static int q_enqueue(void)
 {
     // queue is full
-    if ((q_rear+1) % QUEUE_SIZE == q_front)
+    if ((q_rear + 1) % QUEUE_SIZE == q_front) {
         return -1;
-    q_rear = (q_rear+1) % QUEUE_SIZE;
+    }
+    q_rear = (q_rear + 1) % QUEUE_SIZE;
     return q_rear;
 }
 
 static int q_dequeue(void)
 {
     // queue is empty
-    if (q_front == q_rear)
+    if (q_front == q_rear) {
         return -1;
-    q_front = (q_front+1) % QUEUE_SIZE;
+    }
+    q_front = (q_front + 1) % QUEUE_SIZE;
     return q_front;
 }
 
@@ -38,6 +40,7 @@ static int recv_request(void *msg)
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
     int q_idx = q_enqueue();
+
     datainfo_replys[q_idx].msg = malloc(1024);
 
     RMT_LOG("key_list: %s\n", datainfo_msg->msg);
@@ -54,7 +57,9 @@ static int recv_request(void *msg)
         }
     }
     // The request is not for me.
-    if (!dev_found) return 1;
+    if (!dev_found) {
+        return 1;
+    }
 
     if (datainfo_msg->type == DataInfo_GET) {
         // return the get info back
@@ -92,6 +97,7 @@ static int recv_request(void *msg)
 static int datainfo_agent_send_data(struct dds_transport *transport)
 {
     int q_idx;
+
     while ((q_idx = q_dequeue()) != -1) {
         // reply the data
         if (datainfo_replys[q_idx].msg) {

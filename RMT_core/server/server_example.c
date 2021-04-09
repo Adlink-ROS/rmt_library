@@ -11,7 +11,7 @@ char *short_options = "n:h";
 struct option long_options[] = {
     {"net",  required_argument, NULL, 'n'},
     {"help", no_argument,       NULL, 'h'},
-    { 0, 0, 0, 0},
+    { 0,     0,                 0,    0  },
 };
 
 void print_help(void)
@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     int dev_num;
     device_info *dev_ptr;
     unsigned long *id_list;
+    int cmd_opt = 0;
 
     // Parse argument
-    int cmd_opt = 0;
     while ((cmd_opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
         switch (cmd_opt) {
             case 'n':

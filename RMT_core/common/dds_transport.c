@@ -38,8 +38,8 @@ int dds_transport_config_init(char *interface)
 {
     char dds_config[2048];
     char selected_interface[40];
-
     int ret = 0;
+
     if (interface != NULL) {
         strcpy(selected_interface, interface);
     } else if (net_select_interface(selected_interface) < 0) {
@@ -57,6 +57,7 @@ static struct dds_transport *dds_transport_init(void)
 {
     int ret = 0;
     dds_transport *transport = (dds_transport *) malloc(sizeof(dds_transport));
+
     if (transport == NULL) {
         ret = -1;
         goto exit;
@@ -74,7 +75,7 @@ static struct dds_transport *dds_transport_init(void)
     /* Create topic TOPIC_DEVICE_INFO */
     transport->pairs[PAIR_DEV_INFO].topic = dds_create_topic(transport->participant, &DeviceInfo_Msg_desc, TOPIC_DEVICE_INFO, NULL, NULL);
     if (transport->pairs[PAIR_DEV_INFO].topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].topic)); 
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].topic));
         ret = -1;
         goto exit;
     }
@@ -84,7 +85,7 @@ static struct dds_transport *dds_transport_init(void)
     /* Create topic TOPIC_PAIR_DATA_REQ */
     transport->pairs[PAIR_DATA_REQ].topic = dds_create_topic(transport->participant, &DataInfo_Request_desc, TOPIC_PAIR_DATA_REQ, NULL, NULL);
     if (transport->pairs[PAIR_DATA_REQ].topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REQ].topic)); 
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REQ].topic));
         ret = -1;
         goto exit;
     }
@@ -94,7 +95,7 @@ static struct dds_transport *dds_transport_init(void)
     /* Create topic TOPIC_PAIR_DATA_REPLY */
     transport->pairs[PAIR_DATA_REPLY].topic = dds_create_topic(transport->participant, &DataInfo_Reply_desc, TOPIC_PAIR_DATA_REPLY, NULL, NULL);
     if (transport->pairs[PAIR_DATA_REPLY].topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].topic)); 
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].topic));
         ret = -1;
         goto exit;
     }
@@ -193,7 +194,7 @@ struct dds_transport *dds_transport_agent_init(void)
         goto exit;
     }
     dds_delete_qos(datainfo_qos);
-    
+
 exit:
     return transport;
 }
@@ -202,6 +203,7 @@ int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *ms
 {
     int ret = 0;
     dds_return_t rc;
+
     dds_sleepfor(DDS_MSECS(1000)); // Wait for data ready
     rc = dds_write(transport->pairs[kind].writer, msg);
     if (rc != DDS_RETCODE_OK) {
@@ -220,7 +222,7 @@ int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int 
 
     samples[0] = dds_alloc(transport->pairs[kind].size);
 
-    while(true) {
+    while (true) {
         rc = dds_take(transport->pairs[kind].reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
         if (rc < 0) {
             DDS_FATAL("dds_read: %s\n", dds_strretcode(-rc));
@@ -255,7 +257,7 @@ int dds_transport_deinit(struct dds_transport *transport)
     }
     g_participant_num--;
     /* Delete g_domain */
-    if (g_participant_num == 0 && g_domain > 0) {
+    if ((g_participant_num == 0) && (g_domain > 0)) {
         dds_delete(g_domain);
         g_domain = 0;
     }

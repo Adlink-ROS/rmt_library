@@ -17,6 +17,7 @@ int net_select_interface(char *interface)
     struct if_nameindex *if_nidxs, *intf;
     struct ifreq ifr;
     int sockfd;
+
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     bzero(&ifr, sizeof(ifr));
 
@@ -47,18 +48,18 @@ int net_get_ip(char *interface, char *ip, int ip_len)
 {
     int sockfd;
     struct ifreq ifr;
-   
+
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-   
+
     ifr.ifr_addr.sa_family = AF_INET; // get IPv4 address
-    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get IP from certain interface
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ - 1); // get IP from certain interface
     ioctl(sockfd, SIOCGIFADDR, &ifr); // get IP
-   
+
     close(sockfd);
 
-    strncpy(ip, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), ip_len-1);
-    ip[ip_len-1] = 0;
-   
+    strncpy(ip, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), ip_len - 1);
+    ip[ip_len - 1] = 0;
+
     return 0;
 }
 
@@ -69,18 +70,18 @@ int net_get_mac(char *interface, char *mac, int mac_len)
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ - 1); // get MAC from certain interface
     ioctl(sockfd, SIOCGIFHWADDR, &ifr);
 
     close(sockfd);
 
-    snprintf(mac, mac_len, "%02x:%02x:%02x:%02x:%02x:%02x", 
-            (unsigned char) ifr.ifr_hwaddr.sa_data[0],
-            (unsigned char) ifr.ifr_hwaddr.sa_data[1],
-            (unsigned char) ifr.ifr_hwaddr.sa_data[2],
-            (unsigned char) ifr.ifr_hwaddr.sa_data[3],
-            (unsigned char) ifr.ifr_hwaddr.sa_data[4],
-            (unsigned char) ifr.ifr_hwaddr.sa_data[5]);
+    snprintf(mac, mac_len, "%02x:%02x:%02x:%02x:%02x:%02x",
+             (unsigned char) ifr.ifr_hwaddr.sa_data[0],
+             (unsigned char) ifr.ifr_hwaddr.sa_data[1],
+             (unsigned char) ifr.ifr_hwaddr.sa_data[2],
+             (unsigned char) ifr.ifr_hwaddr.sa_data[3],
+             (unsigned char) ifr.ifr_hwaddr.sa_data[4],
+             (unsigned char) ifr.ifr_hwaddr.sa_data[5]);
 
     return 0;
 }
@@ -93,7 +94,7 @@ uint64_t net_get_id_from_mac(char *interface)
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1); // get MAC from certain interface
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ - 1); // get MAC from certain interface
     ioctl(sockfd, SIOCGIFHWADDR, &ifr);
 
     close(sockfd);

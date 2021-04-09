@@ -46,7 +46,7 @@ int devinfo_agent_config(char *interface, int id)
 {
     int ret = 0;
 
-    /* 
+    /*
      * First, use interface user assigns
      * If no, select the interface by ourselves
      * If fail, return error.

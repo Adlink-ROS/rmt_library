@@ -17,9 +17,11 @@ static int add_device(void *msg)
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     // Check whether the device exist or not.
     dev_list *dev_ptr = g_dev_head;
+
     while (dev_ptr) {
-        if (dev_ptr->info->deviceID == devinfo_msg->deviceID)
+        if (dev_ptr->info->deviceID == devinfo_msg->deviceID) {
             break;
+        }
         dev_ptr = dev_ptr->next;
     }
     // Add/Update the device
@@ -41,7 +43,7 @@ static int add_device(void *msg)
     selected_dev->info->mac = strdup(devinfo_msg->mac);
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
-    
+
     return 0;
 }
 
@@ -62,7 +64,10 @@ static void free_dev_list(dev_list *dev_ptr)
 static int del_device(int32_t id)
 {
     dev_list *dev_ptr = g_dev_head;
-    if (dev_ptr == NULL) goto exit;
+
+    if (dev_ptr == NULL) {
+        goto exit;
+    }
     // If the device is on the head of list
     if (dev_ptr->info->deviceID == id) {
         g_dev_head = dev_ptr->next;
@@ -117,8 +122,9 @@ exit:
 
 int devinfo_server_free_list(device_info *dev)
 {
-    if (dev == NULL)
+    if (dev == NULL) {
         return -1;
+    }
     free(dev);
     return 0;
 }

@@ -26,6 +26,7 @@ int rmt_server_init(void)
 device_info* rmt_server_create_device_list(int *num)
 {
     device_info *dev;
+
     devinfo_server_create_list(g_transport, &dev, num);
     return dev;
 }
@@ -63,6 +64,7 @@ int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len)
 int rmt_server_deinit(void)
 {
     int ret = dds_transport_deinit(g_transport);
+
     devinfo_server_deinit();
     return ret;
 }
