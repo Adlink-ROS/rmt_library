@@ -3,6 +3,8 @@
 #include <unistd.h> // sleep
 #include <getopt.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <linux/wireless.h>
 #include "rmt_agent.h"
 
 static unsigned long myid = 0;
@@ -106,13 +108,63 @@ int get_hostname(char *payload)
 // RMT_TODO: show correct data
 int get_wifi(char *payload)
 {
-    char *ssid = "myssid";
+    int ret = 0;
+    char buffer[512];
+    FILE *fp;
+    char interface[24];
+    int rssi;
+    int interface_num = 0;
 
-    printf("ssid: %s\n", ssid);
-    if (payload) {
-        sprintf(payload, "%s", ssid);
+    if (!payload) return -1;
+
+    fp = fopen("/proc/net/wireless", "r");
+    if (!fp) {
+        ret = -1;
+        goto exit;
     }
-    return 0;
+
+    // skip the first 2 lines
+    for (int i = 0; i < 2; i++) {
+        if (!fgets(buffer, sizeof(buffer), fp)) {
+            ret = -1;
+            goto exit;
+        }
+    }
+
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        // get interface and RSSI
+        sscanf(buffer, "%[^:]: %*s %*d. %d. %*d %*d %*d %*d %*d %*d %*d\n",
+               interface, &rssi);
+        // get SSID
+        int sock_fd;
+        struct iwreq wreq;
+        char ssid[IW_ESSID_MAX_SIZE + 1];
+
+        memset(&wreq, 0, sizeof(struct iwreq));
+        strcpy(wreq.ifr_name, interface);
+        if ((sock_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            ret = -1;
+            goto exit;
+        }
+        wreq.u.essid.pointer = ssid;
+        wreq.u.essid.length = IW_ESSID_MAX_SIZE;
+        if (ioctl(sock_fd, SIOCGIWESSID, &wreq)) {
+            ret = -1;
+            goto exit;
+        }
+        close(sock_fd);
+
+        printf("%s: ssid=%s rssi=%d\n", interface, ssid, rssi);
+        sprintf(payload, "%s %s %d,", interface, ssid, rssi);
+        interface_num++;
+    }
+    if (interface_num == 0) {
+        sprintf(payload, "none");
+    }
+    fclose(fp);
+
+exit:
+    return ret;
 }
 
 static datainfo_func func_maps[] = {
