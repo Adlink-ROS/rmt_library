@@ -18,6 +18,8 @@ int get_cpu(char *payload)
     unsigned int total_jiffies[2], work_jiffies[2];
     FILE *fp;
 
+    if (!payload) return -1;
+
     for (int i = 0; i < 2; i++) {
         fp = fopen("/proc/stat", "r");
         if (!fp) {
@@ -39,9 +41,7 @@ int get_cpu(char *payload)
     cpu_usage = (work_jiffies[1] - work_jiffies[0]) * 100 / (total_jiffies[1] - total_jiffies[0]);
 
     printf("cpu usage: %d\n", cpu_usage);
-    if (payload) {
-        sprintf(payload, "%d", cpu_usage);
-    }
+    sprintf(payload, "%d", cpu_usage);
 
 exit:
     return ret;
@@ -55,6 +55,8 @@ int get_ram(char *payload)
     unsigned int total_mem, free_mem, buffer_mem, cached_mem;
     FILE *fp;
     int ram_usage;
+
+    if (!payload) return -1;
 
     fp = fopen("/proc/meminfo", "r");
     if (!fp) {
@@ -82,9 +84,7 @@ int get_ram(char *payload)
     ram_usage = (total_mem - free_mem - buffer_mem - cached_mem) * 100 / total_mem;
 
     printf("RAM usage: %d\n", ram_usage);
-    if (payload) {
-        sprintf(payload, "%d", ram_usage);
-    }
+    sprintf(payload, "%d", ram_usage);
 
 exit:
     return ret;
@@ -94,11 +94,12 @@ int get_hostname(char *payload)
 {
     char hostname[1024];
 
+    if (!payload) return -1;
+
     gethostname(hostname, sizeof(hostname));
     printf("hostname: %s\n", hostname);
-    if (payload) {
-        sprintf(payload, "%s", hostname);
-    }
+    sprintf(payload, "%s", hostname);
+
     return 0;
 }
 
