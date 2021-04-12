@@ -17,6 +17,7 @@ static int recv_reply(void *msg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
+    RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
     g_reply_list[g_reply_num].deviceID = datainfo_msg->deviceID;
     g_reply_list[g_reply_num].value_list = strdup(datainfo_msg->msg);
     g_reply_num++;
@@ -41,7 +42,11 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     time(&start_time);
     now_time = start_time;
     // wait for all the reply
-    while (g_reply_num != id_num && now_time - start_time < DEFAULT_TIMEOUT) {
+    while (g_reply_num != id_num) {
+        if (now_time - start_time > DEFAULT_TIMEOUT) {
+            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            break;
+        }
         dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
         usleep(10000); // sleep 10ms
         time(&now_time);
