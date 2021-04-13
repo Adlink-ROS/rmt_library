@@ -46,7 +46,7 @@ int rmt_server_free_info(data_info* info_list, int info_num)
     return datainfo_server_free_info(info_list, info_num);
 }
 
-int* rmt_server_set_info(data_info *dev_list, int dev_num)
+char* rmt_server_set_info(data_info *dev_list, int dev_num)
 {
     return datainfo_server_set_info(g_transport, dev_list, dev_num);
 }
