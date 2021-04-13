@@ -10,6 +10,8 @@
 #define DEFAULT_TIMEOUT 3
 
 static DataInfo_Request g_msg;
+// RMT_TODO: Need a filter mechanism or might receive packets not mine.
+//           For example, add random ID for each request.
 static data_info *g_reply_list;
 static int g_reply_num;
 
@@ -65,5 +67,33 @@ int datainfo_server_free_info(data_info* info_list, int info_num)
         }
     }
     free(info_list);
+    return 0;
+}
+
+int* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_list, int dev_num)
+{
+    int id_num = dev_num;
+    unsigned long *id_list = malloc(sizeof(unsigned long) * id_num);
+    char *buffer = malloc(1024 * id_num);
+
+    buffer[0] = 0;
+    for (int i = 0; i < dev_num; i++) {
+        id_list[i] = dev_list[i].deviceID;
+        strcat(buffer, dev_list[i].value_list);
+        strcat(buffer, ",");
+    }
+    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
+    g_msg.id_list._buffer = id_list;
+    g_msg.msg = buffer;
+    g_msg.type = DataInfo_SET;
+
+    // send request
+    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+
+    // RMT_TODO: need to handle reply data
+
+    free(id_list);
+    free(buffer);
+    // RMT_TODO: return reply data
     return 0;
 }

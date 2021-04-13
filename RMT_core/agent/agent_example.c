@@ -105,7 +105,13 @@ int get_hostname(char *payload)
     return 0;
 }
 
-// RMT_TODO: show correct data
+int set_hostname(char *payload)
+{
+    if (!payload) return -1;
+    printf("hostname to be set: %s\n", payload);
+    return 0;
+}
+
 int get_wifi(char *payload)
 {
     int ret = 0;
@@ -168,11 +174,11 @@ exit:
 }
 
 static datainfo_func func_maps[] = {
-    {"cpu",      get_cpu,      NULL},
-    {"ram",      get_ram,      NULL},
-    {"hostname", get_hostname, NULL},
-    {"wifi",     get_wifi,     NULL},
-    {0,          0,            0   },
+    {"cpu",      get_cpu,      NULL         },
+    {"ram",      get_ram,      NULL         },
+    {"hostname", get_hostname, set_hostname },
+    {"wifi",     get_wifi,     NULL         },
+    {0,          0,            0            },
 };
 
 char *short_options = "i:n:h";

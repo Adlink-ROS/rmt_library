@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     printf("RMT Library version is %s\n", rmt_server_version());
     rmt_server_config(my_interface);
     rmt_server_init();
+    // get device list
     dev_ptr = rmt_server_create_device_list(&dev_num);
     for (int i = 0; i < dev_num; i++) {
         printf("Device %d\n", i);
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < dev_num; i++) {
         id_list[i] = dev_ptr[i].deviceID;
     }
+    // get server_info
     int info_list_num;
     data_info *info_list = rmt_server_get_info(id_list, dev_num, "cpu;ram;hostname;wifi;", &info_list_num);
     printf("Try to get info from %d device\n", info_list_num);
@@ -71,6 +73,13 @@ int main(int argc, char *argv[])
         printf("ID: %ld\n", info_list[i].deviceID);
         printf("return list: %s\n", info_list[i].value_list);
     }
+    // set data_info
+    data_info set_info;
+    printf("Try to set info to id 6166\n");
+    set_info.deviceID = 6166;
+    set_info.value_list = "hostname:myhost;";
+    rmt_server_set_info(&set_info, 1);
+    // free resource
     free(id_list);
     rmt_server_free_info(info_list, info_list_num);
     rmt_server_free_device_list(dev_ptr);
