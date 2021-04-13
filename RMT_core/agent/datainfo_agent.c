@@ -39,15 +39,11 @@ static int recv_request(void *msg)
 {
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
-    // RMT_TODO: the enqueue should not behind the check ID.
-    int q_idx = q_enqueue();
-
-    datainfo_replys[q_idx].msg = malloc(1024);
-    datainfo_replys[q_idx].msg[0] = 0;
 
     RMT_LOG("key_list: %s\n", datainfo_msg->msg);
     RMT_LOG("type: %d\n", datainfo_msg->type);
     RMT_LOG("id_list.length: %d\n", datainfo_msg->id_list._length);
+
     // check whether the ID matches or not
     int found_idx = -1;
     for (int i = 0; i < datainfo_msg->id_list._length; i++) {
@@ -62,6 +58,11 @@ static int recv_request(void *msg)
     if (found_idx == -1) {
         return 1;
     }
+
+    // If the request is for me, start to get reply from queue.
+    int q_idx = q_enqueue();
+    datainfo_replys[q_idx].msg = malloc(1024);
+    datainfo_replys[q_idx].msg[0] = 0;
 
     if (datainfo_msg->type == DataInfo_GET) {
         // return the get info back
@@ -127,6 +128,7 @@ static int recv_request(void *msg)
         datainfo_replys[q_idx].deviceID = myid;
     } else {
         // wrong type
+        RMT_ERROR("Wrong type %d for request.\n", datainfo_msg->type);
         return 1;
     }
 
