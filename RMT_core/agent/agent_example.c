@@ -161,7 +161,10 @@ int get_wifi(char *payload)
         close(sock_fd);
 
         printf("%s: ssid=%s rssi=%d\n", interface, ssid, rssi);
-        sprintf(payload, "%s %s %d,", interface, ssid, rssi);
+        if (interface_num != 0) {
+            sprintf(payload, ",");
+        }
+        sprintf(payload, "%s %s %d", interface, ssid, rssi);
         interface_num++;
     }
     if (interface_num == 0) {
