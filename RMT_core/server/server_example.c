@@ -73,15 +73,20 @@ int main(int argc, char *argv[])
         printf("ID: %ld\n", info_list[i].deviceID);
         printf("return list: %s\n", info_list[i].value_list);
     }
+    rmt_server_free_info(info_list, info_list_num);
+    free(id_list);
     // set data_info
     data_info set_info;
     printf("Try to set info to id 6166\n");
     set_info.deviceID = 6166;
     set_info.value_list = "hostname:myhost,";
-    rmt_server_set_info(&set_info, 1);
-    // free resource
-    free(id_list);
+    info_list = rmt_server_set_info(&set_info, 1, &info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
     rmt_server_free_info(info_list, info_list_num);
+    // free resource
     rmt_server_free_device_list(dev_ptr);
     rmt_server_deinit();
 

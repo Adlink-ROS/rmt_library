@@ -97,6 +97,8 @@ static int recv_request(void *msg)
         //                                            |                        |
         //                                           id1                      id2
         // That is, the first delimitor is ";", then ",", and finally ":";
+        char *result_msg = malloc(1024);
+        result_msg[0] = 0;
         RMT_LOG("recv meg: %s\n", datainfo_msg->msg);
         char *set_pairs_list = strtok(datainfo_msg->msg, ";");
         while (found_idx != 0) {
@@ -114,7 +116,8 @@ static int recv_request(void *msg)
                 if (strcmp(key, g_datainfo_func_maps[i].key) == 0) {
                     RMT_LOG("match the key!!\n");
                     if (g_datainfo_func_maps[i].set_func) {
-                        g_datainfo_func_maps[i].set_func(value);
+                        int result = g_datainfo_func_maps[i].set_func(value);
+                        sprintf(result_msg, "%s:%d;", key, result);
                     } else {
                         RMT_ERROR("There is no set function for key %s\n", key);
                     }
@@ -126,6 +129,7 @@ static int recv_request(void *msg)
         // return the set result back
         datainfo_replys[q_idx].type = DataInfo_SET;
         datainfo_replys[q_idx].deviceID = myid;
+        datainfo_replys[q_idx].msg = result_msg;
     } else {
         // wrong type
         RMT_ERROR("Wrong type %d for request.\n", datainfo_msg->type);

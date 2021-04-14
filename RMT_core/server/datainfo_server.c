@@ -28,14 +28,15 @@ static int recv_reply(void *msg)
 
 data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
+    // clean the reply queue
+    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
+    g_reply_num = 0;
+
+    // Build up request message
     g_msg.id_list._maximum = g_msg.id_list._length = id_num;
     g_msg.id_list._buffer = id_list;
     g_msg.msg = key_list;
     g_msg.type = DataInfo_GET;
-
-    // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
-    g_reply_num = 0;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
@@ -70,8 +71,13 @@ int datainfo_server_free_info(data_info* info_list, int info_num)
     return 0;
 }
 
-char* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_list, int dev_num)
+data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_list, int dev_num, int *info_num)
 {
+    // clean the reply queue
+    g_reply_list = (data_info *) malloc(sizeof(data_info) * dev_num);
+    g_reply_num = 0;
+
+    // Build up request message
     int id_num = dev_num;
     unsigned long *id_list = malloc(sizeof(unsigned long) * id_num);
     char *buffer = malloc(1024 * id_num);
@@ -90,10 +96,23 @@ char* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_l
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
 
-    // RMT_TODO: need to handle reply data
+    time_t start_time, now_time;
+    time(&start_time);
+    now_time = start_time;
+    // wait for all the reply
+    while (g_reply_num != id_num) {
+        if (now_time - start_time > DEFAULT_TIMEOUT) {
+            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            break;
+        }
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+        usleep(10000); // sleep 10ms
+        time(&now_time);
+    }
+    *info_num = g_reply_num;
 
     free(id_list);
     free(buffer);
-    // RMT_TODO: return reply data
-    return 0;
+
+    return g_reply_list;
 }
