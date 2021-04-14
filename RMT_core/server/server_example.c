@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     data_info set_info;
     printf("Try to set info to id 6166\n");
     set_info.deviceID = 6166;
-    set_info.value_list = "hostname:myhost,";
+    set_info.value_list = "hostname:ros-ROScube-I,";
     info_list = rmt_server_set_info(&set_info, 1, &info_list_num);
     for (int i = 0; i < info_list_num; i++) {
         printf("ID: %ld\n", info_list[i].deviceID);

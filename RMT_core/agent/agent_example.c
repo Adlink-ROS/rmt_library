@@ -108,7 +108,12 @@ int get_hostname(char *payload)
 int set_hostname(char *payload)
 {
     if (!payload) return -1;
+
     printf("hostname to be set: %s\n", payload);
+    if (sethostname(payload, strlen(payload)) != 0) {
+        return -1;
+    }
+
     return 0;
 }
 
