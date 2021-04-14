@@ -204,7 +204,8 @@ int set_locate(char *payload)
  * status=0: dark
  * status=1: bright
  */
-void set_led_status(int status) {
+void set_led_status(int status)
+{
     mraa_led_context led;
 
     led = mraa_led_init(LED_NUM);
@@ -229,18 +230,19 @@ void locate_daemon(void)
     static int init = 0;
     static int led_status;
     static time_t start_time;
+
     if (!init) {
         init = 1;
         led_status = 0;
         start_time = time(NULL);
     }
-    if (locate_on && start_time != time(NULL)) {
+    if (locate_on && (start_time != time(NULL))) {
         led_status = !led_status;
         set_led_status(led_status);
         start_time = time(NULL);
     }
     // If we do not locate the device, we need to make the led_status back to 0.
-    if (!locate_on && led_status != 0) {
+    if (!locate_on && (led_status != 0)) {
         led_status = 0;
         set_led_status(led_status);
     }
