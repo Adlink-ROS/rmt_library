@@ -67,6 +67,7 @@ static int recv_request(void *msg)
     if (datainfo_msg->type == DataInfo_GET) {
         // return the get info back
         datainfo_replys[q_idx].type = DataInfo_GET;
+        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
         datainfo_replys[q_idx].deviceID = myid;
         // parse keylist and the return with value
         char *keys = strtok(datainfo_msg->msg, ";");
@@ -128,6 +129,7 @@ static int recv_request(void *msg)
         }
         // return the set result back
         datainfo_replys[q_idx].type = DataInfo_SET;
+        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
         datainfo_replys[q_idx].deviceID = myid;
         datainfo_replys[q_idx].msg = result_msg;
     } else {
