@@ -18,7 +18,7 @@ static int recv_reply(void *msg)
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
     // Check whether this reply is for me or not.
-    if (datainfo_msg->type != g_msg.type || datainfo_msg->random_seq != g_msg.random_seq) {
+    if ((datainfo_msg->type != g_msg.type) || (datainfo_msg->random_seq != g_msg.random_seq)) {
         return -1;
     }
 
