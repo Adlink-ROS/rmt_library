@@ -55,6 +55,15 @@ cd ~/RMT/RMT_core/build/server
 ./server_example --net enp1s0
 ```
 
+* Run multiple agents
+
+```bash
+cd ~/RMT/RMT_core/build/agent
+# invoke 5 agents with device ID from 20 t0 24
+./multi_agents.py -n 5 -s 20
+```
+
+
 # Test
 
 ## CUnit:

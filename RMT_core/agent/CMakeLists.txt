@@ -22,3 +22,7 @@ target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 # Example (debug used)
 add_executable(agent_example agent_example.c)
 target_link_libraries(agent_example PRIVATE rmt_agent)
+
+# copy multi_agents.py to 'build/agent/'
+add_custom_target(agent_link_target ALL COMMAND ${CMAKE_COMMAND} -E 
+                  copy "${CMAKE_SOURCE_DIR}/agent/multi_agents.py" "${CMAKE_BINARY_DIR}/agent/multi_agents.py")

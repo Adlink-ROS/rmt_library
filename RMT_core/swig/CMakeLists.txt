@@ -20,5 +20,5 @@ endif ()
 swig_link_libraries(rmt_py_wrapper ${PYTHON_LIBRARIES} ${CMAKE_BINARY_DIR}/server/librmt_server_shared.so)
 
 # copy python_example.py to 'build/swig/'
-add_custom_target(link_target ALL COMMAND ${CMAKE_COMMAND} -E 
+add_custom_target(swig_link_target ALL COMMAND ${CMAKE_COMMAND} -E 
                   copy "${CMAKE_SOURCE_DIR}/swig/python_example.py" "${CMAKE_BINARY_DIR}/swig/python_example.py")
