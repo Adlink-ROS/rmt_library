@@ -21,7 +21,6 @@ target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)
 ## Link and include Neuron Library
-link_directories("/opt/adlink/neuron-sdk/neuron-library/lib/")
-include_directories("/opt/adlink/neuron-sdk/neuron-library/include")
+include_directories(${PROJECT_SOURCE_DIR}/external/mraa/api)
 add_executable(agent_example agent_example.c)
 target_link_libraries(agent_example PRIVATE rmt_agent mraa)

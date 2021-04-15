@@ -214,7 +214,7 @@ void set_led_status(int status)
         goto exit;
     }
 
-    mraa_result_t result = mraa_led_set_brightness(led, !status);
+    mraa_result_t result = mraa_led_set_brightness(led, status);
     if (result != MRAA_SUCCESS) {
         printf("Unable to set LED\n");
         goto exit;
@@ -242,6 +242,7 @@ void locate_daemon(void)
         start_time = time(NULL);
     }
     // If we do not locate the device, we need to make the led_status back to 0.
+    // RMT_TODO: We need to close LED while user presses ctrl+C.
     if (!locate_on && (led_status != 0)) {
         led_status = 0;
         set_led_status(led_status);
