@@ -33,6 +33,17 @@ def config(dev_list, dev_num):
     result = json.dumps(config_data, indent=4)
     print(result)
 
+    # Set device info list
+    info_num_ptr = rmt_py_wrapper.new_intptr()
+    data_info_array = rmt_py_wrapper.new_data_info_array(1)
+    data_info_element = rmt_py_wrapper.data_info()
+    data_info_element.deviceID = 6166
+    data_info_element.value_list = "locate:on"
+    rmt_py_wrapper.data_info_array_setitem(data_info_array, 0, data_info_element)
+    rmt_py_wrapper.rmt_server_set_info(data_info_array, 1, info_num_ptr)
+    info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
+    rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
+
     return config_data
 def search():
     rmt_py_wrapper.rmt_server_init()

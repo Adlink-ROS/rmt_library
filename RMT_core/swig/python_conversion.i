@@ -13,6 +13,7 @@
 
 // for unbounded C arrays
 %include "carrays.i"
+%array_functions(data_info, data_info_array)
 %array_class(device_info, device_info_list);
 %array_class(data_info, data_info_list);
 %array_class(unsigned long, ulong_array);
