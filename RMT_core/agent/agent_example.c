@@ -3,9 +3,11 @@
 #include <unistd.h> // sleep
 #include <getopt.h>
 #include <string.h>
+#include <time.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
 #include "rmt_agent.h"
+#include "mraa/led.h"
 
 static unsigned long myid = 0;
 static char *my_interface = NULL;
@@ -105,7 +107,18 @@ int get_hostname(char *payload)
     return 0;
 }
 
-// RMT_TODO: show correct data
+int set_hostname(char *payload)
+{
+    if (!payload) return -1;
+
+    printf("hostname to be set: %s\n", payload);
+    if (sethostname(payload, strlen(payload)) != 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
 int get_wifi(char *payload)
 {
     int ret = 0;
@@ -155,7 +168,10 @@ int get_wifi(char *payload)
         close(sock_fd);
 
         printf("%s: ssid=%s rssi=%d\n", interface, ssid, rssi);
-        sprintf(payload, "%s %s %d,", interface, ssid, rssi);
+        if (interface_num != 0) {
+            sprintf(payload, ",");
+        }
+        sprintf(payload, "%s %s %d", interface, ssid, rssi);
         interface_num++;
     }
     if (interface_num == 0) {
@@ -167,12 +183,79 @@ exit:
     return ret;
 }
 
+#define LED_NUM 0
+static int locate_on = 0;
+int set_locate(char *payload)
+{
+    if (!payload) return -1;
+
+    if (strcmp(payload, "on") == 0) {
+        locate_on = 1;
+    } else {
+        locate_on = 0;
+    }
+
+    printf("set LED: %d\n", locate_on);
+
+    return 0;
+}
+
+/*
+ * status=0: dark
+ * status=1: bright
+ */
+void set_led_status(int status)
+{
+    mraa_led_context led;
+
+    led = mraa_led_init(LED_NUM);
+    if (led == NULL) {
+        printf("Unable to init LED\n");
+        goto exit;
+    }
+
+    mraa_result_t result = mraa_led_set_brightness(led, status);
+    if (result != MRAA_SUCCESS) {
+        printf("Unable to set LED\n");
+        goto exit;
+    }
+
+exit:
+    if (led)
+        mraa_led_close(led);
+}
+
+void locate_daemon(void)
+{
+    static int init = 0;
+    static int led_status;
+    static time_t start_time;
+
+    if (!init) {
+        init = 1;
+        led_status = 0;
+        start_time = time(NULL);
+    }
+    if (locate_on && (start_time != time(NULL))) {
+        led_status = !led_status;
+        set_led_status(led_status);
+        start_time = time(NULL);
+    }
+    // If we do not locate the device, we need to make the led_status back to 0.
+    // RMT_TODO: We need to close LED while user presses ctrl+C.
+    if (!locate_on && (led_status != 0)) {
+        led_status = 0;
+        set_led_status(led_status);
+    }
+}
+
 static datainfo_func func_maps[] = {
-    {"cpu",      get_cpu,      NULL},
-    {"ram",      get_ram,      NULL},
-    {"hostname", get_hostname, NULL},
-    {"wifi",     get_wifi,     NULL},
-    {0,          0,            0   },
+    {"cpu",      get_cpu,      NULL         },
+    {"ram",      get_ram,      NULL         },
+    {"hostname", get_hostname, set_hostname },
+    {"wifi",     get_wifi,     NULL         },
+    {"locate",   NULL,         set_locate   },
+    {0,          0,            0            },
 };
 
 char *short_options = "i:n:h";
@@ -219,10 +302,13 @@ int main(int argc, char *argv[])
     printf("This is RMT Agent. id=%lu and network interface=%s\n", myid, my_interface);
     rmt_agent_config(my_interface, myid);
     rmt_agent_init(func_maps);
+    mraa_init();
     while (1) {
         rmt_agent_running();
+        locate_daemon();
         usleep(10000); // sleep 10ms
     }
+    mraa_deinit();
     rmt_agent_deinit();
     return 0;
 }

@@ -9,6 +9,7 @@ module DataInfo
     {
         DataInfo::ID_LIST id_list;
         TYPE type;
+        unsigned long long random_seq;
         string msg;
     };
     #pragma keylist Request type
@@ -19,6 +20,7 @@ module DataInfo
     {
         unsigned long long deviceID;
         TYPE type;
+        unsigned long long random_seq;
         string msg;
     };
     #pragma keylist Reply deviceID

@@ -8,6 +8,10 @@ project(RMT_core VERSION 0.9.0)
 # RMT_TODO: upgrade CycloneDDS to 0.8.0
 execute_process(COMMAND git submodule update --init)
 add_subdirectory(external/cyclonedds)
+# Disable swig for mraa
+option (BUILDSWIGNODE "Build swig node modules." OFF)
+option (BUILDTESTS "Override the addition of tests" OFF)
+add_subdirectory(external/mraa)
 
 # Build IDL
 add_subdirectory(idl)

@@ -46,9 +46,9 @@ int rmt_server_free_info(data_info* info_list, int info_num)
     return datainfo_server_free_info(info_list, info_num);
 }
 
-int* rmt_server_set_info(data_info *dev_list, int dev_num)
+data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num)
 {
-    return 0;
+    return datainfo_server_set_info(g_transport, dev_list, dev_num, info_num);
 }
 
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len)

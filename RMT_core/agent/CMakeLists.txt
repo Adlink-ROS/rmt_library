@@ -20,8 +20,10 @@ add_library(rmt_agent ${SOURCE_CODE})
 target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Example (debug used)
+## Link and include Neuron Library
+include_directories(${PROJECT_SOURCE_DIR}/external/mraa/api)
 add_executable(agent_example agent_example.c)
-target_link_libraries(agent_example PRIVATE rmt_agent)
+target_link_libraries(agent_example PRIVATE rmt_agent mraa)
 
 # copy multi_agents.py to 'build/agent/'
 add_custom_target(agent_link_target ALL COMMAND ${CMAKE_COMMAND} -E 

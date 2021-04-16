@@ -35,12 +35,12 @@ data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_lis
 int rmt_server_free_info(data_info* info_list, int info_num);
 /*
  * argument:
- *   data_info: data_info array. value_list is the string of key-value pairs, for example "cpu:20;ram:30;..."
+ *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:my_name,..."
  *   dev_num: the number of device
  * return value:
- *   return the result of each settings.
+ *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:0;locate:-1;..."
  */
-int* rmt_server_set_info(data_info *dev_list, int dev_num);
+data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num);
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len);
 int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len);
 int rmt_server_deinit(void);
