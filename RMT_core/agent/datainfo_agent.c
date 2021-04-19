@@ -117,8 +117,10 @@ static int recv_request(void *msg)
                 if (strcmp(key, g_datainfo_func_maps[i].key) == 0) {
                     RMT_LOG("match the key!!\n");
                     if (g_datainfo_func_maps[i].set_func) {
+                        char msg[128];
                         int result = g_datainfo_func_maps[i].set_func(value);
-                        sprintf(result_msg, "%s:%d;", key, result);
+                        sprintf(msg, "%s:%d;", key, result);
+                        strcat(result_msg, msg);
                     } else {
                         RMT_ERROR("There is no set function for key %s\n", key);
                     }
