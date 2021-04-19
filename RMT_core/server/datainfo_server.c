@@ -91,7 +91,7 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     for (int i = 0; i < dev_num; i++) {
         id_list[i] = dev_list[i].deviceID;
         strcat(buffer, dev_list[i].value_list);
-        strcat(buffer, ";");
+        strcat(buffer, "|");
     }
     g_msg.id_list._maximum = g_msg.id_list._length = id_num;
     g_msg.id_list._buffer = id_list;

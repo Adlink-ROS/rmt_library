@@ -35,7 +35,7 @@ data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_lis
 int rmt_server_free_info(data_info* info_list, int info_num);
 /*
  * argument:
- *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:my_name,..."
+ *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:my_name;locate:on;..."
  *   dev_num: the number of device
  * return value:
  *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:0;locate:-1;..."

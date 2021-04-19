@@ -93,7 +93,7 @@ static int recv_request(void *msg)
         }
         RMT_LOG("reply message: %s\n", datainfo_replys[q_idx].msg);
     } else if (datainfo_msg->type == DataInfo_SET) {
-        // The set message format will be "key1:value1,key2:value2,;key1:value1,key2:value2,;".
+        // The set message format will be "key1:value1;key2:value2;|key1:value1;key2:value2;".
         //                                 |----------------------| |----------------------|
         //                                            |                        |
         //                                           id1                      id2
@@ -101,14 +101,14 @@ static int recv_request(void *msg)
         char *result_msg = malloc(1024);
         result_msg[0] = 0;
         RMT_LOG("recv meg: %s\n", datainfo_msg->msg);
-        char *set_pairs_list = strtok(datainfo_msg->msg, ";");
+        char *set_pairs_list = strtok(datainfo_msg->msg, "|");
         while (found_idx != 0) {
-            set_pairs_list = strtok(NULL, ";");
+            set_pairs_list = strtok(NULL, "|");
             found_idx--;
         }
         RMT_LOG("set info: %s\n", set_pairs_list);
         char *set_pairs_list_dup;
-        char *pairs = strtok_r(set_pairs_list, ",", &set_pairs_list_dup);
+        char *pairs = strtok_r(set_pairs_list, ";", &set_pairs_list_dup);
         while (pairs != NULL) {
             RMT_LOG("The pair is %s\n", pairs);
             char *key = strtok(pairs, ":");
@@ -125,7 +125,7 @@ static int recv_request(void *msg)
                     break;
                 }
             }
-            pairs = strtok_r(NULL, ",", &set_pairs_list_dup);
+            pairs = strtok_r(NULL, ";", &set_pairs_list_dup);
         }
         // return the set result back
         datainfo_replys[q_idx].type = DataInfo_SET;
