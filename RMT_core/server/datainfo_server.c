@@ -24,7 +24,7 @@ static int recv_reply(void *msg)
 
     RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
     g_reply_list[g_reply_num].deviceID = datainfo_msg->deviceID;
-    g_reply_list[g_reply_num].value_list = strdup(datainfo_msg->msg);
+    strncpy(g_reply_list[g_reply_num].value_list, datainfo_msg->msg, CONFIG_KEY_STR_LEN);
     g_reply_num++;
     return 0;
 }
@@ -64,14 +64,8 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     return g_reply_list;
 }
 
-int datainfo_server_free_info(data_info* info_list, int info_num)
+int datainfo_server_free_info(data_info* info_list)
 {
-    for (int i = 0; i < info_num; i++) {
-        if (info_list[i].value_list) {
-            free(info_list[i].value_list);
-            info_list[i].value_list = NULL;
-        }
-    }
     free(info_list);
     return 0;
 }

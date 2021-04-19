@@ -13,9 +13,10 @@ typedef struct _device_info {
     char *rmt_version;
 } device_info;
 
+#define CONFIG_KEY_STR_LEN 1023
 typedef struct _data_info {
     unsigned long deviceID;
-    char *value_list;
+    char value_list[CONFIG_KEY_STR_LEN+1];
 } data_info;
 
 int rmt_server_config(char *interface);
@@ -32,7 +33,7 @@ int rmt_server_free_device_list(device_info *dev);
  *   data_info: data_info array. value_list is the string of key-value pairs, for example "cpu:20;ram:30;..."
  */
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num);
-int rmt_server_free_info(data_info* info_list, int info_num);
+int rmt_server_free_info(data_info* info_list);
 /*
  * argument:
  *   data_info: data_info array. value_list is the string of key-value pairs, for example "hostname:my_name;locate:on;..."
