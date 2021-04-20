@@ -45,32 +45,57 @@ def get_config(dev_list, dev_num):
 
 def set_config():
     # Create data_info_array to set config
-    info_num_ptr = rmt_py_wrapper.new_intptr()
-    data_info_array = rmt_py_wrapper.new_data_info_array(2) # device number
+    dev_num = 2
+    data_info_array = rmt_py_wrapper.new_data_info_array(dev_num)
     
     # Set for device 5566:
     data_info_element = rmt_py_wrapper.data_info()
     data_info_element.deviceID = 5566
     data_info_element.value_list = "hostname:rqi-1234;locate:on"
-    rmt_py_wrapper.data_info_array_setitem(data_info_array, 0, data_info_element)
+    dev_idx = 0
+    rmt_py_wrapper.data_info_array_setitem(data_info_array, dev_idx, data_info_element)
 
     # Set for device 6166:
     data_info_element.deviceID = 6166
     data_info_element.value_list = "hostname:hacked_by_ting;locate:on"
-    rmt_py_wrapper.data_info_array_setitem(data_info_array, 1, data_info_element)
+    dev_idx = 1
+    rmt_py_wrapper.data_info_array_setitem(data_info_array, dev_idx, data_info_element)
 
     # Print what we want to set in data_info_array
-    print("=== set config ===")
-    data_info_element = rmt_py_wrapper.data_info_array_getitem(data_info_array, 0)
+    print("=== set config req ===")
+    dev_idx = 0
+    data_info_element = rmt_py_wrapper.data_info_array_getitem(data_info_array, dev_idx)
     print("deviceID=%d" % data_info_element.deviceID)
     print("value_list=%s" % data_info_element.value_list)
-    data_info_element = rmt_py_wrapper.data_info_array_getitem(data_info_array, 1)
+    dev_idx = 1
+    data_info_element = rmt_py_wrapper.data_info_array_getitem(data_info_array, dev_idx)
     print("deviceID=%d" % data_info_element.deviceID)
     print("value_list=%s" % data_info_element.value_list)
 
     # Send data_info_array to RMT library
-    rmt_py_wrapper.rmt_server_set_info(data_info_array, 2, info_num_ptr)
+    info_num_ptr = rmt_py_wrapper.new_intptr()
+    info_list = rmt_py_wrapper.data_info_list.frompointer(rmt_py_wrapper.rmt_server_set_info(data_info_array, dev_num, info_num_ptr))
+    info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
     rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
+
+    print("=== set config result ===")
+    config_data = []
+    for i in range(0, info_num):
+        # Split the result string into dictionary data
+        result_list = info_list[i].value_list.split(";")
+        dict_data = {"deviceID": info_list[i].deviceID}
+        # print(info_list[i].deviceID)
+        # print(info_list[i].value_list)
+        for item in result_list:
+            key_value_pair = item.split(":")
+            if len(key_value_pair) > 1:
+                key = key_value_pair[0]
+                value = key_value_pair[1]
+                dict_data[key] = value
+        # print(dict_data)
+        config_data.append(dict_data)
+    result = json.dumps(config_data, indent=4)
+    print(result)
 
 def discover():
     rmt_py_wrapper.rmt_server_init()

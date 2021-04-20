@@ -23,3 +23,6 @@
 device_info *rmt_server_create_device_list(int *num);
 %newobject rmt_server_get_info;
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num);
+%newobject rmt_server_set_info;
+data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num);
+
