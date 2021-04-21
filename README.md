@@ -1,8 +1,7 @@
 # Introduction
 
-The repo contains several components:
+The repo contains two components:
 
-* RESTful API server
 * RMT Server (Server Side)
 * RMT Agent (Client Side)
 
@@ -23,24 +22,22 @@ git clone https://github.com/Adlink-ROS/RMT.git
 
 # Build
 
-## RMT_core:
-
 ```bash
-cd ~/RMT/RMT_core
+cd ~/RMT
 cmake -Bbuild -H.
 cmake --build build
 ```
 
 # Run
 
-* Run RMT_core example
+* Run example
   
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/RMT_core/build/agent
+cd ~/RMT/build/agent
 ./agent_example
 # 2nd terminal: Run the server
-cd ~/RMT/RMT_core/build/server
+cd ~/RMT/build/server
 ./server_example
 ```
 
@@ -48,28 +45,27 @@ cd ~/RMT/RMT_core/build/server
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/RMT_core/build/agent
+cd ~/RMT/build/agent
 ./agent_example --id 6166 --net enp1s0
 # 2nd terminal: Run the server
-cd ~/RMT/RMT_core/build/server
+cd ~/RMT/build/server
 ./server_example --net enp1s0
 ```
 
 * Run multiple agents
 
 ```bash
-cd ~/RMT/RMT_core/build/agent
+cd ~/RMT/build/agent
 # invoke 5 agents with device ID from 20 t0 24
 ./multi_agents.py -n 5 -s 20
 ```
-
 
 # Test
 
 ## CUnit:
 
 ```bash
-cd ~/RMT/RMT_core/build
+cd ~/RMT/build
 ctest
 # verbose
 ctest -V
@@ -80,13 +76,13 @@ ctest -V
 * Run few agents before testing
 
 ```bash
-cd ~/RMT/RMT_core/build/agent
+cd ~/RMT/build/agent
 ./agent_example
 ```
 
 * Start testing
 
 ```bash
-cd ~/RMT/RMT_core/build/swig
+cd ~/RMT/build/swig
 python3 python_example.py
 ```

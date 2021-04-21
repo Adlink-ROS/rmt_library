@@ -1,6 +1,6 @@
-[submodule "RMT_core/external/cyclonedds"]
-	path = RMT_core/external/cyclonedds
+[submodule "external/cyclonedds"]
+	path = external/cyclonedds
 	url = https://github.com/eclipse-cyclonedds/cyclonedds.git
-[submodule "RMT_core/external/mraa"]
-	path = RMT_core/external/mraa
+[submodule "external/mraa"]
+	path = external/mraa
 	url = https://github.com/Adlink-ROS/mraa.git
