@@ -75,9 +75,6 @@ int main(int argc, char *argv[])
     }
     rmt_server_free_info(info_list);
     free(id_list);
-    while (1) {
-        usleep(10000); // sleep 10ms
-    }
     // set data_info
     data_info set_info;
     printf("Try to set info to id 6166\n");
