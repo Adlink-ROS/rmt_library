@@ -35,7 +35,7 @@ static int q_dequeue(void)
     return q_front;
 }
 
-static int recv_request(void *msg)
+static int recv_request(void *msg, void *arg)
 {
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;

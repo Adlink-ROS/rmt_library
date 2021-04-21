@@ -13,7 +13,7 @@ static DataInfo_Request g_msg;
 static data_info *g_reply_list;
 static int g_reply_num;
 
-static int recv_reply(void *msg)
+static int recv_reply(void *msg, void *arg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 

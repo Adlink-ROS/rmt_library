@@ -14,7 +14,7 @@ int rmt_server_config(char *interface)
 
 int rmt_server_init(void)
 {
-    g_transport = dds_transport_server_init();
+    g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {
         return 0;
     } else {
