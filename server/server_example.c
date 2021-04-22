@@ -21,6 +21,7 @@ void print_help(void)
     printf("* --net [interface]: Decide which interface agent uses.\n");
 }
 
+// RMT_TODO: able to use argument to decide search/get/set
 int main(int argc, char *argv[])
 {
     int dev_num;
