@@ -6,6 +6,9 @@ import sys, getopt
 import atexit
 from signal import signal, SIGINT
 
+import os
+os.environ['LD_LIBRARY_PATH'] = os.getcwd()
+
 def usage():
     print("Usage:")
     print("\t-n <device_num>")
