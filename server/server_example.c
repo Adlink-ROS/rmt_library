@@ -86,6 +86,15 @@ int main(int argc, char *argv[])
         printf("return list: %s\n", info_list[i].value_list);
     }
     rmt_server_free_info(info_list);
+    sleep(2);
+    // set same info
+    unsigned long set_id_list[1] = {6166};
+    printf("Try to set info to id 6166 with same vlue\n");
+    info_list = rmt_server_set_info_with_same_value(set_id_list, 1, "hostname:ros-ROScube-I;locate:off", &info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
     // free resource
     rmt_server_free_device_list(dev_ptr);
     rmt_server_deinit();

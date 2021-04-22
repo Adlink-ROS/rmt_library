@@ -7,6 +7,7 @@
 #include "DataInfo.h"
 #include "logger.h"
 
+// RMT_TODO: This should be configurable.
 #define DEFAULT_TIMEOUT 3
 
 static DataInfo_Request g_msg;
@@ -103,7 +104,7 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     // wait for all the reply
     while (g_reply_num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
             break;
         }
         dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
@@ -114,6 +115,41 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
 
     free(id_list);
     free(buffer);
+
+    return g_reply_list;
+}
+
+data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transport, unsigned long *id_list, int id_num, char *value_list, int *info_num)
+{
+    // clean the reply queue
+    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
+    g_reply_num = 0;
+
+    // Build up request message
+    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
+    g_msg.id_list._buffer = id_list;
+    g_msg.msg = value_list;
+    g_msg.type = DataInfo_SET_SAME_VALUE;
+    srand(time(NULL));
+    g_msg.random_seq = rand();
+
+    // send request
+    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+
+    time_t start_time, now_time;
+    time(&start_time);
+    now_time = start_time;
+    // wait for all the reply
+    while (g_reply_num != id_num) {
+        if (now_time - start_time > DEFAULT_TIMEOUT) {
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            break;
+        }
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+        usleep(10000); // sleep 10ms
+        time(&now_time);
+    }
+    *info_num = g_reply_num;
 
     return g_reply_list;
 }

@@ -92,19 +92,25 @@ static int recv_request(void *msg, void *arg)
             keys = strtok(NULL, ";");
         }
         RMT_LOG("reply message: %s\n", datainfo_replys[q_idx].msg);
-    } else if (datainfo_msg->type == DataInfo_SET) {
-        // The set message format will be "key1:value1;key2:value2;|key1:value1;key2:value2;".
-        //                                 |----------------------| |----------------------|
-        //                                            |                        |
-        //                                           id1                      id2
-        // That is, the first delimitor is ";", then ",", and finally ":";
+    } else if ((datainfo_msg->type == DataInfo_SET) || (datainfo_msg->type == DataInfo_SET_SAME_VALUE)) {
         char *result_msg = malloc(1024);
         result_msg[0] = 0;
         RMT_LOG("recv meg: %s\n", datainfo_msg->msg);
-        char *set_pairs_list = strtok(datainfo_msg->msg, "|");
-        while (found_idx != 0) {
-            set_pairs_list = strtok(NULL, "|");
-            found_idx--;
+        char *set_pairs_list;
+        if (datainfo_msg->type == DataInfo_SET) {
+            // The set message format will be "key1:value1;key2:value2;|key1:value1;key2:value2;".
+            //                                 |----------------------| |----------------------|
+            //                                            |                        |
+            //                                           id1                      id2
+            // That is, the first delimitor is ";", then ",", and finally ":";
+            set_pairs_list = strtok(datainfo_msg->msg, "|");
+            while (found_idx != 0) {
+                set_pairs_list = strtok(NULL, "|");
+                found_idx--;
+            }
+        } else { // DataInfo_SET_SAME_VALUE
+            // The format of DataInfo_SET_SAME_VALUE is much more simpler, "key1:valu1;key2:value2;"
+            set_pairs_list = datainfo_msg->msg;
         }
         RMT_LOG("set info: %s\n", set_pairs_list);
         char *set_pairs_list_dup;
@@ -130,7 +136,7 @@ static int recv_request(void *msg, void *arg)
             pairs = strtok_r(NULL, ";", &set_pairs_list_dup);
         }
         // return the set result back
-        datainfo_replys[q_idx].type = DataInfo_SET;
+        datainfo_replys[q_idx].type = datainfo_msg->type;
         datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
         datainfo_replys[q_idx].deviceID = myid;
         datainfo_replys[q_idx].msg = result_msg;
