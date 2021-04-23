@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     sleep(2);
     // set same info
     unsigned long set_id_list[1] = {6166};
-    printf("Try to set info to id 6166 with same vlue\n");
+    printf("Try to set info to id 6166 with same value\n");
     info_list = rmt_server_set_info_with_same_value(set_id_list, 1, "hostname:ros-ROScube-I;locate:off", &info_list_num);
     for (int i = 0; i < info_list_num; i++) {
         printf("ID: %ld\n", info_list[i].deviceID);

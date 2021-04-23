@@ -43,7 +43,7 @@ def get_config(dev_list, dev_num):
 
     return config_data
 
-def set_config():
+def set_diff_config():
     # Create data_info_array to set config
     dev_num = 2
     data_info_array = rmt_py_wrapper.new_data_info_array(dev_num)
@@ -62,7 +62,7 @@ def set_config():
     rmt_py_wrapper.data_info_array_setitem(data_info_array, dev_idx, data_info_element)
 
     # Print what we want to set in data_info_array
-    print("=== set config req ===")
+    print("=== set diff config req ===")
     dev_idx = 0
     data_info_element = rmt_py_wrapper.data_info_array_getitem(data_info_array, dev_idx)
     print("deviceID=%d" % data_info_element.deviceID)
@@ -78,7 +78,40 @@ def set_config():
     info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
     rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
 
-    print("=== set config result ===")
+    print("=== set diff config result ===")
+    config_data = []
+    for i in range(0, info_num):
+        # Split the result string into dictionary data
+        result_list = info_list[i].value_list.split(";")
+        dict_data = {"deviceID": info_list[i].deviceID}
+        # print(info_list[i].deviceID)
+        # print(info_list[i].value_list)
+        for item in result_list:
+            key_value_pair = item.split(":")
+            if len(key_value_pair) > 1:
+                key = key_value_pair[0]
+                value = key_value_pair[1]
+                dict_data[key] = value
+        # print(dict_data)
+        config_data.append(dict_data)
+    result = json.dumps(config_data, indent=4)
+    print(result)
+
+def set_same_config():
+    # Prepare mock data for setting config
+    dev_num = 2
+    id_list = rmt_py_wrapper.ulong_array(dev_num)
+    id_list[0] = 5566
+    id_list[1] = 5567
+    config_str = "hostname:rqi-1234;locate:on"
+
+    # Send data_info_array to RMT library
+    info_num_ptr = rmt_py_wrapper.new_intptr()
+    info_list = rmt_py_wrapper.data_info_list.frompointer(rmt_py_wrapper.rmt_server_set_info_with_same_value(id_list, dev_num, config_str, info_num_ptr))
+    info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
+    rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
+
+    print("=== set same config result ===")
     config_data = []
     for i in range(0, info_num):
         # Split the result string into dictionary data
@@ -158,7 +191,8 @@ def main(args):
 
     # Set config
     if flag_set_config:
-        set_config()
+        set_same_config()
+        set_diff_config()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
