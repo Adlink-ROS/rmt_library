@@ -1,6 +1,3 @@
 [submodule "external/cyclonedds"]
 	path = external/cyclonedds
 	url = https://github.com/eclipse-cyclonedds/cyclonedds.git
-[submodule "external/mraa"]
-	path = external/mraa
-	url = https://github.com/Adlink-ROS/mraa.git
