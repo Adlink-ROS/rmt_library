@@ -4,15 +4,17 @@
 #include "dds_transport.h"
 #include "DeviceInfo.h"
 #include "rmt_server.h" // RMT_TODO: we only want to use the structure device_info
+#include "logger.h"
 
 typedef struct _dev_list {
     struct _dev_list *next;
     device_info *info;
+    long internal_id;
 } dev_list;
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
-static int add_device(void *msg)
+static int add_device(void *msg, void *arg)
 {
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     // Check whether the device exist or not.
@@ -43,6 +45,7 @@ static int add_device(void *msg)
     selected_dev->info->mac = strdup(devinfo_msg->mac);
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
+    selected_dev->internal_id = (long) arg;
 
     return 0;
 }
@@ -60,23 +63,23 @@ static void free_dev_list(dev_list *dev_ptr)
     }
 }
 
-// RMT_TODO: Use liveliness and get config to remove device
-static int del_device(int32_t id)
+static int del_device(long internal_id)
 {
     dev_list *dev_ptr = g_dev_head;
 
     if (dev_ptr == NULL) {
         goto exit;
     }
+
     // If the device is on the head of list
-    if (dev_ptr->info->deviceID == id) {
+    if (dev_ptr->internal_id == internal_id) {
         g_dev_head = dev_ptr->next;
         g_dev_num--;
         goto exit;
     }
     // Check if the device exist
     while (dev_ptr->next) {
-        if (dev_ptr->next->info->deviceID == id) {
+        if (dev_ptr->next->internal_id == internal_id) {
             dev_list *to_be_freed = dev_ptr->next;
             dev_ptr->next = dev_ptr->next->next;
             dev_ptr = to_be_freed;
@@ -86,8 +89,17 @@ static int del_device(int32_t id)
     }
 
 exit:
+    if (dev_ptr) {
+        RMT_WARN("Lost device ID: %ld\n", dev_ptr->info->deviceID);
+    }
     free_dev_list(dev_ptr);
     return 0;
+}
+
+int devinfo_server_del_device_callback(long internal_id)
+{
+    RMT_WARN("Some deviecs are lost.\n");
+    return del_device(internal_id);
 }
 
 int devinfo_server_update(struct dds_transport *transport)

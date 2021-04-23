@@ -14,7 +14,7 @@ int rmt_server_config(char *interface)
 
 int rmt_server_init(void)
 {
-    g_transport = dds_transport_server_init();
+    g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {
         return 0;
     } else {
@@ -49,6 +49,11 @@ int rmt_server_free_info(data_info* info_list)
 data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num)
 {
     return datainfo_server_set_info(g_transport, dev_list, dev_num, info_num);
+}
+
+data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_num, char *value_list, int *info_num)
+{
+    return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
 }
 
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len)

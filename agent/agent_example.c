@@ -274,6 +274,7 @@ void print_help(void)
     printf("* --net [interface]: Decide which interface agent uses.\n");
 }
 
+// RMT_TODO: Use C++ instead of C.
 int main(int argc, char *argv[])
 {
     int cmd_opt = 0;

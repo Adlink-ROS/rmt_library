@@ -3,7 +3,8 @@ module DataInfo
     typedef sequence<unsigned long long> ID_LIST; 
     enum TYPE {
         GET,
-        SET
+        SET,
+        SET_SAME_VALUE
     };
     struct Request
     {

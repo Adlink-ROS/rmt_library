@@ -29,6 +29,8 @@ typedef struct dds_comm_pair {
 
 static dds_entity_t g_domain = 0;
 static unsigned int g_participant_num = 0;
+typedef int (*server_liveliness_fptr)(long);
+static server_liveliness_fptr server_liveliness_callback = NULL;
 typedef struct dds_transport {
     dds_entity_t participant;
     dds_comm_pair pairs[PAIR_TOTAL];
@@ -106,9 +108,19 @@ exit:
     return transport;
 }
 
-struct dds_transport *dds_transport_server_init(void)
+static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_changed_status_t status, void *arg)
+{
+    if (status.not_alive_count) {
+        if (server_liveliness_callback) {
+            server_liveliness_callback((long) arg);
+        }
+    }
+}
+
+struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long))
 {
     dds_transport *transport;
+    dds_listener_t *listener;
     int ret = 0;
 
     transport = dds_transport_init();
@@ -118,16 +130,21 @@ struct dds_transport *dds_transport_server_init(void)
     }
 
     /* Create a devinfo Reader. */
+    listener = dds_create_listener(NULL);
+    server_liveliness_callback = liveliness_callback;
+    dds_lset_liveliness_changed(listener, callback_liveliness_changed);
     dds_qos_t *devinfo_qos = dds_create_qos();
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    transport->pairs[PAIR_DEV_INFO].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, NULL);
+    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(5));
+    transport->pairs[PAIR_DEV_INFO].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, listener);
     if (transport->pairs[PAIR_DEV_INFO].reader < 0) {
         DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].reader));
         ret = -1;
         goto exit;
     }
     dds_delete_qos(devinfo_qos);
+    dds_delete_listener (listener);
 
     dds_qos_t *datainfo_qos = dds_create_qos();
     dds_qset_reliability(datainfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
@@ -169,6 +186,7 @@ struct dds_transport *dds_transport_agent_init(void)
     dds_qos_t *devinfo_qos = dds_create_qos();
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
+    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(5));
     transport->pairs[PAIR_DEV_INFO].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, NULL);
     if (transport->pairs[PAIR_DEV_INFO].writer < 0) {
         DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].writer));
@@ -213,7 +231,7 @@ int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *ms
     return ret;
 }
 
-int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *))
+int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *))
 {
     dds_sample_info_t infos[MAX_SAMPLES];
     void *samples[MAX_SAMPLES];
@@ -232,7 +250,11 @@ int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int 
 
         /* Check if we read some data and it is valid. */
         if ((rc > 0) && (infos[0].valid_data)) {
-            func(samples[0]);
+            if (kind == PAIR_DEV_INFO) {
+                func(samples[0], (void *)infos[0].publication_handle);
+            } else {
+                func(samples[0], NULL);
+            }
         } else {
             // If there is no other device
             break;

@@ -8,8 +8,8 @@ jobs:
       - name: Install necessary packages
         run: sudo apt-get install libcunit1-dev uncrustify
       - name: Build
-        working-directory: ./RMT_core
+        working-directory: ./
         run: cmake -Bbuild -H. && cmake --build build
       - name: Test
-        working-directory: ./RMT_core/build
+        working-directory: ./build
         run: ctest -V
