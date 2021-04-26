@@ -1,9 +1,11 @@
 #ifndef _RMT_AGENT_
 #define _RMT_AGENT_
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* *INDENT-ON* */
 
 typedef int (*INFO_FUNC)(char *);
 
@@ -19,8 +21,10 @@ int rmt_agent_running(void);
 int rmt_agent_deinit(void);
 char* rmt_agent_version(void);
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
 } /* extern "C" */
 #endif 
+/* *INDENT-ON* */
 
 #endif /*_RMT_AGENT_*/
