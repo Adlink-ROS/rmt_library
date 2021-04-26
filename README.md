@@ -34,7 +34,7 @@ cmake --build build
   
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/agent
+cd ~/RMT/build/examples/RMT_example/agent
 ./agent_example
 # 2nd terminal: Run the server
 cd ~/RMT/build/server
@@ -45,7 +45,7 @@ cd ~/RMT/build/server
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/agent
+cd ~/RMT/build/examples/RMT_example/agent
 ./agent_example --id 6166 --net enp1s0
 # 2nd terminal: Run the server
 cd ~/RMT/build/server
@@ -55,8 +55,8 @@ cd ~/RMT/build/server
 * Run multiple agents
 
 ```bash
-cd ~/RMT/build/agent
-# invoke 5 agents with device ID from 20 t0 24
+cd ~/RMT/build/examples/RMT_example/agent
+# invoke 5 agents with device ID from 20 to 24
 ./multi_agents.py -n 5 -s 20
 ```
 

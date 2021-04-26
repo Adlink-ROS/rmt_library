@@ -6,12 +6,8 @@ project(RMT_library VERSION 0.9.0)
 
 # Include external project
 # RMT_TODO: upgrade CycloneDDS to 0.8.0
-execute_process(COMMAND git submodule update --init)
+execute_process(COMMAND git submodule update --init --recursive)
 add_subdirectory(external/cyclonedds)
-# Disable swig for mraa
-#option (BUILDSWIGNODE "Build swig node modules." OFF)
-#option (BUILDTESTS "Override the addition of tests" OFF)
-#add_subdirectory(external/mraa)
 
 # Build IDL
 add_subdirectory(idl)
@@ -24,6 +20,9 @@ add_subdirectory(agent)
 
 # Use SWIG to generate python lib
 add_subdirectory(swig)
+
+# Build example
+add_subdirectory(examples/RMT_example/agent)
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h
