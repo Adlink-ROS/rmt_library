@@ -61,8 +61,7 @@ static int recv_request(void *msg, void *arg)
 
     // If the request is for me, start to get reply from queue.
     int q_idx = q_enqueue();
-    datainfo_replys[q_idx].msg = malloc(1024);
-    datainfo_replys[q_idx].msg[0] = 0;
+    datainfo_replys[q_idx].msg = calloc(sizeof(char), 1024);
 
     if (datainfo_msg->type == DataInfo_GET) {
         // return the get info back
@@ -76,6 +75,7 @@ static int recv_request(void *msg, void *arg)
             for (int i = 0; g_datainfo_func_maps != NULL && g_datainfo_func_maps[i].key != 0; i++) {
                 if (strcmp(keys, g_datainfo_func_maps[i].key) == 0) {
                     char value[256];
+                    memset(value, 0, sizeof(value));
                     RMT_LOG("match the key!!\n");
                     if (g_datainfo_func_maps[i].get_func) {
                         g_datainfo_func_maps[i].get_func(value);
@@ -93,8 +93,7 @@ static int recv_request(void *msg, void *arg)
         }
         RMT_LOG("reply message: %s\n", datainfo_replys[q_idx].msg);
     } else if ((datainfo_msg->type == DataInfo_SET) || (datainfo_msg->type == DataInfo_SET_SAME_VALUE)) {
-        char *result_msg = malloc(1024);
-        result_msg[0] = 0;
+        char *result_msg = calloc(sizeof(char), 1024);
         RMT_LOG("recv meg: %s\n", datainfo_msg->msg);
         char *set_pairs_list;
         if (datainfo_msg->type == DataInfo_SET) {
