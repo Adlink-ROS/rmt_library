@@ -60,6 +60,28 @@ cd ~/RMT/build/examples/RMT_example/agent
 ./multi_agents.py -n 5 -s 20
 ```
 
+# Install
+
+* Build pacakge
+
+```bash
+cd ~/RMT/build
+make package
+# it'll create rmt_library_0.9.0_amd64.deb in build folder
+```
+
+* Install package
+
+```bash
+sudo apt install ./rmt_library_0.9.0_amd64.deb
+```
+
+* Uninstall
+
+```bash
+sudo apt remove ./rmt_library
+```
+
 # Test
 
 ## CUnit:
