@@ -26,3 +26,12 @@ target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 # Example (debug used)
 add_executable(server_example server_example.c)
 target_link_libraries(server_example PRIVATE rmt_server)
+
+# Make header public
+set_target_properties(rmt_server PROPERTIES PUBLIC_HEADER "rmt_server.h")
+
+# Install
+install(TARGETS rmt_server rmt_server_shared
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include
+)
