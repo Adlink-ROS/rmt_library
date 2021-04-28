@@ -13,9 +13,6 @@ install(
     ${CMAKE_BINARY_DIR}/lib/libddsc.so
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.7.0
-    ${CMAKE_BINARY_DIR}/lib/libdds_security_ac.so
-    ${CMAKE_BINARY_DIR}/lib/libdds_security_auth.so
-    ${CMAKE_BINARY_DIR}/lib/libdds_security_crypto.so
   DESTINATION 
     lib
 )
