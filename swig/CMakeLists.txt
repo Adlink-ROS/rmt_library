@@ -22,3 +22,14 @@ swig_link_libraries(rmt_py_wrapper ${PYTHON_LIBRARIES} ${CMAKE_BINARY_DIR}/serve
 # copy python_example.py to 'build/swig/'
 add_custom_target(swig_link_target ALL COMMAND ${CMAKE_COMMAND} -E 
                   copy "${CMAKE_SOURCE_DIR}/swig/python_example.py" "${CMAKE_BINARY_DIR}/swig/python_example.py")
+
+# install
+install(
+  TARGETS ${SWIG_MODULE_rmt_py_wrapper_REAL_NAME}
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON3_PACKAGES_PATH}
+)
+
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/rmt_py_wrapper.py
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON3_PACKAGES_PATH}
+)
