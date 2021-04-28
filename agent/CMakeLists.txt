@@ -16,5 +16,5 @@ set(SOURCE_CODE rmt_agent.c
    )
 
 # Build library rmt_agent
-add_library(rmt_agent ${SOURCE_CODE})
+add_library(rmt_agent SHARED ${SOURCE_CODE})
 target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
