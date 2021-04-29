@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
+#include <unistd.h>
 #include "rmt_server.h"
 
 static char *my_interface = NULL;

@@ -26,6 +26,8 @@ git clone https://github.com/Adlink-ROS/RMT.git
 cd ~/RMT
 cmake -Bbuild -H.
 cmake --build build
+# If you want to build deb file, run the command and find deb file in build folder
+cmake --build build --target package
 ```
 
 # Run
@@ -58,28 +60,6 @@ cd ~/RMT/build/server
 cd ~/RMT/build/examples/RMT_example/agent
 # invoke 5 agents with device ID from 20 to 24
 ./multi_agents.py -n 5 -s 20
-```
-
-# Install
-
-* Build pacakge
-
-```bash
-cd ~/RMT/build
-make package
-# it'll create rmt_library_0.9.0_amd64.deb in build folder
-```
-
-* Install package
-
-```bash
-sudo apt install ./rmt_library_0.9.0_amd64.deb
-```
-
-* Uninstall
-
-```bash
-sudo apt remove ./rmt_library
 ```
 
 # Test

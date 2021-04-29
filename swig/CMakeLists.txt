@@ -24,12 +24,13 @@ add_custom_target(swig_link_target ALL COMMAND ${CMAKE_COMMAND} -E
                   copy "${CMAKE_SOURCE_DIR}/swig/python_example.py" "${CMAKE_BINARY_DIR}/swig/python_example.py")
 
 # install
+execute_process(COMMAND python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(), end = '')" OUTPUT_VARIABLE PYTHON3_PATH)
 install(
   TARGETS ${SWIG_MODULE_rmt_py_wrapper_REAL_NAME}
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON3_PACKAGES_PATH}
+  DESTINATION ${PYTHON3_PATH}
 )
 
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/rmt_py_wrapper.py
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON3_PACKAGES_PATH}
+  DESTINATION ${PYTHON3_PATH}
 )
