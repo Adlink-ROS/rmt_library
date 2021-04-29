@@ -43,6 +43,8 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     g_msg.type = DataInfo_GET;
     srand(time(NULL));
     g_msg.random_seq = rand();
+    g_msg.binary._buffer = NULL;
+    g_msg.binary._maximum = g_msg.binary._length = 0;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
@@ -94,6 +96,8 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     g_msg.type = DataInfo_SET;
     srand(time(NULL));
     g_msg.random_seq = rand();
+    g_msg.binary._buffer = NULL;
+    g_msg.binary._maximum = g_msg.binary._length = 0;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
@@ -132,6 +136,8 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     g_msg.type = DataInfo_SET_SAME_VALUE;
     srand(time(NULL));
     g_msg.random_seq = rand();
+    g_msg.binary._buffer = NULL;
+    g_msg.binary._maximum = g_msg.binary._length = 0;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);

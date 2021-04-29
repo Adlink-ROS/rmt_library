@@ -1,10 +1,13 @@
 module DataInfo
 {
     typedef sequence<unsigned long long> ID_LIST; 
+    typedef sequence<octet> BINARY;
     enum TYPE {
         GET,
         SET,
-        SET_SAME_VALUE
+        SET_SAME_VALUE,
+        IMPORT,
+        EXPORT
     };
     struct Request
     {
@@ -12,6 +15,7 @@ module DataInfo
         TYPE type;
         unsigned long long random_seq;
         string msg;
+        DataInfo::BINARY binary;
     };
     #pragma keylist Request type
     // it seems like we can't use unbounded array as keylist
@@ -23,6 +27,7 @@ module DataInfo
         TYPE type;
         unsigned long long random_seq;
         string msg;
+        DataInfo::BINARY binary;
     };
     #pragma keylist Reply deviceID
 };
