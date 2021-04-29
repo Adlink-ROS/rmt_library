@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /**
  * @file
  * RMT server library API.
@@ -128,5 +134,11 @@ int rmt_server_deinit(void);
  * @returns return the library version in string
  */
 char* rmt_server_version(void);
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif 
+/* *INDENT-ON* */
 
 #endif /*_RMT_SERVER_*/
