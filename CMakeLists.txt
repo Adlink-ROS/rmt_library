@@ -30,7 +30,7 @@ add_subdirectory(agent)
 add_subdirectory(swig)
 
 # Build example
-add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
+add_subdirectory(examples/RMT_example/agent)
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h
