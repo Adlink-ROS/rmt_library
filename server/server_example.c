@@ -80,11 +80,11 @@ void server_cmd_search_and_get(void)
 
 void server_cmd_set(void)
 {
+    data_info set_info;
     data_info *info_list;
     int info_list_num;
 
     // set data_info
-    data_info set_info;
     printf("Try to set info to id 6166\n");
     set_info.deviceID = 6166;
     strncpy(set_info.value_list, "hostname:ros-ROScube-I;locate:on;", CONFIG_KEY_STR_LEN);
