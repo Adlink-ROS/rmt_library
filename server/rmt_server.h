@@ -30,6 +30,18 @@ typedef struct _data_info {
     char value_list[CONFIG_KEY_STR_LEN + 1];
 } data_info;
 
+typedef struct _recv_file_info {
+    int handle_id;
+    void *pFile;
+    uint32_t file_len;
+} recv_file_info;
+
+typedef enum _transfer_hdl_status {
+    HDL_NOT_EXIST,
+    HDL_DOING,
+    HDL_DONE
+} transfer_hdl_status;
+
 /**
  * @brief rmt_server_config
  * Set the config for RMT server
@@ -113,9 +125,40 @@ data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num);
  */
 data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_num, char *value_list, int *info_num);
 
+/**
+ * @brief rmt_server_send_file
+ * Send file to agent and get the handle ID
+ *
+ * @param[in]  filename: the name of the file you want to send
+ * @param[in]  pFile: the content of the file
+ * @param[in]  file_len: the length of the file
+ *
+ * @returns handle ID: get result by the ID
+ */
 int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len);
 
-int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len);
+/**
+ * @brief rmt_server_recv_file
+ * Get file from agent and get the handle ID
+ *
+ * @param[in]  filename: the name of the file you want to send
+ *
+ * @returns recv_file_result contains handle ID and file data.
+ *          Note that the return value should be reserved until the result is gotten.
+ */
+recv_file_info rmt_server_recv_file(char *filename);
+
+/**
+ * @brief rmt_server_get_result
+ * Get the result of file transfer by handle ID
+ * Note that the status of handle_id will be clear when you get the DONE status.
+ *
+ * @param[in]  handle_id: the ID of the result you want to get
+ * @param[out] result: the file transfer result
+ *
+ * @returns transfer_hdl_status indicates the status of file transfer
+ */
+transfer_hdl_status rmt_server_get_result(int handle_id, int *result);
 
 /**
  * @brief rmt_server_deinit

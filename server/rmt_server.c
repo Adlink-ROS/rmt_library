@@ -61,9 +61,16 @@ int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len)
     return 0;
 }
 
-int rmt_server_recv_file(char *filename, void *pFile, uint32_t *file_len)
+recv_file_info rmt_server_recv_file(char *filename)
 {
-    return 0;
+    recv_file_info info;
+
+    return info;
+}
+
+transfer_hdl_status rmt_server_get_result(int handle_id, int *result)
+{
+    return HDL_NOT_EXIST;
 }
 
 int rmt_server_deinit(void)
