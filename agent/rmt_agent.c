@@ -13,9 +13,9 @@ int rmt_agent_config(char *interface, int id)
     devinfo_agent_config(interface, id);
 }
 
-int rmt_agent_init(datainfo_func *func_maps)
+int rmt_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps)
 {
-    datainfo_agent_init(func_maps);
+    datainfo_agent_init(func_maps, file_maps);
     g_transport = dds_transport_agent_init();
     if (g_transport) {
         return 0;

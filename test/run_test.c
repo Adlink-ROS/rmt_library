@@ -8,7 +8,7 @@ extern CU_TestInfo testcases_basic[];
 int suite_init(void)
 {
     rmt_server_init();
-    rmt_agent_init(NULL);
+    rmt_agent_init(NULL, NULL);
     return 0;
 }
 

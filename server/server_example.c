@@ -24,12 +24,14 @@ void print_help(void)
     printf("server_cmd:\n");
     printf("  * search: show the search result (default).\n");
     printf("  * set: set the config from certain ID.\n");
+    printf("  * sendfile: send files to agent.\n");
     printf("  * all: do all the action of search, get, set.\n");
 }
 
 typedef enum _SVR_CMD {
     CMD_SEARCH = 0,
     CMD_SET,
+    CMD_SEND_FILE,
     CMD_ALL,
     CMD_SUM
 } SVR_CMD;
@@ -37,6 +39,7 @@ typedef enum _SVR_CMD {
 char *svr_cmd_mapping[CMD_SUM] = {
     "search",
     "set",
+    "sendfile",
     "all"
 };
 
@@ -106,6 +109,20 @@ void server_cmd_set(void)
     }
 }
 
+void server_cmd_send_file(void)
+{
+    transfer_result file_result;
+    transfer_status agent_status;
+    int id_num = 1;
+    unsigned long id_list[1] = {6166};
+    unsigned char *file_content = "This is file content.\n";
+    unsigned long file_len = strlen(file_content);
+
+    rmt_server_send_file(id_list, id_num, "testfile", file_content, file_len);
+    rmt_server_get_result(id_list[0], &file_result);
+    printf("status: %d, result: %d\n", agent_status, file_result.result);
+}
+
 int main(int argc, char *argv[])
 {
     int cmd_opt = 0;
@@ -148,9 +165,13 @@ int main(int argc, char *argv[])
         case CMD_SET:
             server_cmd_set();
             break;
+        case CMD_SEND_FILE:
+            server_cmd_send_file();
+            break;
         case CMD_ALL:
             server_cmd_search_and_get();
             server_cmd_set();
+            server_cmd_send_file();
             break;
     }
 
