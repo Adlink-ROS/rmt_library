@@ -168,6 +168,7 @@ static int recv_request(void *msg, void *arg)
                 break;
             }
         }
+        // RMT_TODO: What if there is no match filename? We need to modify the return message like filename=xxxx
         // build reply message
         datainfo_replys[q_idx].type = datainfo_msg->type;
         datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
@@ -198,6 +199,7 @@ static int recv_request(void *msg, void *arg)
                     fclose(fp);
                 }
                 if (g_fileinfo_func_maps[i].export_func) {
+                    // RMT_TODO: Should we consider export function will extent the file length?
                     int result = g_fileinfo_func_maps[i].export_func(file_content, file_size);
                     sprintf(result_msg, "%d", result);
                     RMT_LOG("result of export func: %d\n", result);
@@ -207,6 +209,7 @@ static int recv_request(void *msg, void *arg)
                 break;
             }
         }
+        // RMT_TODO: What if there is no match filename? We need to modify the return message like filename=xxxx
         // build reply message
         datainfo_replys[q_idx].type = datainfo_msg->type;
         datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;

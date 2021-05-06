@@ -37,11 +37,10 @@ typedef struct _transfer_result {
 } transfer_result;
 
 typedef enum _transfer_status {
-    INIT_STATUS,
-    DEV_NOT_EXIST,
-    AGENT_ERROR,
+    TRANSFER_DONE = 0,
     TRANSFER_RUNNING,
-    TRANSFER_DONE
+    SERVER_ERROR,
+    AGENT_ERROR,
 } transfer_status;
 
 /**
