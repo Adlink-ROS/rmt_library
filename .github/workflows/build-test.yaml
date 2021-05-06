@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install necessary packages
-        run: sudo apt-get install libcunit1-dev uncrustify
+        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev
       - name: Build
         working-directory: ./
         run: cmake -Bbuild -H. && cmake --build build

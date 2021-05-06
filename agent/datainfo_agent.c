@@ -10,6 +10,7 @@
 #define QUEUE_SIZE 16
 
 static datainfo_func *g_datainfo_func_maps;
+static fileinfo_func *g_fileinfo_func_maps;
 
 static DataInfo_Reply datainfo_replys[QUEUE_SIZE];
 static int q_front = 0;
@@ -40,9 +41,9 @@ static int recv_request(void *msg, void *arg)
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
 
-    RMT_LOG("key_list: %s\n", datainfo_msg->msg);
-    RMT_LOG("type: %d\n", datainfo_msg->type);
     RMT_LOG("id_list.length: %d\n", datainfo_msg->id_list._length);
+    RMT_LOG("type: %d\n", datainfo_msg->type);
+    RMT_LOG("msg: %s\n", datainfo_msg->msg);
 
     // check whether the ID matches or not
     int found_idx = -1;
@@ -143,6 +144,37 @@ static int recv_request(void *msg, void *arg)
         datainfo_replys[q_idx].msg = result_msg;
         datainfo_replys[q_idx].binary._buffer = NULL;
         datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
+    } else if (datainfo_msg->type == DataInfo_IMPORT) {
+        char *result_msg = calloc(sizeof(char), 1024);
+        // run import function
+        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].filename != 0; i++) {
+            if (strcmp(datainfo_msg->msg, g_fileinfo_func_maps[i].filename) == 0) {
+                RMT_LOG("match the filename!!\n");
+                if (g_fileinfo_func_maps[i].import_func) {
+                    int result = g_fileinfo_func_maps[i].import_func(datainfo_msg->binary._buffer, datainfo_msg->binary._length);
+                    sprintf(result_msg, "%d", result);
+                    RMT_LOG("result of import func: %d\n", result);
+                } else {
+                    RMT_ERROR("There is no import function for filename %s\n", datainfo_msg->msg);
+                }
+                // save the file
+                if (g_fileinfo_func_maps[i].path != NULL) {
+                    char filepath[1024] = {0};
+                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, g_fileinfo_func_maps[i].filename);
+                    FILE *fp = fopen(filepath, "w");
+                    fwrite(datainfo_msg->binary._buffer, 1, datainfo_msg->binary._length, fp);
+                    fclose(fp);
+                }
+                break;
+            }
+        }
+        // build reply message
+        datainfo_replys[q_idx].type = datainfo_msg->type;
+        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
+        datainfo_replys[q_idx].deviceID = myid;
+        datainfo_replys[q_idx].msg = result_msg;
+        datainfo_replys[q_idx].binary._buffer = NULL;
+        datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
     } else {
         // wrong type
         RMT_ERROR("Wrong type %d for request.\n", datainfo_msg->type);
@@ -174,9 +206,10 @@ int datainfo_agent_update(struct dds_transport *transport)
     return 0;
 }
 
-int datainfo_agent_init(datainfo_func *func_maps)
+int datainfo_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps)
 {
     g_datainfo_func_maps = func_maps;
+    g_fileinfo_func_maps = file_maps;
     for (int i = 0; i < QUEUE_SIZE; i++) {
         datainfo_replys[i].msg = NULL;
     }

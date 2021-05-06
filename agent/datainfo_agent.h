@@ -2,6 +2,6 @@
 #define _DATAINFO_AGENT_
 
 int datainfo_agent_update(struct dds_transport *transport);
-int datainfo_agent_init(datainfo_func *func_maps);
+int datainfo_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps);
 
 #endif /*_DATAINFO_AGENT_*/

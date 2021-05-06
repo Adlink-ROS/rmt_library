@@ -231,6 +231,7 @@ int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *ms
     return ret;
 }
 
+// RMT_TODO: We need to use instance to check which kind of data we want to receive, e.g. get, set, import, export...
 int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *))
 {
     dds_sample_info_t infos[MAX_SAMPLES];

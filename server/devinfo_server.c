@@ -9,6 +9,8 @@
 typedef struct _dev_list {
     struct _dev_list *next;
     device_info *info;
+    transfer_status agent_transfer_status;
+    transfer_result transfer_result;
     long internal_id;
 } dev_list;
 static dev_list *g_dev_head = NULL;
@@ -149,5 +151,33 @@ int devinfo_server_deinit(void)
         g_dev_head = g_dev_head->next;
         free_dev_list(dev_ptr);
         g_dev_num--;
+    }
+}
+
+int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer_result dev_result)
+{
+    dev_list *dev_ptr = g_dev_head;
+
+    for (int i = 0; i < g_dev_num; i++) {
+        if (id == dev_ptr->info->deviceID) {
+            dev_ptr->agent_transfer_status = dev_status;
+            dev_ptr->transfer_result = dev_result;
+            break;
+        }
+        dev_ptr = dev_ptr->next;
+    }
+}
+
+int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfer_result *dev_result)
+{
+    dev_list *dev_ptr = g_dev_head;
+
+    for (int i = 0; i < g_dev_num; i++) {
+        if (id == dev_ptr->info->deviceID) {
+            *dev_status = dev_ptr->agent_transfer_status;
+            *dev_result = dev_ptr->transfer_result;
+            break;
+        }
+        dev_ptr = dev_ptr->next;
     }
 }

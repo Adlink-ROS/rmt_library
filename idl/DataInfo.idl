@@ -18,9 +18,6 @@ module DataInfo
         DataInfo::BINARY binary;
     };
     #pragma keylist Request type
-    // it seems like we can't use unbounded array as keylist
-    // RMT_TODO: I need to know what keylist means.
-    //#pragma keylist Request id_list
     struct Reply
     {
         unsigned long long deviceID;
@@ -29,5 +26,5 @@ module DataInfo
         string msg;
         DataInfo::BINARY binary;
     };
-    #pragma keylist Reply deviceID
+    #pragma keylist Reply type
 };

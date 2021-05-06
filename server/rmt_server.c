@@ -56,21 +56,24 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
     return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
 }
 
-int rmt_server_send_file(char *filename, void *pFile, uint32_t file_len)
+int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
+{
+    // RMT_TODO: Suggest to run server update in another thread.
+    devinfo_server_update(g_transport);
+    return datainfo_server_send_file(g_transport, id_list, id_num, filename, pFile, file_len);
+}
+
+int rmt_server_recv_file(unsigned long id, char *filename)
 {
     return 0;
 }
 
-recv_file_info rmt_server_recv_file(char *filename)
+transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *result)
 {
-    recv_file_info info;
+    transfer_status current_status;
 
-    return info;
-}
-
-transfer_hdl_status rmt_server_get_result(int handle_id, int *result)
-{
-    return HDL_NOT_EXIST;
+    devinfo_server_get_status_by_id(device_id, &current_status, result);
+    return current_status;
 }
 
 int rmt_server_deinit(void)
