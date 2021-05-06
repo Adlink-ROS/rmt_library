@@ -11,6 +11,8 @@ The repo contains two components:
 sudo apt install -y libcunit1-dev swig
 # Used by CycloneDDS
 sudo apt install maven default-jdk
+# Used by agent example
+sudo apt install libnm-dev
 ```
 
 # Download

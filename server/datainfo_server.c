@@ -35,6 +35,7 @@ static int recv_reply(void *msg, void *arg)
 static int recv_file_transfer_reply(void *msg, void *arg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
+    transfer_status status;
 
     // Check whether this reply is for me or not.
     if ((datainfo_msg->type != g_msg.type) || (datainfo_msg->random_seq != g_msg.random_seq)) {
@@ -45,9 +46,20 @@ static int recv_file_transfer_reply(void *msg, void *arg)
     RMT_LOG("Receive result: %s\n", datainfo_msg->msg);
     transfer_result file_result;
     file_result.result = atoi(datainfo_msg->msg);
-    file_result.pFile = NULL;
-    file_result.file_len = 0;
-    devinfo_server_set_status_by_id(datainfo_msg->deviceID, TRANSFER_DONE, file_result);
+    if (datainfo_msg->type == DataInfo_IMPORT) {
+        file_result.pFile = NULL;
+        file_result.file_len = 0;
+    } else if (datainfo_msg->type == DataInfo_EXPORT) {
+        file_result.pFile = malloc(sizeof(uint8_t) * datainfo_msg->binary._length);
+        if (file_result.pFile) {
+            memcpy(file_result.pFile, datainfo_msg->binary._buffer, datainfo_msg->binary._length);
+            file_result.file_len = datainfo_msg->binary._length;
+            status = TRANSFER_DONE;
+        } else {
+            status = SERVER_ERROR;
+        }
+    }
+    devinfo_server_set_status_by_id(datainfo_msg->deviceID, status, file_result);
     g_reply_num++;
     return 0;
 }
@@ -218,6 +230,51 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
     while (g_reply_num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
             RMT_WARN("send file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            // RMT_TODO: need to check whether the transfer is timeout or not, and then update the status.
+            break;
+        }
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply);
+        usleep(10000); // sleep 10ms
+        time(&now_time);
+    }
+
+    return 0;
+}
+
+int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *filename)
+{
+    // clean the reply queue
+    g_reply_list = (data_info *) malloc(sizeof(data_info) * 1);
+    g_reply_num = 0;
+
+    // Build up request message
+    g_msg.id_list._maximum = g_msg.id_list._length = 1;
+    g_msg.id_list._buffer = &id;
+    g_msg.msg = filename;
+    g_msg.type = DataInfo_EXPORT;
+    srand(time(NULL));
+    g_msg.random_seq = rand();
+    g_msg.binary._buffer = NULL;
+    g_msg.binary._maximum = g_msg.binary._length = 0;
+
+    // send request
+    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+
+    // Mark all devices as running
+    transfer_result default_result;
+    default_result.result = 0;
+    default_result.pFile = NULL;
+    default_result.file_len = 0;
+    devinfo_server_set_status_by_id(id, TRANSFER_RUNNING, default_result);
+
+    // RMT_TODO: I should receive the data in another thread.
+    time_t start_time, now_time;
+    time(&start_time);
+    now_time = start_time;
+    // wait for all the reply
+    while (g_reply_num != 1) {
+        if (now_time - start_time > DEFAULT_TIMEOUT) {
+            RMT_WARN("recv file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, 1, g_reply_num);
             break;
         }
         dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply);

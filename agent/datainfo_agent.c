@@ -168,6 +168,7 @@ static int recv_request(void *msg, void *arg)
                 break;
             }
         }
+        // RMT_TODO: What if there is no match filename? We need to modify the return message like filename=xxxx
         // build reply message
         datainfo_replys[q_idx].type = datainfo_msg->type;
         datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
@@ -175,6 +176,47 @@ static int recv_request(void *msg, void *arg)
         datainfo_replys[q_idx].msg = result_msg;
         datainfo_replys[q_idx].binary._buffer = NULL;
         datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
+    } else if (datainfo_msg->type == DataInfo_EXPORT) {
+        char *result_msg = calloc(sizeof(char), 1024);
+        unsigned char *file_content;
+        unsigned long file_size;
+        // run export function
+        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].filename != 0; i++) {
+            if (strcmp(datainfo_msg->msg, g_fileinfo_func_maps[i].filename) == 0) {
+                RMT_LOG("match the filename!!\n");
+                // save the file
+                if (g_fileinfo_func_maps[i].path != NULL) {
+                    char filepath[1024] = {0};
+                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, g_fileinfo_func_maps[i].filename);
+                    FILE *fp = fopen(filepath, "r");
+                    fseek(fp, 0L, SEEK_END);
+                    file_size = ftell(fp);
+                    fseek(fp, 0L, SEEK_SET);
+                    file_content = malloc(file_size);
+                    if (fread(file_content, 1, file_size, fp) != file_size) {
+                        RMT_WARN("something wrong while reading file\n");
+                    }
+                    fclose(fp);
+                }
+                if (g_fileinfo_func_maps[i].export_func) {
+                    // RMT_TODO: Should we consider export function will extent the file length?
+                    int result = g_fileinfo_func_maps[i].export_func(file_content, file_size);
+                    sprintf(result_msg, "%d", result);
+                    RMT_LOG("result of export func: %d\n", result);
+                } else {
+                    RMT_ERROR("There is no export function for filename %s\n", datainfo_msg->msg);
+                }
+                break;
+            }
+        }
+        // RMT_TODO: What if there is no match filename? We need to modify the return message like filename=xxxx
+        // build reply message
+        datainfo_replys[q_idx].type = datainfo_msg->type;
+        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
+        datainfo_replys[q_idx].deviceID = myid;
+        datainfo_replys[q_idx].msg = result_msg;
+        datainfo_replys[q_idx].binary._buffer = file_content;
+        datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = file_size;
     } else {
         // wrong type
         RMT_ERROR("Wrong type %d for request.\n", datainfo_msg->type);

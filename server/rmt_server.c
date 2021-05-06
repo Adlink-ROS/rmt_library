@@ -65,7 +65,9 @@ int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, voi
 
 int rmt_server_recv_file(unsigned long id, char *filename)
 {
-    return 0;
+    // RMT_TODO: Suggest to run server update in another thread.
+    devinfo_server_update(g_transport);
+    return datainfo_server_recv_file(g_transport, id, filename);
 }
 
 transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *result)

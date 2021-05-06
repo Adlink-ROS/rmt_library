@@ -32,6 +32,7 @@ typedef enum _SVR_CMD {
     CMD_SEARCH = 0,
     CMD_SET,
     CMD_SEND_FILE,
+    CMD_RECV_FILE,
     CMD_ALL,
     CMD_SUM
 } SVR_CMD;
@@ -40,6 +41,7 @@ char *svr_cmd_mapping[CMD_SUM] = {
     "search",
     "set",
     "sendfile",
+    "recvfile",
     "all"
 };
 
@@ -119,8 +121,19 @@ void server_cmd_send_file(void)
     unsigned long file_len = strlen(file_content);
 
     rmt_server_send_file(id_list, id_num, "testfile", file_content, file_len);
-    rmt_server_get_result(id_list[0], &file_result);
+    agent_status = rmt_server_get_result(id_list[0], &file_result);
     printf("status: %d, result: %d\n", agent_status, file_result.result);
+}
+
+void server_cmd_recv_file(void)
+{
+    transfer_result file_result;
+    transfer_status agent_status;
+    unsigned long id = 6166;
+
+    rmt_server_recv_file(id, "testfile");
+    agent_status = rmt_server_get_result(id, &file_result);
+    printf("status: %d, result: %d, file_content: %s\n", agent_status, file_result.result, (char *)file_result.pFile);
 }
 
 int main(int argc, char *argv[])
@@ -167,6 +180,9 @@ int main(int argc, char *argv[])
             break;
         case CMD_SEND_FILE:
             server_cmd_send_file();
+            break;
+        case CMD_RECV_FILE:
+            server_cmd_recv_file();
             break;
         case CMD_ALL:
             server_cmd_search_and_get();
