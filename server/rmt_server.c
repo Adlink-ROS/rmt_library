@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include "rmt_server.h"
 #include "version.h"
 #include "dds_transport.h"
@@ -6,6 +7,14 @@
 #include "logger.h"
 
 static struct dds_transport *g_transport;
+static pthread_t g_recv_thread;
+int g_recv_thread_status; // 1: running, 0 stop
+
+void *recv_thread_func(void *data) {
+    while (1 == g_recv_thread_status) {
+    }
+    pthread_exit(NULL); // leave the thread
+}
 
 int rmt_server_config(char *interface)
 {
@@ -16,6 +25,8 @@ int rmt_server_init(void)
 {
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {
+        g_recv_thread_status = 1;
+        pthread_create(&g_recv_thread, NULL, recv_thread_func, NULL);
         return 0;
     } else {
         RMT_ERROR("Unable to init server\n");
@@ -83,6 +94,9 @@ int rmt_server_deinit(void)
     int ret = dds_transport_deinit(g_transport);
 
     devinfo_server_deinit();
+    // kill the thread
+    g_recv_thread_status = 0;
+    pthread_join(g_recv_thread, NULL);
     return ret;
 }
 

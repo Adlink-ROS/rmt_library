@@ -17,11 +17,11 @@ set(SOURCE_CODE rmt_server.c
 
 # Build library rmt_server
 add_library(rmt_server STATIC ${SOURCE_CODE})
-target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib)
+target_link_libraries(rmt_server PRIVATE CycloneDDS::ddsc RmtIdl_lib pthread)
 
 # Build library rmt_server_shared for SWIG
 add_library(rmt_server_shared SHARED ${SOURCE_CODE})
-target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib)
+target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib pthread)
 
 # Example (debug used)
 add_executable(server_example server_example.c)
