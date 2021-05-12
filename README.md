@@ -1,9 +1,12 @@
 # Introduction
 
-The repo contains two components:
+The repository is Robot Management Tool library.
+The library provides the communication way between server and agent.
 
-* RMT Server (Server Side)
-* RMT Agent (Client Side)
+You can use the repo with other two projects
+
+* Server side: https://github.com/Adlink-ROS/rmt_web_devkit
+* Agent side: https://github.com/Adlink-ROS/RMT_example
 
 # Install necessary packages
 
