@@ -11,10 +11,8 @@
 // RMT_TODO: This should be configurable.
 #define DEFAULT_TIMEOUT 3
 
-// RMT_TODO: To support simultaneous access, should not use one global variable.
-static DataInfo_Request g_msg;
-
 typedef struct _reply_data {
+    struct DataInfo_Request *req;
     data_info *list;
     int num;
 } reply_data;
@@ -25,7 +23,7 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
     // Check whether this reply is for me or not.
-    if ((datainfo_msg->type != g_msg.type) || (datainfo_msg->random_seq != g_msg.random_seq)) {
+    if ((datainfo_msg->type != replys->req->type) || (datainfo_msg->random_seq != replys->req->random_seq)) {
         return -1;
     }
 
@@ -43,7 +41,7 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
     transfer_status status;
 
     // Check whether this reply is for me or not.
-    if ((datainfo_msg->type != g_msg.type) || (datainfo_msg->random_seq != g_msg.random_seq)) {
+    if ((datainfo_msg->type != replys->req->type) || (datainfo_msg->random_seq != replys->req->random_seq)) {
         return -1;
     }
 
@@ -71,24 +69,26 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
 
 data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
+    static DataInfo_Request req_msg;
     reply_data replys;
 
     // clean the reply queue
+    replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
     replys.num = 0;
 
     // Build up request message
-    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
-    g_msg.id_list._buffer = id_list;
-    g_msg.msg = key_list;
-    g_msg.type = DataInfo_GET;
+    req_msg.id_list._maximum = req_msg.id_list._length = id_num;
+    req_msg.id_list._buffer = id_list;
+    req_msg.msg = key_list;
+    req_msg.type = DataInfo_GET;
     srand(time(NULL));
-    g_msg.random_seq = rand();
-    g_msg.binary._buffer = NULL;
-    g_msg.binary._maximum = g_msg.binary._length = 0;
+    req_msg.random_seq = rand();
+    req_msg.binary._buffer = NULL;
+    req_msg.binary._maximum = req_msg.binary._length = 0;
 
     // send request
-    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     time_t start_time, now_time;
     time(&start_time);
@@ -116,9 +116,11 @@ int datainfo_server_free_info(data_info* info_list)
 
 data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_list, int dev_num, int *info_num)
 {
+    static DataInfo_Request req_msg;
     reply_data replys;
 
     // clean the reply queue
+    replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * dev_num);
     replys.num = 0;
 
@@ -133,17 +135,17 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
         strcat(buffer, dev_list[i].value_list);
         strcat(buffer, "|");
     }
-    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
-    g_msg.id_list._buffer = id_list;
-    g_msg.msg = buffer;
-    g_msg.type = DataInfo_SET;
+    req_msg.id_list._maximum = req_msg.id_list._length = id_num;
+    req_msg.id_list._buffer = id_list;
+    req_msg.msg = buffer;
+    req_msg.type = DataInfo_SET;
     srand(time(NULL));
-    g_msg.random_seq = rand();
-    g_msg.binary._buffer = NULL;
-    g_msg.binary._maximum = g_msg.binary._length = 0;
+    req_msg.random_seq = rand();
+    req_msg.binary._buffer = NULL;
+    req_msg.binary._maximum = req_msg.binary._length = 0;
 
     // send request
-    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     time_t start_time, now_time;
     time(&start_time);
@@ -168,24 +170,26 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
 
 data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transport, unsigned long *id_list, int id_num, char *value_list, int *info_num)
 {
+    static DataInfo_Request req_msg;
     reply_data replys;
 
     // clean the reply queue
+    replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
     replys.num = 0;
 
     // Build up request message
-    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
-    g_msg.id_list._buffer = id_list;
-    g_msg.msg = value_list;
-    g_msg.type = DataInfo_SET_SAME_VALUE;
+    req_msg.id_list._maximum = req_msg.id_list._length = id_num;
+    req_msg.id_list._buffer = id_list;
+    req_msg.msg = value_list;
+    req_msg.type = DataInfo_SET_SAME_VALUE;
     srand(time(NULL));
-    g_msg.random_seq = rand();
-    g_msg.binary._buffer = NULL;
-    g_msg.binary._maximum = g_msg.binary._length = 0;
+    req_msg.random_seq = rand();
+    req_msg.binary._buffer = NULL;
+    req_msg.binary._maximum = req_msg.binary._length = 0;
 
     // send request
-    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     time_t start_time, now_time;
     time(&start_time);
@@ -207,24 +211,26 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
 
 int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
 {
+    static DataInfo_Request req_msg;
     reply_data replys;
 
     // clean the reply queue
+    replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
     replys.num = 0;
 
     // Build up request message
-    g_msg.id_list._maximum = g_msg.id_list._length = id_num;
-    g_msg.id_list._buffer = id_list;
-    g_msg.msg = filename;
-    g_msg.type = DataInfo_IMPORT;
+    req_msg.id_list._maximum = req_msg.id_list._length = id_num;
+    req_msg.id_list._buffer = id_list;
+    req_msg.msg = filename;
+    req_msg.type = DataInfo_IMPORT;
     srand(time(NULL));
-    g_msg.random_seq = rand();
-    g_msg.binary._buffer = pFile;
-    g_msg.binary._maximum = g_msg.binary._length = file_len;
+    req_msg.random_seq = rand();
+    req_msg.binary._buffer = pFile;
+    req_msg.binary._maximum = req_msg.binary._length = file_len;
 
     // send request
-    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     // Mark all devices as running
     transfer_result default_result;
@@ -254,24 +260,26 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
 
 int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *filename)
 {
+    static DataInfo_Request req_msg;
     reply_data replys;
 
     // clean the reply queue
+    replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * 1);
     replys.num = 0;
 
     // Build up request message
-    g_msg.id_list._maximum = g_msg.id_list._length = 1;
-    g_msg.id_list._buffer = &id;
-    g_msg.msg = filename;
-    g_msg.type = DataInfo_EXPORT;
+    req_msg.id_list._maximum = req_msg.id_list._length = 1;
+    req_msg.id_list._buffer = &id;
+    req_msg.msg = filename;
+    req_msg.type = DataInfo_EXPORT;
     srand(time(NULL));
-    g_msg.random_seq = rand();
-    g_msg.binary._buffer = NULL;
-    g_msg.binary._maximum = g_msg.binary._length = 0;
+    req_msg.random_seq = rand();
+    req_msg.binary._buffer = NULL;
+    req_msg.binary._maximum = req_msg.binary._length = 0;
 
     // send request
-    dds_transport_send(PAIR_DATA_REQ, transport, &g_msg);
+    dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     // Mark all devices as running
     transfer_result default_result;
