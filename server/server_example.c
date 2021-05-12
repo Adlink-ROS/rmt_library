@@ -188,6 +188,7 @@ int main(int argc, char *argv[])
             server_cmd_search_and_get();
             server_cmd_set();
             server_cmd_send_file();
+            server_cmd_recv_file();
             break;
     }
 
