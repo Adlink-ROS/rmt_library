@@ -36,7 +36,7 @@ static int q_dequeue(void)
     return q_front;
 }
 
-static int recv_request(void *msg, void *arg)
+static int recv_request(void *msg, void *arg, void *recv_buf)
 {
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
@@ -243,7 +243,7 @@ static int datainfo_agent_send_data(struct dds_transport *transport)
 
 int datainfo_agent_update(struct dds_transport *transport)
 {
-    dds_transport_try_recv(PAIR_DATA_REQ, transport, recv_request);
+    dds_transport_try_recv(PAIR_DATA_REQ, transport, recv_request, NULL);
     datainfo_agent_send_data(transport);
     return 0;
 }

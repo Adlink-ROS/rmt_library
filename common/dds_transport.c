@@ -232,7 +232,7 @@ int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *ms
 }
 
 // RMT_TODO: We need to use instance to check which kind of data we want to receive, e.g. get, set, import, export...
-int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *))
+int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *, void *), void *arg)
 {
     dds_sample_info_t infos[MAX_SAMPLES];
     void *samples[MAX_SAMPLES];
@@ -252,9 +252,9 @@ int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int 
         /* Check if we read some data and it is valid. */
         if ((rc > 0) && (infos[0].valid_data)) {
             if (kind == PAIR_DEV_INFO) {
-                func(samples[0], (void *)infos[0].publication_handle);
+                func(samples[0], arg, (void *)infos[0].publication_handle);
             } else {
-                func(samples[0], NULL);
+                func(samples[0], arg, NULL);
             }
         } else {
             // If there is no other device

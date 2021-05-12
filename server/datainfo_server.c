@@ -13,11 +13,15 @@
 
 // RMT_TODO: To support simultaneous access, should not use one global variable.
 static DataInfo_Request g_msg;
-static data_info *g_reply_list;
-static int g_reply_num;
 
-static int recv_reply(void *msg, void *arg)
+typedef struct _reply_data {
+    data_info *list;
+    int num;
+} reply_data;
+
+static int recv_reply(void *msg, void *recv_buf, void *arg)
 {
+    reply_data *replys = (reply_data *)recv_buf;
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
     // Check whether this reply is for me or not.
@@ -26,14 +30,15 @@ static int recv_reply(void *msg, void *arg)
     }
 
     RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
-    g_reply_list[g_reply_num].deviceID = datainfo_msg->deviceID;
-    strncpy(g_reply_list[g_reply_num].value_list, datainfo_msg->msg, CONFIG_KEY_STR_LEN);
-    g_reply_num++;
+    replys->list[replys->num].deviceID = datainfo_msg->deviceID;
+    strncpy(replys->list[replys->num].value_list, datainfo_msg->msg, CONFIG_KEY_STR_LEN);
+    replys->num++;
     return 0;
 }
 
-static int recv_file_transfer_reply(void *msg, void *arg)
+static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
 {
+    reply_data *replys = (reply_data *)recv_buf;
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
     transfer_status status;
 
@@ -60,15 +65,17 @@ static int recv_file_transfer_reply(void *msg, void *arg)
         }
     }
     devinfo_server_set_status_by_id(datainfo_msg->deviceID, status, file_result);
-    g_reply_num++;
+    replys->num++;
     return 0;
 }
 
 data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
+    reply_data replys;
+
     // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
-    g_reply_num = 0;
+    replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
+    replys.num = 0;
 
     // Build up request message
     g_msg.id_list._maximum = g_msg.id_list._length = id_num;
@@ -87,18 +94,18 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     time(&start_time);
     now_time = start_time;
     // wait for all the reply
-    while (g_reply_num != id_num) {
+    while (replys.num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
-    *info_num = g_reply_num;
+    *info_num = replys.num;
 
-    return g_reply_list;
+    return replys.list;
 }
 
 int datainfo_server_free_info(data_info* info_list)
@@ -109,9 +116,11 @@ int datainfo_server_free_info(data_info* info_list)
 
 data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *dev_list, int dev_num, int *info_num)
 {
+    reply_data replys;
+
     // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * dev_num);
-    g_reply_num = 0;
+    replys.list = (data_info *) malloc(sizeof(data_info) * dev_num);
+    replys.num = 0;
 
     // Build up request message
     int id_num = dev_num;
@@ -140,28 +149,30 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     time(&start_time);
     now_time = start_time;
     // wait for all the reply
-    while (g_reply_num != id_num) {
+    while (replys.num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
-    *info_num = g_reply_num;
+    *info_num = replys.num;
 
     free(id_list);
     free(buffer);
 
-    return g_reply_list;
+    return replys.list;
 }
 
 data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transport, unsigned long *id_list, int id_num, char *value_list, int *info_num)
 {
+    reply_data replys;
+
     // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
-    g_reply_num = 0;
+    replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
+    replys.num = 0;
 
     // Build up request message
     g_msg.id_list._maximum = g_msg.id_list._length = id_num;
@@ -180,25 +191,27 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     time(&start_time);
     now_time = start_time;
     // wait for all the reply
-    while (g_reply_num != id_num) {
+    while (replys.num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
-    *info_num = g_reply_num;
+    *info_num = replys.num;
 
-    return g_reply_list;
+    return replys.list;
 }
 
 int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
 {
+    reply_data replys;
+
     // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * id_num);
-    g_reply_num = 0;
+    replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
+    replys.num = 0;
 
     // Build up request message
     g_msg.id_list._maximum = g_msg.id_list._length = id_num;
@@ -225,15 +238,13 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
     // RMT_TODO: I should receive the data in another thread.
     time_t start_time, now_time;
     time(&start_time);
-    now_time = start_time;
-    // wait for all the reply
-    while (g_reply_num != id_num) {
+    while (replys.num != id_num) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("send file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, g_reply_num);
+            RMT_WARN("send file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             // RMT_TODO: need to check whether the transfer is timeout or not, and then update the status.
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
@@ -243,9 +254,11 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
 
 int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *filename)
 {
+    reply_data replys;
+
     // clean the reply queue
-    g_reply_list = (data_info *) malloc(sizeof(data_info) * 1);
-    g_reply_num = 0;
+    replys.list = (data_info *) malloc(sizeof(data_info) * 1);
+    replys.num = 0;
 
     // Build up request message
     g_msg.id_list._maximum = g_msg.id_list._length = 1;
@@ -272,12 +285,12 @@ int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id,
     time(&start_time);
     now_time = start_time;
     // wait for all the reply
-    while (g_reply_num != 1) {
+    while (replys.num != 1) {
         if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("recv file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, 1, g_reply_num);
+            RMT_WARN("recv file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, 1, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply);
+        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
