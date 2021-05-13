@@ -14,7 +14,7 @@ void *recv_thread_func(void *data)
 {
     RMT_LOG("Start recv thread.\n")
     while (1 == g_recv_thread_status) {
-        sleep(1);
+        devinfo_server_update(g_transport);
     }
     RMT_LOG("Stop recv thread.\n")
     pthread_exit(NULL); // leave the thread
@@ -73,15 +73,11 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
 
 int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
 {
-    // RMT_TODO: Suggest to run server update in another thread.
-    devinfo_server_update(g_transport);
     return datainfo_server_send_file(g_transport, id_list, id_num, filename, pFile, file_len);
 }
 
 int rmt_server_recv_file(unsigned long id, char *filename)
 {
-    // RMT_TODO: Suggest to run server update in another thread.
-    devinfo_server_update(g_transport);
     return datainfo_server_recv_file(g_transport, id, filename);
 }
 
@@ -95,12 +91,14 @@ transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *
 
 int rmt_server_deinit(void)
 {
-    int ret = dds_transport_deinit(g_transport);
+    int ret;
 
-    devinfo_server_deinit();
     // kill the thread
     g_recv_thread_status = 0;
     pthread_join(g_recv_thread, NULL);
+
+    ret = dds_transport_deinit(g_transport);
+    devinfo_server_deinit();
     return ret;
 }
 
