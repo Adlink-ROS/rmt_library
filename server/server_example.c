@@ -121,7 +121,9 @@ void server_cmd_send_file(void)
     unsigned long file_len = strlen(file_content);
 
     rmt_server_send_file(id_list, id_num, "testfile", file_content, file_len);
-    agent_status = rmt_server_get_result(id_list[0], &file_result);
+    while ((agent_status = rmt_server_get_result(id_list[0], &file_result)) == TRANSFER_RUNNING) {
+        ;
+    }
     printf("status: %d, result: %d\n", agent_status, file_result.result);
 }
 
@@ -132,7 +134,9 @@ void server_cmd_recv_file(void)
     unsigned long id = 6166;
 
     rmt_server_recv_file(id, "testfile");
-    agent_status = rmt_server_get_result(id, &file_result);
+    while ((agent_status = rmt_server_get_result(id, &file_result)) == TRANSFER_RUNNING) {
+        ;
+    }
     printf("status: %d, result: %d, file_content: %s\n", agent_status, file_result.result, (char *)file_result.pFile);
 }
 

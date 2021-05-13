@@ -17,6 +17,18 @@ typedef struct _reply_data {
     int num;
 } reply_data;
 
+typedef struct _file_transfer_stat {
+    int status; // 0: idle, 1: running
+    time_t start_time;
+    DataInfo_TYPE type;
+    uint64_t random_seq;
+    unsigned long *id_list;
+    int id_num;
+    int recv_num;
+} file_transfer_stat;
+
+file_transfer_stat g_file_transfer_stat;
+
 static int recv_reply(void *msg, void *recv_buf, void *arg)
 {
     reply_data *replys = (reply_data *)recv_buf;
@@ -36,12 +48,11 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
 
 static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
 {
-    reply_data *replys = (reply_data *)recv_buf;
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
     transfer_status status;
 
     // Check whether this reply is for me or not.
-    if ((datainfo_msg->type != replys->req->type) || (datainfo_msg->random_seq != replys->req->random_seq)) {
+    if ((datainfo_msg->type != g_file_transfer_stat.type) || (datainfo_msg->random_seq != g_file_transfer_stat.random_seq)) {
         return -1;
     }
 
@@ -63,8 +74,17 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
         }
     }
     devinfo_server_set_status_by_id(datainfo_msg->deviceID, status, file_result);
-    replys->num++;
+    g_file_transfer_stat.recv_num++;
     return 0;
+}
+
+void datainfo_server_init(void)
+{
+    g_file_transfer_stat.status = 0;
+    g_file_transfer_stat.start_time = 0;
+    g_file_transfer_stat.recv_num = 0;
+    g_file_transfer_stat.id_list = NULL;
+    g_file_transfer_stat.id_num = 0;
 }
 
 data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned long *id_list, int id_num, char *key_list, int *info_num)
@@ -212,12 +232,11 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
 int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
 {
     static DataInfo_Request req_msg;
-    reply_data replys;
 
-    // clean the reply queue
-    replys.req = &req_msg;
-    replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
-    replys.num = 0;
+    // Last file transfer hasn't finished.
+    if (g_file_transfer_stat.status != 0) {
+        return -1;
+    }
 
     // Build up request message
     req_msg.id_list._maximum = req_msg.id_list._length = id_num;
@@ -241,19 +260,17 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
         devinfo_server_set_status_by_id(id_list[i], TRANSFER_RUNNING, default_result);
     }
 
-    // RMT_TODO: I should receive the data in another thread.
-    time_t start_time, now_time;
-    time(&start_time);
-    while (replys.num != id_num) {
-        if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("send file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
-            // RMT_TODO: need to check whether the transfer is timeout or not, and then update the status.
-            break;
-        }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, &replys);
-        usleep(10000); // sleep 10ms
-        time(&now_time);
+    // Trigger the file transfer to run
+    g_file_transfer_stat.status = 1;
+    g_file_transfer_stat.recv_num = 0;
+    g_file_transfer_stat.random_seq = req_msg.random_seq;
+    g_file_transfer_stat.type = req_msg.type;
+    g_file_transfer_stat.id_num = id_num;
+    g_file_transfer_stat.id_list = malloc(sizeof(unsigned long) * id_num);
+    for (int i = 0; i < id_num; i++) {
+        g_file_transfer_stat.id_list[i] = id_list[i];
     }
+    time(&g_file_transfer_stat.start_time);
 
     return 0;
 }
@@ -261,12 +278,11 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
 int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *filename)
 {
     static DataInfo_Request req_msg;
-    reply_data replys;
 
-    // clean the reply queue
-    replys.req = &req_msg;
-    replys.list = (data_info *) malloc(sizeof(data_info) * 1);
-    replys.num = 0;
+    // Last file transfer hasn't finished.
+    if (g_file_transfer_stat.status != 0) {
+        return -1;
+    }
 
     // Build up request message
     req_msg.id_list._maximum = req_msg.id_list._length = 1;
@@ -288,20 +304,48 @@ int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id,
     default_result.file_len = 0;
     devinfo_server_set_status_by_id(id, TRANSFER_RUNNING, default_result);
 
-    // RMT_TODO: I should receive the data in another thread.
-    time_t start_time, now_time;
-    time(&start_time);
-    now_time = start_time;
-    // wait for all the reply
-    while (replys.num != 1) {
-        if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("recv file timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, 1, replys.num);
-            break;
-        }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, &replys);
-        usleep(10000); // sleep 10ms
-        time(&now_time);
-    }
+    // Trigger the file transfer to run
+    g_file_transfer_stat.status = 1;
+    g_file_transfer_stat.recv_num = 0;
+    g_file_transfer_stat.random_seq = req_msg.random_seq;
+    g_file_transfer_stat.type = req_msg.type;
+    g_file_transfer_stat.id_num = 1;
+    g_file_transfer_stat.id_list = malloc(sizeof(unsigned long) * 1);
+    g_file_transfer_stat.id_list[0] = id;
+    time(&g_file_transfer_stat.start_time);
 
     return 0;
+}
+
+void dataserver_info_file_transfer_thread(struct dds_transport *transport)
+{
+    time_t now_time;
+
+    if (g_file_transfer_stat.status == 1) {
+        // Try to receive data from agent
+        for (int i = g_file_transfer_stat.recv_num; i < g_file_transfer_stat.id_num; i++) {
+            dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, NULL);
+        }
+        // If we receive all the data
+        if (g_file_transfer_stat.recv_num == g_file_transfer_stat.id_num) {
+            g_file_transfer_stat.status = 0;
+        }
+        // While receive timeout
+        time(&now_time);
+        if (now_time - g_file_transfer_stat.start_time > DEFAULT_TIMEOUT) {
+            transfer_result default_result;
+            default_result.result = 0;
+            default_result.pFile = NULL;
+            default_result.file_len = 0;
+            for (int i = 0; i < g_file_transfer_stat.id_num; i++) {
+                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], AGENT_ERROR, default_result);
+            }
+            g_file_transfer_stat.status = 0;
+        }
+        // free the resource
+        if (g_file_transfer_stat.status == 0) {
+            g_file_transfer_stat.id_list = NULL;
+            g_file_transfer_stat.id_num = 0;
+        }
+    }
 }

@@ -129,6 +129,7 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
 /**
  * @brief rmt_server_send_file
  * Send files to agent
+ * Note that the file transfer last time should be done before you use the function.
  *
  * @param[in]  id_list: unsigned long array
  * @param[in]  id_num: the number of id
@@ -138,20 +139,21 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
  *
  * @returns The error code
  * @retval  0 Success
- * @retval -1 Something wrong
+ * @retval -1 Something wrong, e.g. the last file transfer is still running
  */
 int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len);
 
 /**
  * @brief rmt_server_recv_file
  * Get files from agent
+ * Note that the file transfer last time should be done before you use the function.
  *
  * @param[in]  id: the id you want to get file from
  * @param[in]  filename: the name of the file you want to receive
  *
  * @returns The error code
  * @retval  0 Success
- * @retval -1 Something wrong
+ * @retval -1 Something wrong, e.g. the last file transfer is still running
  */
 int rmt_server_recv_file(unsigned long id, char *filename);
 

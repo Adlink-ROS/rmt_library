@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <unistd.h>
 #include "rmt_server.h"
 #include "version.h"
 #include "dds_transport.h"
@@ -15,6 +16,8 @@ void *recv_thread_func(void *data)
     RMT_LOG("Start recv thread.\n")
     while (1 == g_recv_thread_status) {
         devinfo_server_update(g_transport);
+        dataserver_info_file_transfer_thread(g_transport);
+        usleep(10000); // sleep 10ms
     }
     RMT_LOG("Stop recv thread.\n")
     pthread_exit(NULL); // leave the thread
@@ -27,6 +30,7 @@ int rmt_server_config(char *interface)
 
 int rmt_server_init(void)
 {
+    datainfo_server_init();
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {
         g_recv_thread_status = 1;
