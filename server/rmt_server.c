@@ -8,11 +8,15 @@
 
 static struct dds_transport *g_transport;
 static pthread_t g_recv_thread;
-int g_recv_thread_status; // 1: running, 0 stop
+int g_recv_thread_status = 0; // 0: stop, 1: running
 
-void *recv_thread_func(void *data) {
+void *recv_thread_func(void *data)
+{
+    RMT_LOG("Start recv thread.\n")
     while (1 == g_recv_thread_status) {
+        sleep(1);
     }
+    RMT_LOG("Stop recv thread.\n")
     pthread_exit(NULL); // leave the thread
 }
 
