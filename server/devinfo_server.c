@@ -16,7 +16,7 @@ typedef struct _dev_list {
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
-static int add_device(void *msg, void *arg)
+static int add_device(void *msg, void *recv_buf, void *arg)
 {
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     // Check whether the device exist or not.
@@ -106,7 +106,7 @@ int devinfo_server_del_device_callback(long internal_id)
 
 int devinfo_server_update(struct dds_transport *transport)
 {
-    return dds_transport_try_recv(PAIR_DEV_INFO, transport, add_device);
+    return dds_transport_try_recv(PAIR_DEV_INFO, transport, add_device, NULL);
 }
 
 int devinfo_server_create_list(struct dds_transport *transport, device_info **dev, uint32_t *num)
