@@ -30,7 +30,7 @@ add_subdirectory(agent)
 add_subdirectory(swig)
 
 # Build example
-add_subdirectory(examples/RMT_example/agent)
+add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h
@@ -54,7 +54,7 @@ add_test("lint_test" ./uncrustify.sh ${SRC_FILES})
 
 # Package
 set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_NAME "rmt_library")
 set(CPACK_SET_DESTDIR true)
 set(CPACK_INSTALL_PREFIX "/usr/")
