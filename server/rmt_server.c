@@ -75,7 +75,7 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
     return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
 }
 
-int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
+int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, unsigned long file_len)
 {
     return datainfo_server_send_file(g_transport, id_list, id_num, filename, pFile, file_len);
 }
