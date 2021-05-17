@@ -4,6 +4,37 @@
 #include "rmt_server.h"
 %}
  
+%include "typemaps.i"
+// typemap for the write buffer of rmt_server_send_file()
+%typemap(in) (void *pFile, unsigned long file_len) {
+    if (!PyString_Check($input)) {
+        PyErr_SetString(PyExc_ValueError, "Expecting a binary string");
+        SWIG_fail;
+    }
+    $1 = PyString_AsString($input);
+    $2 = PyString_Size($input);
+}
+
+// In python, it's not required to put 'transfer_result' as a function parameter
+// to get the result. Instead, python function can return multiple values with 
+// different types. Therefore, we just set 'numinputs=0' to ignore this input 
+// parameter and then use 'argout' to append it to return value
+%typemap(in,numinputs=0) transfer_result* (transfer_result tmp) %{
+    $1 = &tmp;
+%}
+%typemap(argout) transfer_result* (PyObject* o) %{
+    // Blow away any previous result
+    Py_XDECREF($result);
+
+    // for transfer_result->result
+    o = PyLong_FromLong($1->result);
+    $result = SWIG_Python_AppendOutput($result, o);
+
+    // for transfer_result->pFile and transfer_result->file_len, return as a bytearray
+    o = PyByteArray_FromStringAndSize((char*) $1->pFile, $1->file_len);
+    $result = SWIG_Python_AppendOutput($result, o);
+%}
+
 // Parse the header file to generate wrappers
 %include "rmt_server.h"
 

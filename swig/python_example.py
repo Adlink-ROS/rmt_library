@@ -7,6 +7,8 @@ def usage():
     print("Usage:")
     print("\t-g | --get_config")
     print("\t-s | --set_config")
+    print("\t--send_file")
+    print("\t--recv_file")
     print("Example:")
     print("\t./python_example.py -gs")    
 
@@ -32,6 +34,7 @@ def get_config(dev_list, dev_num):
         # Split the result string into dictionary data
         result_list = info_list[i].value_list.split(";")
         dict_data = {"deviceID": info_list[i].deviceID}
+        print("deviceID=%d" % info_list[i].deviceID)
         for item in result_list:
             for key in config_list:
                 if key in item:
@@ -158,9 +161,42 @@ def discover():
     print(result)
     return dev_list, num
 
+def test_send_binary():
+    print("=== test send binary ===")
+    filename = "test_send_binary"
+    bytes_buffer = b"a\0bc\r\ndef\tg" # convert to bytes
+    dev_num = 1
+    id_list = rmt_py_wrapper.ulong_array(dev_num)
+    id_list[0] = 5566
+
+    agent_status = rmt_py_wrapper.rmt_server_send_file(id_list, dev_num, filename, bytes_buffer)
+    print("send_file: agent_status=%d" % agent_status)
+
+    agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(id_list[0])
+    print("get_result: agent_status=%d" % agent_status)
+    print("transfer_result=%d" % result)
+    print("file_len=%d" % len(byte_array))
+    print("file content=")
+    print(bytes(byte_array))
+
+def test_recv_binary():
+    print("=== test recv binary ===")
+    target_id = 5566
+    filename = "test_recv_binary"
+
+    agent_status = rmt_py_wrapper.rmt_server_recv_file(target_id, filename)
+    print("recv_file: agent_status=%d" % agent_status)
+
+    agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
+    print("get_result: agent_status=%d" % agent_status)
+    print("transfer_result=%d" % result)
+    print("file_len=%d" % len(byte_array))
+    print("file content=")
+    print(bytes(byte_array)) 
+
 def main(args):
     try:
-        opts, args = getopt.getopt(args, "hgs", ["help", "get_config", "set_config"])
+        opts, args = getopt.getopt(args, "hgs", ["help", "get_config", "set_config", "send_file", "recv_file"])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err)  # will print something like "option -a not recognized"
@@ -168,6 +204,8 @@ def main(args):
         sys.exit(2)
     flag_get_config = False
     flag_set_config = False
+    flag_send_file = False
+    flag_recv_file = False
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -176,6 +214,10 @@ def main(args):
             flag_get_config = True
         elif o in ("-s", "--set_config"):
             flag_set_config = True
+        elif o in ("--send_file"):
+            flag_send_file = True
+        elif o in ("--recv_file"):
+            flag_recv_file = True
         else:
             assert False, "unhandled option"    
 
@@ -193,6 +235,14 @@ def main(args):
     if flag_set_config:
         set_same_config()
         set_diff_config()
+
+    # Send file
+    if flag_send_file:
+        test_send_binary()
+
+    # Recv file
+    if flag_recv_file:
+        test_recv_binary()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
