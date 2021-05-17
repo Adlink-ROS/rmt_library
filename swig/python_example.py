@@ -2,6 +2,7 @@
 import rmt_py_wrapper
 import json
 import sys, getopt
+import time
 
 def usage():
     print("Usage:")
@@ -163,36 +164,46 @@ def discover():
 
 def test_send_binary():
     print("=== test send binary ===")
-    filename = "test_send_binary"
+    filename = "testfile"
     bytes_buffer = b"a\0bc\r\ndef\tg" # convert to bytes
     dev_num = 1
+    target_id = 6166
     id_list = rmt_py_wrapper.ulong_array(dev_num)
-    id_list[0] = 5566
+    id_list[0] = target_id
 
     agent_status = rmt_py_wrapper.rmt_server_send_file(id_list, dev_num, filename, bytes_buffer)
     print("send_file: agent_status=%d" % agent_status)
 
-    agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(id_list[0])
+    agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
+    while agent_status == rmt_py_wrapper.STATUS_RUNNING:
+        print("sleep for 1 second")
+        time.sleep(1)
+        agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
+     
     print("get_result: agent_status=%d" % agent_status)
     print("transfer_result=%d" % result)
-    print("file_len=%d" % len(byte_array))
-    print("file content=")
-    print(bytes(byte_array))
+    print(bytes(byte_array).decode("utf-8"))
 
 def test_recv_binary():
     print("=== test recv binary ===")
-    target_id = 5566
-    filename = "test_recv_binary"
+    target_id = 6166
+    filename = "testfile"
 
     agent_status = rmt_py_wrapper.rmt_server_recv_file(target_id, filename)
     print("recv_file: agent_status=%d" % agent_status)
 
     agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
+    while agent_status == rmt_py_wrapper.STATUS_RUNNING:
+        print("sleep for 1 second")
+        time.sleep(1)
+        agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
+     
     print("get_result: agent_status=%d" % agent_status)
     print("transfer_result=%d" % result)
     print("file_len=%d" % len(byte_array))
-    print("file content=")
-    print(bytes(byte_array)) 
+    print("=== file content start ===")
+    print(bytes(byte_array).decode("utf-8"))
+    print("=== file content end ===")
 
 def main(args):
     try:
