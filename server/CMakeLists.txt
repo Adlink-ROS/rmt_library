@@ -33,5 +33,6 @@ set_target_properties(rmt_server PROPERTIES PUBLIC_HEADER "rmt_server.h")
 # Install
 install(TARGETS rmt_server rmt_server_shared
         LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include
 )
