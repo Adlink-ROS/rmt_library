@@ -68,9 +68,9 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
         if (file_result.pFile) {
             memcpy(file_result.pFile, datainfo_msg->binary._buffer, datainfo_msg->binary._length);
             file_result.file_len = datainfo_msg->binary._length;
-            status = TRANSFER_DONE;
+            status = STATUS_DONE;
         } else {
-            status = SERVER_ERROR;
+            status = STATUS_SERVER_ERROR;
         }
     }
     devinfo_server_set_status_by_id(datainfo_msg->deviceID, status, file_result);
@@ -257,7 +257,7 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
     default_result.pFile = NULL;
     default_result.file_len = 0;
     for (int i = 0; i < id_num; i++) {
-        devinfo_server_set_status_by_id(id_list[i], TRANSFER_RUNNING, default_result);
+        devinfo_server_set_status_by_id(id_list[i], STATUS_RUNNING, default_result);
     }
 
     // Trigger the file transfer to run
@@ -302,7 +302,7 @@ int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id,
     default_result.result = 0;
     default_result.pFile = NULL;
     default_result.file_len = 0;
-    devinfo_server_set_status_by_id(id, TRANSFER_RUNNING, default_result);
+    devinfo_server_set_status_by_id(id, STATUS_RUNNING, default_result);
 
     // Trigger the file transfer to run
     g_file_transfer_stat.status = 1;
@@ -338,7 +338,7 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
             default_result.pFile = NULL;
             default_result.file_len = 0;
             for (int i = 0; i < g_file_transfer_stat.id_num; i++) {
-                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], AGENT_ERROR, default_result);
+                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], STATUS_AGENT_ERROR, default_result);
             }
             g_file_transfer_stat.status = 0;
         }
