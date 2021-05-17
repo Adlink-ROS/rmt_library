@@ -1,8 +1,20 @@
 name: build-test
 on: [pull_request]
 jobs:
-  build:
+  build_2004:
     runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install necessary packages
+        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev
+      - name: Build
+        working-directory: ./
+        run: cmake -Bbuild -H. && cmake --build build
+      - name: Test
+        working-directory: ./build
+        run: ctest -V
+  build_1804:
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Install necessary packages
