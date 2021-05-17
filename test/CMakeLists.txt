@@ -1,3 +1,5 @@
+include(../idl/add_generated.cmake)
+
 # Build rmt_test
 add_executable(rmt_test run_test.c testcases_basic.c)
 
