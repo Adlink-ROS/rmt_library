@@ -63,6 +63,7 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
     if (datainfo_msg->type == DataInfo_IMPORT) {
         file_result.pFile = NULL;
         file_result.file_len = 0;
+        status = STATUS_DONE;
     } else if (datainfo_msg->type == DataInfo_EXPORT) {
         file_result.pFile = malloc(sizeof(uint8_t) * datainfo_msg->binary._length);
         if (file_result.pFile) {
@@ -252,12 +253,8 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
     dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     // Mark all devices as running
-    transfer_result default_result;
-    default_result.result = 0;
-    default_result.pFile = NULL;
-    default_result.file_len = 0;
     for (int i = 0; i < id_num; i++) {
-        devinfo_server_set_status_by_id(id_list[i], STATUS_RUNNING, default_result);
+        devinfo_server_set_status_by_id(id_list[i], STATUS_RUNNING, empty_result);
     }
 
     // Trigger the file transfer to run
@@ -298,11 +295,7 @@ int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id,
     dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
 
     // Mark all devices as running
-    transfer_result default_result;
-    default_result.result = 0;
-    default_result.pFile = NULL;
-    default_result.file_len = 0;
-    devinfo_server_set_status_by_id(id, STATUS_RUNNING, default_result);
+    devinfo_server_set_status_by_id(id, STATUS_RUNNING, empty_result);
 
     // Trigger the file transfer to run
     g_file_transfer_stat.status = 1;
@@ -333,12 +326,8 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
         // While receive timeout
         time(&now_time);
         if (now_time - g_file_transfer_stat.start_time > DEFAULT_TIMEOUT) {
-            transfer_result default_result;
-            default_result.result = 0;
-            default_result.pFile = NULL;
-            default_result.file_len = 0;
             for (int i = 0; i < g_file_transfer_stat.id_num; i++) {
-                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], STATUS_AGENT_ERROR, default_result);
+                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], STATUS_AGENT_ERROR, empty_result);
             }
             g_file_transfer_stat.status = 0;
         }
