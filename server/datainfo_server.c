@@ -63,6 +63,7 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
     if (datainfo_msg->type == DataInfo_IMPORT) {
         file_result.pFile = NULL;
         file_result.file_len = 0;
+        status = STATUS_DONE;
     } else if (datainfo_msg->type == DataInfo_EXPORT) {
         file_result.pFile = malloc(sizeof(uint8_t) * datainfo_msg->binary._length);
         if (file_result.pFile) {
