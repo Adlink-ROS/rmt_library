@@ -30,6 +30,7 @@ int rmt_server_config(char *interface)
 
 int rmt_server_init(void)
 {
+    devinfo_server_init();
     datainfo_server_init();
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {

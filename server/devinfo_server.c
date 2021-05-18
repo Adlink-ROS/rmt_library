@@ -16,6 +16,8 @@ typedef struct _dev_list {
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
 
+transfer_result empty_result;
+
 static int add_device(void *msg, void *recv_buf, void *arg)
 {
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
@@ -143,6 +145,13 @@ int devinfo_server_free_list(device_info *dev)
     return 0;
 }
 
+void devinfo_server_init(void)
+{
+    empty_result.result = 0;
+    empty_result.file_len = 0;
+    empty_result.pFile = NULL;
+}
+
 int devinfo_server_deinit(void)
 {
     // Remove all device
@@ -171,13 +180,22 @@ int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer
 int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfer_result *dev_result)
 {
     dev_list *dev_ptr = g_dev_head;
+    int found = 0;
 
     for (int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             *dev_status = dev_ptr->agent_transfer_status;
             *dev_result = dev_ptr->transfer_result;
+            found = 1;
             break;
         }
         dev_ptr = dev_ptr->next;
     }
+
+    if (!found) {
+        *dev_status = STATUS_AGENT_ERROR;
+        *dev_result = empty_result;
+    }
+
+    return 0;
 }
