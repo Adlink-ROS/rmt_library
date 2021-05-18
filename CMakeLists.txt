@@ -31,6 +31,9 @@ add_subdirectory(swig)
 
 # Build example
 add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
+# I ignore all target in subdirectory and then only pick the necessary target.
+# If I use all target, then the cpack will include the subdirectory.
+add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target)
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h
