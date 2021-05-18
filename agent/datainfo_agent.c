@@ -178,8 +178,8 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
     } else if (datainfo_msg->type == DataInfo_EXPORT) {
         char *result_msg = calloc(sizeof(char), 1024);
-        unsigned char *file_content;
-        unsigned long file_size;
+        unsigned char *file_content = NULL;
+        unsigned long file_size = 0;
         // run export function
         for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].filename != 0; i++) {
             if (strcmp(datainfo_msg->msg, g_fileinfo_func_maps[i].filename) == 0) {
@@ -189,14 +189,16 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                     char filepath[1024] = {0};
                     sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, g_fileinfo_func_maps[i].filename);
                     FILE *fp = fopen(filepath, "r");
-                    fseek(fp, 0L, SEEK_END);
-                    file_size = ftell(fp);
-                    fseek(fp, 0L, SEEK_SET);
-                    file_content = malloc(file_size);
-                    if (fread(file_content, 1, file_size, fp) != file_size) {
-                        RMT_WARN("something wrong while reading file\n");
+                    if (fp != NULL) {
+                        fseek(fp, 0L, SEEK_END);
+                        file_size = ftell(fp);
+                        fseek(fp, 0L, SEEK_SET);
+                        file_content = malloc(file_size);
+                        if (fread(file_content, 1, file_size, fp) != file_size) {
+                            RMT_WARN("something wrong while reading file\n");
+                        }
+                        fclose(fp);
                     }
-                    fclose(fp);
                 }
                 if (g_fileinfo_func_maps[i].export_func) {
                     // RMT_TODO: Should we consider export function will extent the file length?
