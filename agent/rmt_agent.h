@@ -18,7 +18,7 @@ typedef struct datainfo_func {
 typedef int (*FILE_FUNC)(char *, int);
 
 typedef struct fileinfo_func {
-    const char *filename;
+    const char *callbackname;
     const char *path;
     FILE_FUNC import_func;
     FILE_FUNC export_func;

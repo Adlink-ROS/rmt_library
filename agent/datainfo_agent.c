@@ -146,9 +146,12 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
     } else if (datainfo_msg->type == DataInfo_IMPORT) {
         char *result_msg = calloc(sizeof(char), 1024);
+        char *callbackname, *filename;
+        callbackname = strtok(datainfo_msg->msg, ";");
+        filename = strtok(NULL, ";");
         // run import function
-        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].filename != 0; i++) {
-            if (strcmp(datainfo_msg->msg, g_fileinfo_func_maps[i].filename) == 0) {
+        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
+            if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
                 RMT_LOG("match the filename!!\n");
                 if (g_fileinfo_func_maps[i].import_func) {
                     int result = g_fileinfo_func_maps[i].import_func(datainfo_msg->binary._buffer, datainfo_msg->binary._length);
@@ -160,7 +163,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                 // save the file
                 if (g_fileinfo_func_maps[i].path != NULL) {
                     char filepath[1024] = {0};
-                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, g_fileinfo_func_maps[i].filename);
+                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, filename);
                     FILE *fp = fopen(filepath, "w");
                     fwrite(datainfo_msg->binary._buffer, 1, datainfo_msg->binary._length, fp);
                     fclose(fp);
@@ -180,14 +183,17 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         char *result_msg = calloc(sizeof(char), 1024);
         unsigned char *file_content = NULL;
         unsigned long file_size = 0;
+        char *callbackname, *filename;
+        callbackname = strtok(datainfo_msg->msg, ";");
+        filename = strtok(NULL, ";");
         // run export function
-        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].filename != 0; i++) {
-            if (strcmp(datainfo_msg->msg, g_fileinfo_func_maps[i].filename) == 0) {
+        for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
+            if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
                 RMT_LOG("match the filename!!\n");
                 // save the file
                 if (g_fileinfo_func_maps[i].path != NULL) {
                     char filepath[1024] = {0};
-                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, g_fileinfo_func_maps[i].filename);
+                    sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, filename);
                     FILE *fp = fopen(filepath, "r");
                     if (fp != NULL) {
                         fseek(fp, 0L, SEEK_END);

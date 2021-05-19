@@ -133,6 +133,7 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
  *
  * @param[in]  id_list: unsigned long array
  * @param[in]  id_num: the number of id
+ * @param[in]  callbackname: the name of the callback you want to call
  * @param[in]  filename: the name of the file you want to send
  * @param[in]  pFile: the content of the file
  * @param[in]  file_len: the length of the file
@@ -141,7 +142,7 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
  * @retval  0 Success
  * @retval -1 Something wrong, e.g. the last file transfer is still running
  */
-int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, unsigned long file_len);
+int rmt_server_send_file(unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, unsigned long file_len);
 
 /**
  * @brief rmt_server_recv_file
@@ -149,13 +150,14 @@ int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, voi
  * Note that the file transfer last time should be done before you use the function.
  *
  * @param[in]  id: the id you want to get file from
+ * @param[in]  callbackname: the name of the callback you want to call
  * @param[in]  filename: the name of the file you want to receive
  *
  * @returns The error code
  * @retval  0 Success
  * @retval -1 Something wrong, e.g. the last file transfer is still running
  */
-int rmt_server_recv_file(unsigned long id, char *filename);
+int rmt_server_recv_file(unsigned long id, char *callbackname, char *filename);
 
 /**
  * @brief rmt_server_get_result

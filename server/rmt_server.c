@@ -76,14 +76,14 @@ data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_nu
     return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
 }
 
-int rmt_server_send_file(unsigned long *id_list, int id_num, char *filename, void *pFile, unsigned long file_len)
+int rmt_server_send_file(unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, unsigned long file_len)
 {
-    return datainfo_server_send_file(g_transport, id_list, id_num, filename, pFile, file_len);
+    return datainfo_server_send_file(g_transport, id_list, id_num, callbackname, filename, pFile, file_len);
 }
 
-int rmt_server_recv_file(unsigned long id, char *filename)
+int rmt_server_recv_file(unsigned long id, char *callbackname, char *filename)
 {
-    return datainfo_server_recv_file(g_transport, id, filename);
+    return datainfo_server_recv_file(g_transport, id, callbackname, filename);
 }
 
 transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *result)
