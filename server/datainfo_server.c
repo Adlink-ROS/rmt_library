@@ -230,19 +230,23 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     return replys.list;
 }
 
-int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *filename, void *pFile, uint32_t file_len)
+int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, uint32_t file_len)
 {
     static DataInfo_Request req_msg;
+    char message[1024] = {0};
 
     // Last file transfer hasn't finished.
     if (g_file_transfer_stat.status != 0) {
         return -1;
     }
+    strcat(message, callbackname);
+    strcat(message, ";");
+    strcat(message, filename);
 
     // Build up request message
     req_msg.id_list._maximum = req_msg.id_list._length = id_num;
     req_msg.id_list._buffer = id_list;
-    req_msg.msg = filename;
+    req_msg.msg = message;
     req_msg.type = DataInfo_IMPORT;
     srand(time(NULL));
     req_msg.random_seq = rand();
@@ -272,19 +276,23 @@ int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id
     return 0;
 }
 
-int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *filename)
+int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *callbackname, char *filename)
 {
     static DataInfo_Request req_msg;
+    char message[1024] = {0};
 
     // Last file transfer hasn't finished.
     if (g_file_transfer_stat.status != 0) {
         return -1;
     }
+    strcat(message, callbackname);
+    strcat(message, ";");
+    strcat(message, filename);
 
     // Build up request message
     req_msg.id_list._maximum = req_msg.id_list._length = 1;
     req_msg.id_list._buffer = &id;
-    req_msg.msg = filename;
+    req_msg.msg = message;
     req_msg.type = DataInfo_EXPORT;
     srand(time(NULL));
     req_msg.random_seq = rand();

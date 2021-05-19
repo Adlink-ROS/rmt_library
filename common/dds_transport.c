@@ -112,7 +112,7 @@ static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_ch
 {
     if (status.not_alive_count) {
         if (server_liveliness_callback) {
-            server_liveliness_callback((long) arg);
+            server_liveliness_callback((long) status.last_publication_handle);
         }
     }
 }
