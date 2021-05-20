@@ -121,7 +121,7 @@ void server_cmd_send_file(void)
     unsigned char *file_content = "This is file content.\n";
     unsigned long file_len = strlen(file_content);
 
-    rmt_server_send_file(id_list, id_num, "testfile", "myfile.txt", file_content, file_len);
+    rmt_server_send_file(id_list, id_num, "custom_callback", "myfile.txt", file_content, file_len);
     while ((agent_status = rmt_server_get_result(id_list[0], &file_result)) == STATUS_RUNNING) {
         ;
     }
@@ -134,7 +134,7 @@ void server_cmd_recv_file(void)
     transfer_status agent_status;
     unsigned long id = 6166;
 
-    rmt_server_recv_file(id, "testfile", "myfile.txt");
+    rmt_server_recv_file(id, "custom_callback", "myfile.txt");
     while ((agent_status = rmt_server_get_result(id, &file_result)) == STATUS_RUNNING) {
         ;
     }

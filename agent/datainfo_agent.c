@@ -152,7 +152,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         // run import function
         for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
             if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
-                RMT_LOG("match the filename!!\n");
+                RMT_LOG("match the callback name!!\n");
                 if (g_fileinfo_func_maps[i].import_func) {
                     int result = g_fileinfo_func_maps[i].import_func(datainfo_msg->binary._buffer, datainfo_msg->binary._length);
                     sprintf(result_msg, "%d", result);
@@ -189,7 +189,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         // run export function
         for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
             if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
-                RMT_LOG("match the filename!!\n");
+                RMT_LOG("match the callback name!!\n");
                 // save the file
                 if (g_fileinfo_func_maps[i].path != NULL) {
                     char filepath[1024] = {0};

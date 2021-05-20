@@ -164,14 +164,15 @@ def discover():
 
 def test_send_binary():
     print("=== test send binary ===")
-    filename = "testfile"
+    custom_callback = "custom_callback"
+    filename = "my_testfile"
     bytes_buffer = b"a\0bc\r\ndef\tg" # convert to bytes
     dev_num = 1
     target_id = 6166
     id_list = rmt_py_wrapper.ulong_array(dev_num)
     id_list[0] = target_id
 
-    agent_status = rmt_py_wrapper.rmt_server_send_file(id_list, dev_num, filename, bytes_buffer)
+    agent_status = rmt_py_wrapper.rmt_server_send_file(id_list, dev_num, custom_callback, filename, bytes_buffer)
     print("send_file: agent_status=%d" % agent_status)
 
     agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
@@ -187,9 +188,10 @@ def test_send_binary():
 def test_recv_binary():
     print("=== test recv binary ===")
     target_id = 6166
-    filename = "testfile"
+    custom_callback = "custom_callback"
+    filename = "my_testfile"
 
-    agent_status = rmt_py_wrapper.rmt_server_recv_file(target_id, filename)
+    agent_status = rmt_py_wrapper.rmt_server_recv_file(target_id, custom_callback, filename)
     print("recv_file: agent_status=%d" % agent_status)
 
     agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
