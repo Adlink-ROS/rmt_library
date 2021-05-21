@@ -32,6 +32,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     }
     // Add/Update the device
     dev_list *selected_dev;
+    RMT_LOG("Found new device %lu\n", devinfo_msg->deviceID);
     if (dev_ptr == NULL) {
         // The device doesn't exist. Add it.
         selected_dev = (dev_list *) malloc(sizeof(dev_list));
@@ -41,6 +42,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
         selected_dev->info = (device_info *) malloc(sizeof(device_info));
     } else {
         // The device exist. Update it.
+        RMT_WARN("The device with same ID %lu already exists. Will be replaced.\n", devinfo_msg->deviceID);
         selected_dev = dev_ptr;
     }
     selected_dev->info->deviceID = devinfo_msg->deviceID;
@@ -70,6 +72,7 @@ static void free_dev_list(dev_list *dev_ptr)
 static int del_device(long internal_id)
 {
     dev_list *dev_ptr = g_dev_head;
+    dev_list *to_be_freed = NULL;
 
     if (dev_ptr == NULL) {
         goto exit;
@@ -79,30 +82,30 @@ static int del_device(long internal_id)
     if (dev_ptr->internal_id == internal_id) {
         g_dev_head = dev_ptr->next;
         g_dev_num--;
+        to_be_freed = dev_ptr;
         goto exit;
     }
     // Check if the device exist
     while (dev_ptr->next) {
         if (dev_ptr->next->internal_id == internal_id) {
-            dev_list *to_be_freed = dev_ptr->next;
+            to_be_freed = dev_ptr->next;
             dev_ptr->next = dev_ptr->next->next;
-            dev_ptr = to_be_freed;
             goto exit;
         }
         dev_ptr = dev_ptr->next;
     }
 
 exit:
-    if (dev_ptr) {
-        RMT_WARN("Lost device ID: %ld\n", dev_ptr->info->deviceID);
+    // If the matched internal ID exist in our device list.
+    if (to_be_freed) {
+        RMT_WARN("Lost device ID %lu\n", to_be_freed->info->deviceID);
+        free_dev_list(to_be_freed);
     }
-    free_dev_list(dev_ptr);
     return 0;
 }
 
 int devinfo_server_del_device_callback(long internal_id)
 {
-    RMT_WARN("Some deviecs are lost.\n");
     return del_device(internal_id);
 }
 

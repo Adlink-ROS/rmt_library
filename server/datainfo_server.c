@@ -335,7 +335,13 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
         time(&now_time);
         if (now_time - g_file_transfer_stat.start_time > DEFAULT_TIMEOUT) {
             for (int i = 0; i < g_file_transfer_stat.id_num; i++) {
-                devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], STATUS_AGENT_ERROR, empty_result);
+                transfer_status dev_status;
+                transfer_result dev_result;
+                devinfo_server_get_status_by_id(g_file_transfer_stat.id_list[i], &dev_status, &dev_result);
+                // Mark all running device as agent error
+                if (dev_status == STATUS_RUNNING) {
+                    devinfo_server_set_status_by_id(g_file_transfer_stat.id_list[i], STATUS_AGENT_ERROR, empty_result);
+                }
             }
             g_file_transfer_stat.status = 0;
         }

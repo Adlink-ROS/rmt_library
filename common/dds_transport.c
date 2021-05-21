@@ -156,6 +156,8 @@ struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long)
         goto exit;
     }
     /* Create a datainfo Reader*/
+    // Keep all history for reader, or we will miss some packets from agent.
+    dds_qset_history(datainfo_qos, DDS_HISTORY_KEEP_ALL, 0);
     transport->pairs[PAIR_DATA_REPLY].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DATA_REPLY].topic, datainfo_qos, NULL);
     if (transport->pairs[PAIR_DATA_REPLY].reader < 0) {
         DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-transport->pairs[PAIR_DATA_REPLY].reader));
