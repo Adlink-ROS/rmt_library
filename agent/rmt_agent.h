@@ -15,7 +15,7 @@ typedef struct datainfo_func {
     INFO_FUNC set_func;
 } datainfo_func;
 
-typedef int (*FILE_FUNC)(char *, int);
+typedef int (*FILE_FUNC)(char *, char *, int);
 
 typedef struct fileinfo_func {
     const char *callbackname;

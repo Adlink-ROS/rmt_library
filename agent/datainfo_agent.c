@@ -153,13 +153,6 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
             if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
                 RMT_LOG("match the callback name!!\n");
-                if (g_fileinfo_func_maps[i].import_func) {
-                    int result = g_fileinfo_func_maps[i].import_func(datainfo_msg->binary._buffer, datainfo_msg->binary._length);
-                    sprintf(result_msg, "%d", result);
-                    RMT_LOG("result of import func: %d\n", result);
-                } else {
-                    RMT_ERROR("There is no import function for filename %s\n", datainfo_msg->msg);
-                }
                 // save the file
                 if (g_fileinfo_func_maps[i].path != NULL) {
                     char filepath[1024] = {0};
@@ -167,6 +160,13 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                     FILE *fp = fopen(filepath, "w");
                     fwrite(datainfo_msg->binary._buffer, 1, datainfo_msg->binary._length, fp);
                     fclose(fp);
+                }
+                if (g_fileinfo_func_maps[i].import_func) {
+                    int result = g_fileinfo_func_maps[i].import_func(filename, datainfo_msg->binary._buffer, datainfo_msg->binary._length);
+                    sprintf(result_msg, "%d", result);
+                    RMT_LOG("result of import func: %d\n", result);
+                } else {
+                    RMT_ERROR("There is no import function for filename %s\n", datainfo_msg->msg);
                 }
                 break;
             }
@@ -190,7 +190,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         for (int i = 0; g_fileinfo_func_maps != NULL && g_fileinfo_func_maps[i].callbackname != 0; i++) {
             if (strcmp(callbackname, g_fileinfo_func_maps[i].callbackname) == 0) {
                 RMT_LOG("match the callback name!!\n");
-                // save the file
+                // read the file
                 if (g_fileinfo_func_maps[i].path != NULL) {
                     char filepath[1024] = {0};
                     sprintf(filepath, "%s/%s", g_fileinfo_func_maps[i].path, filename);
@@ -208,7 +208,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                 }
                 if (g_fileinfo_func_maps[i].export_func) {
                     // RMT_TODO: Should we consider export function will extent the file length?
-                    int result = g_fileinfo_func_maps[i].export_func(file_content, file_size);
+                    int result = g_fileinfo_func_maps[i].export_func(filename, file_content, file_size);
                     sprintf(result_msg, "%d", result);
                     RMT_LOG("result of export func: %d\n", result);
                 } else {
