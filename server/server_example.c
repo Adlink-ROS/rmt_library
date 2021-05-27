@@ -25,7 +25,7 @@ void print_help(void)
     printf("  * search: show the search result (default).\n");
     printf("  * set: set the config from certain ID.\n");
     printf("  * task-get: get the task list and current task mode from certain ID.\n");
-    printf("  * task-set: set the task mode to certain ID.\n");    
+    printf("  * task-set: set the task mode to certain ID.\n");
     printf("  * sendfile: send files to agent.\n");
     printf("  * recvfile: receive files from agent.\n");
     printf("  * all: do all the action of search, get, set.\n");
