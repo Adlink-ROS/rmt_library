@@ -24,7 +24,7 @@ typedef struct _device_info {
     char *rmt_version;
 } device_info;
 
-#define CONFIG_KEY_STR_LEN 1023
+#define CONFIG_KEY_STR_LEN 4096
 typedef struct _data_info {
     unsigned long deviceID;
     char value_list[CONFIG_KEY_STR_LEN + 1];
