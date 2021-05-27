@@ -25,10 +25,10 @@ typedef struct fileinfo_func {
 } fileinfo_func;
 
 typedef struct _rmt_agent_cfg {
-    char *net_interface;           // NULL for default interface chosen by RMT agent
-    int device_id;                 // 0 for default device ID generated from MAC
-    int domain_id;                 // 0 for default domain ID 0
-    unsigned long getinfo_bufsize; // 0 for default size 256
+    char *net_interface;             // NULL for default interface chosen by RMT agent
+    int device_id;                   // 0 for default device ID generated from MAC
+    int domain_id;                   // 0 for default domain ID 0
+    unsigned long datainfo_val_size; // 0 for default size 256
 } rmt_agent_cfg;
 
 int rmt_agent_configure(rmt_agent_cfg *config);

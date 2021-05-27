@@ -12,7 +12,7 @@ int agent_config_set(rmt_agent_cfg *config)
     int ret = 0;
 
     g_agent_cfg.domain_id = 0;
-    g_agent_cfg.getinfo_bufsize = 256;
+    g_agent_cfg.datainfo_val_size = 256;
     if (net_select_interface(g_agent_cfg.net_interface) < 0) {
         RMT_ERROR("Unable to select interface.\n");
         ret = -1;
@@ -25,8 +25,8 @@ int agent_config_set(rmt_agent_cfg *config)
         if (config->domain_id != 0) {
             g_agent_cfg.domain_id = config->domain_id;
         }
-        if (g_agent_cfg.getinfo_bufsize != 0) {
-            g_agent_cfg.getinfo_bufsize = 0;
+        if (config->datainfo_val_size != 0) {
+            g_agent_cfg.datainfo_val_size = config->datainfo_val_size;
         }
         if (config->device_id != 0) {
             g_agent_cfg.device_id = config->device_id;
