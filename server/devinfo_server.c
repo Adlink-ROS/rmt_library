@@ -34,11 +34,8 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     dev_list *selected_dev;
     RMT_LOG("Found new device %lu\n", devinfo_msg->deviceID);
     if (dev_ptr == NULL) {
-        // The device doesn't exist. Add it.
+        // The device doesn't exist. Create a new one.
         selected_dev = (dev_list *) malloc(sizeof(dev_list));
-        selected_dev->next = g_dev_head;
-        g_dev_head = selected_dev;
-        g_dev_num++;
         selected_dev->info = (device_info *) malloc(sizeof(device_info));
     } else {
         // The device exist. Update it.
@@ -52,6 +49,15 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
     selected_dev->internal_id = (long) arg;
+
+    // Add new device at the head if this is new device
+    // Note: g_dev_num should ALWAYS put at the bottom. We should make sure selected_dev is ready before putting into linked list.
+    //       Otherwise, user might get the wrong data.
+    if (dev_ptr == NULL) {
+        selected_dev->next = g_dev_head;
+        g_dev_head = selected_dev;
+        g_dev_num++;
+    }
 
     return 0;
 }
