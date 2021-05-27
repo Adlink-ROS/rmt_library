@@ -46,25 +46,10 @@ int devinfo_agent_config(char *interface, int id)
 {
     int ret = 0;
 
-    /*
-     * First, use interface user assigns
-     * If no, select the interface by ourselves
-     * If fail, return error.
-     */
     if (interface != NULL) {
         strcpy(g_dev.interface, interface);
-    } else if (net_select_interface(g_dev.interface) < 0) {
-        RMT_ERROR("Unable to select interface.\n");
-        ret = -1;
-        goto exit;
     }
-
-    /* Parse ID */
-    if (id == 0) {
-        g_msg.deviceID = net_get_id_from_mac(g_dev.interface);
-    } else {
-        g_msg.deviceID = id;
-    }
+    g_msg.deviceID = id;
 
 exit:
     return ret;

@@ -11,6 +11,7 @@ include_directories(${PROJECT_SOURCE_DIR}/common)
 set(SOURCE_CODE rmt_agent.c
                 devinfo_agent.c
                 datainfo_agent.c
+                agent_config.c
                 ${PROJECT_SOURCE_DIR}/common/network.c
                 ${PROJECT_SOURCE_DIR}/common/dds_transport.c
    )

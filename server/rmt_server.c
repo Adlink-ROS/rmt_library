@@ -1,10 +1,12 @@
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include "rmt_server.h"
 #include "version.h"
 #include "dds_transport.h"
 #include "devinfo_server.h"
 #include "datainfo_server.h"
+#include "network.h"
 #include "logger.h"
 
 static struct dds_transport *g_transport;
@@ -25,7 +27,17 @@ void *recv_thread_func(void *data)
 
 int rmt_server_configure(char *interface)
 {
-    return dds_transport_config_init(interface);
+    char myinterface[40];
+
+    if (interface == NULL) {
+        if (net_select_interface(myinterface) < 0) {
+            RMT_ERROR("Unable to select interface.\n");
+            return -1;
+        }
+    } else {
+        strncpy(myinterface, interface, sizeof(myinterface));
+    }
+    return dds_transport_config_init(myinterface);
 }
 
 int rmt_server_init(void)
