@@ -120,7 +120,8 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
         while (pairs != NULL) {
             RMT_LOG("The pair is %s\n", pairs);
             char *key = strtok(pairs, ":");
-            char *value = strtok(NULL, ":");
+            //char *value = strtok(NULL, ":");
+            char *value = pairs + strlen(key) + 1;
             for (int i = 0; g_datainfo_func_maps != NULL && g_datainfo_func_maps[i].key != 0; i++) {
                 if (strcmp(key, g_datainfo_func_maps[i].key) == 0) {
                     RMT_LOG("match the key!!\n");
