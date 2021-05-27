@@ -23,7 +23,7 @@ void *recv_thread_func(void *data)
     pthread_exit(NULL); // leave the thread
 }
 
-int rmt_server_config(char *interface)
+int rmt_server_configure(char *interface)
 {
     return dds_transport_config_init(interface);
 }

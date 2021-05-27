@@ -44,7 +44,7 @@ typedef enum _transfer_status {
 } transfer_status;
 
 /**
- * @brief rmt_server_config
+ * @brief rmt_server_configure
  * Set the config for RMT server
  *
  * @param[in] interface The network interface
@@ -53,7 +53,7 @@ typedef enum _transfer_status {
  * @retval  0 Success
  * @retval -1 Something wrong
  */
-int rmt_server_config(char *interface);
+int rmt_server_configure(char *interface);
 
 /**
  * @brief rmt_server_init
