@@ -42,7 +42,7 @@ static void get_device_info(void)
     g_msg.rmt_version = PROJECT_VERSION;
 }
 
-int devinfo_agent_config(char *interface, int id)
+int devinfo_agent_config(char *interface, uint64_t id)
 {
     int ret = 0;
 
