@@ -242,7 +242,10 @@ int main(int argc, char *argv[])
     }
 
     printf("RMT Library version is %s\n", rmt_server_version());
-    rmt_server_configure(my_interface);
+    rmt_server_cfg mycfg;
+    mycfg.net_interface = my_interface;
+    mycfg.domain_id = 0;
+    rmt_server_configure(&mycfg);
     rmt_server_init();
 
     switch (svr_cmd) {
