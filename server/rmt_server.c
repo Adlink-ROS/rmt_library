@@ -5,6 +5,7 @@
 #include "dds_transport.h"
 #include "devinfo_server.h"
 #include "datainfo_server.h"
+#include "server_config.h"
 #include "logger.h"
 
 static struct dds_transport *g_transport;
@@ -23,13 +24,14 @@ void *recv_thread_func(void *data)
     pthread_exit(NULL); // leave the thread
 }
 
-int rmt_server_config(char *interface)
+int rmt_server_configure(char *interface, int domain_id)
 {
-    return dds_transport_config_init(interface);
+    return server_config_set(interface, domain_id);
 }
 
 int rmt_server_init(void)
 {
+    dds_transport_config_init(g_server_cfg.net_interface);
     devinfo_server_init();
     datainfo_server_init();
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);

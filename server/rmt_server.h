@@ -43,17 +43,23 @@ typedef enum _transfer_status {
     STATUS_AGENT_ERROR,
 } transfer_status;
 
+typedef struct _rmt_server_cfg {
+    char *net_interface;           // NULL for default interface chosen by RMT server
+    int domain_id;                 // 0 for default domain ID 0
+} rmt_server_cfg;
+
 /**
- * @brief rmt_server_config
+ * @brief rmt_server_configure
  * Set the config for RMT server
  *
  * @param[in] interface The network interface
+ * @param[in] domain_id The DDS domain ID
  *
  * @returns The error code
  * @retval  0 Success
  * @retval -1 Something wrong
  */
-int rmt_server_config(char *interface);
+int rmt_server_configure(char *interface, int domain_id);
 
 /**
  * @brief rmt_server_init

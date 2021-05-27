@@ -11,6 +11,7 @@
 
 static datainfo_func *g_datainfo_func_maps;
 static fileinfo_func *g_fileinfo_func_maps;
+unsigned long g_datainfo_val_size;
 
 static DataInfo_Reply datainfo_replys[QUEUE_SIZE];
 static int q_front = 0;
@@ -62,38 +63,46 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
 
     // If the request is for me, start to get reply from queue.
     int q_idx = q_enqueue();
-    datainfo_replys[q_idx].msg = calloc(sizeof(char), 1024);
 
     if (datainfo_msg->type == DataInfo_GET) {
-        // return the get info back
-        datainfo_replys[q_idx].type = DataInfo_GET;
-        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
-        datainfo_replys[q_idx].deviceID = myid;
-        datainfo_replys[q_idx].binary._buffer = NULL;
-        datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
+        unsigned int result_msg_size = 1024;
+        char *result_msg = calloc(sizeof(char), result_msg_size);
         // parse keylist and the return with value
         char *keys = strtok(datainfo_msg->msg, ";");
         while (keys != NULL) {
             RMT_LOG("The key is %s\n", keys);
             for (int i = 0; g_datainfo_func_maps != NULL && g_datainfo_func_maps[i].key != 0; i++) {
                 if (strcmp(keys, g_datainfo_func_maps[i].key) == 0) {
-                    char value[256];
-                    memset(value, 0, sizeof(value));
+                    char *value = calloc(sizeof(char), g_datainfo_val_size);
                     RMT_LOG("match the key!!\n");
                     if (g_datainfo_func_maps[i].get_func) {
                         g_datainfo_func_maps[i].get_func(value);
                     } else {
                         RMT_ERROR("There is no get function for key %s\n", keys);
                     }
-                    strcat(datainfo_replys[q_idx].msg, keys);
-                    strcat(datainfo_replys[q_idx].msg, ":");
-                    strcat(datainfo_replys[q_idx].msg, value);
-                    strcat(datainfo_replys[q_idx].msg, ";");
+                    // Make sure result_msg length is enough
+                    int new_size = strlen(result_msg) + strlen(keys) + strlen(value) + 2;
+                    if (result_msg_size <= new_size) {
+                        result_msg_size = new_size * 2;
+                        result_msg = realloc(result_msg, result_msg_size);
+                    }
+                    strcat(result_msg, keys);
+                    strcat(result_msg, ":");
+                    strcat(result_msg, value);
+                    strcat(result_msg, ";");
+                    free(value);
                     break;
                 }
             }
             keys = strtok(NULL, ";");
         }
+        // return the get info back
+        datainfo_replys[q_idx].type = DataInfo_GET;
+        datainfo_replys[q_idx].random_seq = datainfo_msg->random_seq;
+        datainfo_replys[q_idx].deviceID = myid;
+        datainfo_replys[q_idx].msg = result_msg;
+        datainfo_replys[q_idx].binary._buffer = NULL;
+        datainfo_replys[q_idx].binary._maximum = datainfo_replys[q_idx].binary._length = 0;
         RMT_LOG("reply message: %s\n", datainfo_replys[q_idx].msg);
     } else if ((datainfo_msg->type == DataInfo_SET) || (datainfo_msg->type == DataInfo_SET_SAME_VALUE)) {
         char *result_msg = calloc(sizeof(char), 1024);
@@ -258,10 +267,11 @@ int datainfo_agent_update(struct dds_transport *transport)
     return 0;
 }
 
-int datainfo_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps)
+int datainfo_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps, unsigned long datainfo_val_size)
 {
     g_datainfo_func_maps = func_maps;
     g_fileinfo_func_maps = file_maps;
+    g_datainfo_val_size = datainfo_val_size;
     for (int i = 0; i < QUEUE_SIZE; i++) {
         datainfo_replys[i].msg = NULL;
     }

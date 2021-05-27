@@ -4,8 +4,8 @@
 #include "dds_transport.h"
 #include "DeviceInfo.h"
 #include "DataInfo.h"
-#include "network.h"
 
+// RMT_TODO: domain ID should be able to choose.
 #define DOMAIN_ID 0
 #define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
 #define TOPIC_PAIR_DATA_REQ    "DataReq_Msg"
@@ -42,14 +42,7 @@ int dds_transport_config_init(char *interface)
     char selected_interface[40];
     int ret = 0;
 
-    if (interface != NULL) {
-        strcpy(selected_interface, interface);
-    } else if (net_select_interface(selected_interface) < 0) {
-        ret = -1;
-        goto exit;
-    }
-
-    sprintf(dds_config, DDS_CONFIG, selected_interface);
+    sprintf(dds_config, DDS_CONFIG, interface);
     g_domain = dds_create_domain(DOMAIN_ID, dds_config);
 exit:
     return ret;

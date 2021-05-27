@@ -4,18 +4,22 @@
 #include "datainfo_agent.h"
 #include "version.h"
 #include "logger.h"
+#include "agent_config.h"
 
 static struct dds_transport *g_transport;
 
-int rmt_agent_config(char *interface, int id)
+// RMT_TODO: I think it would be better to use string with key-value instead of structure
+//           Because we can decide whether to keep some config default or not.
+int rmt_agent_configure(rmt_agent_cfg *config)
 {
-    dds_transport_config_init(interface);
-    devinfo_agent_config(interface, id);
+    return agent_config_set(config);
 }
 
 int rmt_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps)
 {
-    datainfo_agent_init(func_maps, file_maps);
+    dds_transport_config_init(g_agent_cfg.net_interface);
+    devinfo_agent_config(g_agent_cfg.net_interface, g_agent_cfg.device_id);
+    datainfo_agent_init(func_maps, file_maps, g_agent_cfg.datainfo_val_size);
     g_transport = dds_transport_agent_init();
     if (g_transport) {
         return 0;
