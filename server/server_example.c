@@ -24,6 +24,8 @@ void print_help(void)
     printf("server_cmd:\n");
     printf("  * search: show the search result (default).\n");
     printf("  * set: set the config from certain ID.\n");
+    printf("  * task-get: get the task list and current task mode from certain ID.\n");
+    printf("  * task-set: set the task mode to certain ID.\n");    
     printf("  * sendfile: send files to agent.\n");
     printf("  * recvfile: receive files from agent.\n");
     printf("  * all: do all the action of search, get, set.\n");
@@ -32,6 +34,8 @@ void print_help(void)
 typedef enum _SVR_CMD {
     CMD_SEARCH = 0,
     CMD_SET,
+    CMD_GET_TASK,
+    CMD_SET_TASK,
     CMD_SEND_FILE,
     CMD_RECV_FILE,
     CMD_ALL,
@@ -41,6 +45,8 @@ typedef enum _SVR_CMD {
 char *svr_cmd_mapping[CMD_SUM] = {
     "search",
     "set",
+    "task-get",
+    "task-set",
     "sendfile",
     "recvfile",
     "all"
@@ -110,6 +116,69 @@ void server_cmd_set(void)
         printf("ID: %ld\n", info_list[i].deviceID);
         printf("return list: %s\n", info_list[i].value_list);
     }
+}
+
+void server_cmd_set_task(void)
+{
+    data_info set_info;
+    data_info *info_list;
+    int info_list_num;
+
+    // set task to Inspection
+    printf("Try to set task to id 6166\n");
+    set_info.deviceID = 6166;
+    strncpy(set_info.value_list, "task_mode:Inspection", CONFIG_KEY_STR_LEN);
+    info_list = rmt_server_set_info(&set_info, 1, &info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
+
+#if 0 // open it if you wnat to test 'Idle' task mode
+    sleep(5);
+
+    // set task to Idle
+    printf("Try to set task to id 6166\n");
+    set_info.deviceID = 6166;
+    strncpy(set_info.value_list, "task_mode:Idle", CONFIG_KEY_STR_LEN);
+    info_list = rmt_server_set_info(&set_info, 1, &info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
+#endif
+
+    rmt_server_free_info(info_list);
+}
+
+void server_cmd_get_task(void)
+{
+    device_info *dev_ptr;
+    int dev_num;
+    unsigned long *id_list;
+    data_info *info_list;
+    int info_list_num;
+
+    // get device list
+    dev_ptr = rmt_server_create_device_list(&dev_num);
+
+    // assign id to id_list
+    id_list = (unsigned long *) malloc(sizeof(unsigned long) * dev_num);
+    for (int i = 0; i < dev_num; i++) {
+        id_list[i] = dev_ptr[i].deviceID;
+    }
+
+    // get task info
+    info_list = rmt_server_get_info(id_list, dev_num, "task_list;task_mode", &info_list_num);
+    printf("Try to get task info from %d device\n", info_list_num);
+    for (int i = 0; i < info_list_num; i++) {
+        printf("ID: %ld\n", info_list[i].deviceID);
+        printf("return list: %s\n", info_list[i].value_list);
+    }
+    rmt_server_free_info(info_list);
+    free(id_list);
+
+    rmt_server_free_device_list(dev_ptr);
 }
 
 void server_cmd_send_file(void)
@@ -182,6 +251,12 @@ int main(int argc, char *argv[])
             break;
         case CMD_SET:
             server_cmd_set();
+            break;
+        case CMD_GET_TASK:
+            server_cmd_get_task();
+            break;
+        case CMD_SET_TASK:
+            server_cmd_set_task();
             break;
         case CMD_SEND_FILE:
             server_cmd_send_file();
