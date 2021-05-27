@@ -52,13 +52,14 @@ typedef struct _rmt_server_cfg {
  * @brief rmt_server_configure
  * Set the config for RMT server
  *
- * @param[in] config The config for RMT server
+ * @param[in] interface The network interface
+ * @param[in] domain_id The DDS domain ID
  *
  * @returns The error code
  * @retval  0 Success
  * @retval -1 Something wrong
  */
-int rmt_server_configure(rmt_server_cfg *config);
+int rmt_server_configure(char *interface, int domain_id);
 
 /**
  * @brief rmt_server_init

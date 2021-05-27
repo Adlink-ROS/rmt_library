@@ -24,9 +24,9 @@ void *recv_thread_func(void *data)
     pthread_exit(NULL); // leave the thread
 }
 
-int rmt_server_configure(rmt_server_cfg *config)
+int rmt_server_configure(char *interface, int domain_id)
 {
-    return server_config_set(config);
+    return server_config_set(interface, domain_id);
 }
 
 int rmt_server_init(void)

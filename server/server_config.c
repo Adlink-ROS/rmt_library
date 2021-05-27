@@ -6,7 +6,7 @@
 
 server_config g_server_cfg;
 
-int server_config_set(rmt_server_cfg *config)
+int server_config_set(char *interface, int domain_id)
 {
     int ret = 0;
 
@@ -18,13 +18,11 @@ int server_config_set(rmt_server_cfg *config)
     }
 
     // if there is user's config
-    if (config != NULL) {
-        if (config->domain_id != 0) {
-            g_server_cfg.domain_id = config->domain_id;
-        }
-        if (config->net_interface != NULL) {
-            strncpy(g_server_cfg.net_interface, config->net_interface, sizeof(g_server_cfg.net_interface));
-        }
+    if (domain_id != 0) {
+        g_server_cfg.domain_id = domain_id;
+    }
+    if (interface != NULL) {
+        strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface));
     }
 
 exit:

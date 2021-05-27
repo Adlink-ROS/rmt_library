@@ -10,6 +10,6 @@ typedef struct _server_config {
 
 extern server_config g_server_cfg;
 
-int server_config_set(rmt_server_cfg *config);
+int server_config_set(char *interface, int domain_id);
 
 #endif /*_SERVER_CONFIG_*/
