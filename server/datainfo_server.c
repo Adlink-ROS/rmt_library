@@ -92,6 +92,10 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
 {
     static DataInfo_Request req_msg;
     reply_data replys;
+    DataInfo_Reply reply_instance;
+
+    // Setup instance
+    reply_instance.type = DataInfo_GET;
 
     // clean the reply queue
     replys.req = &req_msg;
@@ -120,7 +124,7 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
             RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
+        dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
@@ -139,6 +143,10 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
 {
     static DataInfo_Request req_msg;
     reply_data replys;
+    DataInfo_Reply reply_instance;
+
+    // Setup instance
+    reply_instance.type = DataInfo_SET;
 
     // clean the reply queue
     replys.req = &req_msg;
@@ -177,7 +185,7 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
             RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
+        dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
@@ -193,6 +201,10 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
 {
     static DataInfo_Request req_msg;
     reply_data replys;
+    DataInfo_Reply reply_instance;
+
+    // Setup instance
+    reply_instance.type = DataInfo_SET_SAME_VALUE;
 
     // clean the reply queue
     replys.req = &req_msg;
@@ -221,7 +233,7 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
             RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
             break;
         }
-        dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_reply, &replys);
+        dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
         usleep(10000); // sleep 10ms
         time(&now_time);
     }
@@ -321,11 +333,15 @@ int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id,
 void dataserver_info_file_transfer_thread(struct dds_transport *transport)
 {
     time_t now_time;
+    DataInfo_Reply reply_instance;
+
+    // Setup instance
+    reply_instance.type = g_file_transfer_stat.type;
 
     if (g_file_transfer_stat.status == 1) {
         // Try to receive data from agent
         for (int i = g_file_transfer_stat.recv_num; i < g_file_transfer_stat.id_num; i++) {
-            dds_transport_try_recv(PAIR_DATA_REPLY, transport, recv_file_transfer_reply, NULL);
+            dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_file_transfer_reply, NULL);
         }
         // If we receive all the data
         if (g_file_transfer_stat.recv_num == g_file_transfer_stat.id_num) {

@@ -228,7 +228,6 @@ int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *ms
     return ret;
 }
 
-// RMT_TODO: We need to use instance to check which kind of data we want to receive, e.g. get, set, import, export...
 int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *, void *), void *arg)
 {
     dds_sample_info_t infos[MAX_SAMPLES];
@@ -241,7 +240,7 @@ int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int 
     while (true) {
         rc = dds_take(transport->pairs[kind].reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
         if (rc < 0) {
-            DDS_FATAL("dds_read: %s\n", dds_strretcode(-rc));
+            DDS_FATAL("dds_take: %s\n", dds_strretcode(-rc));
             ret = -1;
             break;
         }
@@ -254,7 +253,42 @@ int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int 
                 func(samples[0], arg, NULL);
             }
         } else {
-            // If there is no other device
+            // If there is no reply data
+            break;
+        }
+    }
+
+    dds_sample_free(samples[0], transport->pairs[kind].desc, DDS_FREE_ALL);
+
+    return ret;
+}
+
+int dds_transport_try_recv_instance(void *instance, PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *, void *), void *arg)
+{
+    dds_sample_info_t infos[MAX_SAMPLES];
+    void *samples[MAX_SAMPLES];
+    dds_return_t rc;
+    int ret = 0;
+    dds_instance_handle_t hdl;
+
+    samples[0] = dds_alloc(transport->pairs[kind].size);
+
+    while (0 != (hdl = dds_lookup_instance(transport->pairs[kind].reader, instance))) {
+        rc = dds_take_instance(transport->pairs[kind].reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES, hdl);
+        if (rc < 0) {
+            // If there is no agent, it'll return DDS_RETCODE_PRECONDITION_NOT_MET. We should ignore this.
+            if (rc != DDS_RETCODE_PRECONDITION_NOT_MET) {
+                DDS_FATAL("dds_take_instance: %s\n", dds_strretcode(-rc));
+            }
+            ret = -1;
+            break;
+        }
+
+        /* Check if we read some data and it is valid. */
+        if ((rc > 0) && (infos[0].valid_data)) {
+            func(samples[0], arg, NULL);
+        } else {
+            // If there is no reply data
             break;
         }
     }
