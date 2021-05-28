@@ -94,9 +94,6 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     reply_data replys;
     DataInfo_Reply reply_instance;
 
-    // Setup instance
-    reply_instance.type = DataInfo_GET;
-
     // clean the reply queue
     replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
@@ -111,6 +108,12 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     req_msg.random_seq = rand();
     req_msg.binary._buffer = NULL;
     req_msg.binary._maximum = req_msg.binary._length = 0;
+
+    // Setup instance
+    // RMT_TODO: we should make sure random sequence will not duplicate
+    // RMT_TODO: we should make sure unlimited key will not cause problem
+    // RMT_TODO: if we recive some data which is not ours, it'll always be in the buffer. (Need to use lifespan to clean the buffer)
+    reply_instance.random_seq = req_msg.random_seq;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
@@ -145,9 +148,6 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     reply_data replys;
     DataInfo_Reply reply_instance;
 
-    // Setup instance
-    reply_instance.type = DataInfo_SET;
-
     // clean the reply queue
     replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * dev_num);
@@ -172,6 +172,9 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     req_msg.random_seq = rand();
     req_msg.binary._buffer = NULL;
     req_msg.binary._maximum = req_msg.binary._length = 0;
+
+    // Setup instance
+    reply_instance.random_seq = req_msg.random_seq;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
@@ -203,9 +206,6 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     reply_data replys;
     DataInfo_Reply reply_instance;
 
-    // Setup instance
-    reply_instance.type = DataInfo_SET_SAME_VALUE;
-
     // clean the reply queue
     replys.req = &req_msg;
     replys.list = (data_info *) malloc(sizeof(data_info) * id_num);
@@ -220,6 +220,9 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     req_msg.random_seq = rand();
     req_msg.binary._buffer = NULL;
     req_msg.binary._maximum = req_msg.binary._length = 0;
+
+    // Setup instance
+    reply_instance.random_seq = req_msg.random_seq;
 
     // send request
     dds_transport_send(PAIR_DATA_REQ, transport, &req_msg);
@@ -336,7 +339,7 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
     DataInfo_Reply reply_instance;
 
     // Setup instance
-    reply_instance.type = g_file_transfer_stat.type;
+    reply_instance.random_seq = g_file_transfer_stat.random_seq;
 
     if (g_file_transfer_stat.status == 1) {
         // Try to receive data from agent
