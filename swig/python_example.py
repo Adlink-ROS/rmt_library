@@ -152,7 +152,8 @@ def discover():
             "Host": dev_list[i].host,
             "IP": dev_list[i].ip,
             "MAC": dev_list[i].mac,
-            "RMT_VERSION": dev_list[i].rmt_version
+            "RMT_VERSION": dev_list[i].rmt_version,
+            "Device_Info": dev_list[i].devinfo
         }
         items.append(item)
 

@@ -22,6 +22,7 @@ typedef struct _device_info {
     char *ip;
     char *mac;
     char *rmt_version;
+    char *devinfo;
 } device_info;
 
 #define CONFIG_KEY_STR_LEN 4096

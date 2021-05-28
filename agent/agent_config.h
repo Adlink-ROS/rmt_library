@@ -9,6 +9,7 @@ typedef struct _agent_config {
     uint64_t device_id;              // 0 for default device ID generated from MAC
     int domain_id;                   // 0 for default domain ID 0
     unsigned long datainfo_val_size; // 0 for default size 256
+    unsigned long devinfo_size;      // 0 for default size 1024
 } agent_config;
 
 extern agent_config g_agent_cfg;

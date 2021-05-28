@@ -70,6 +70,7 @@ void server_cmd_search_and_get(void)
         printf("IP: %s\n", dev_ptr[i].ip);
         printf("MAC: %s\n", dev_ptr[i].mac);
         printf("RMT version: %s\n", dev_ptr[i].rmt_version);
+        printf("Device Info: %s\n", dev_ptr[i].devinfo);
         fflush (stdout);
     }
     // assign id to id_list
