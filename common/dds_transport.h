@@ -16,6 +16,7 @@ struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long)
 struct dds_transport *dds_transport_agent_init(void);
 int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *msg);
 int dds_transport_try_recv(PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *, void *), void *);
+int dds_transport_try_recv_instance(void *instance, PAIR_KIND kind, struct dds_transport *transport, int (*func)(void *, void *, void *), void *arg);
 int dds_transport_deinit(struct dds_transport *transport);
 
 #endif /*_DDS_TRANSPORT_*/

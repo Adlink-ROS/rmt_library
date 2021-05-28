@@ -17,7 +17,7 @@ module DataInfo
         string msg;
         DataInfo::BINARY binary;
     };
-    #pragma keylist Request type
+    #pragma keylist Request random_seq
     struct Reply
     {
         unsigned long long deviceID;
@@ -26,5 +26,5 @@ module DataInfo
         string msg;
         DataInfo::BINARY binary;
     };
-    #pragma keylist Reply type
+    #pragma keylist Reply random_seq
 };
