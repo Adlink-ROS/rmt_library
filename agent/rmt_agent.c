@@ -17,7 +17,7 @@ int rmt_agent_configure(rmt_agent_cfg *config)
 
 int rmt_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps)
 {
-    dds_transport_config_init(g_agent_cfg.net_interface);
+    dds_transport_config_init(g_agent_cfg.net_interface, g_agent_cfg.domain_id);
     devinfo_agent_config(g_agent_cfg.net_interface, g_agent_cfg.device_id);
     datainfo_agent_init(func_maps, file_maps, g_agent_cfg.datainfo_val_size);
     g_transport = dds_transport_agent_init();

@@ -28,6 +28,7 @@ typedef struct dds_comm_pair {
 } dds_comm_pair;
 
 static dds_entity_t g_domain = 0;
+static int g_domain_id = 0;
 static unsigned int g_participant_num = 0;
 typedef int (*server_liveliness_fptr)(long);
 static server_liveliness_fptr server_liveliness_callback = NULL;
@@ -36,14 +37,15 @@ typedef struct dds_transport {
     dds_comm_pair pairs[PAIR_TOTAL];
 } dds_transport;
 
-int dds_transport_config_init(char *interface)
+int dds_transport_config_init(char *interface, int domain_id)
 {
     char dds_config[2048];
     char selected_interface[40];
     int ret = 0;
 
     sprintf(dds_config, DDS_CONFIG, interface);
-    g_domain = dds_create_domain(DOMAIN_ID, dds_config);
+    g_domain_id = domain_id;
+    g_domain = dds_create_domain(g_domain_id, dds_config);
 exit:
     return ret;
 }
@@ -59,7 +61,7 @@ static struct dds_transport *dds_transport_init(void)
     }
 
     /* Create a Participant. */
-    transport->participant = dds_create_participant(DOMAIN_ID, NULL, NULL);
+    transport->participant = dds_create_participant(g_domain_id, NULL, NULL);
     if (transport->participant < 0) {
         DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-transport->participant));
         ret = -1;
