@@ -31,7 +31,7 @@ int rmt_server_configure(char *interface, int domain_id)
 
 int rmt_server_init(void)
 {
-    dds_transport_config_init(g_server_cfg.net_interface);
+    dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);

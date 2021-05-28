@@ -25,6 +25,9 @@ int server_config_set(char *interface, int domain_id)
         strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface));
     }
 
+    RMT_LOG("g_agent_cfg.domain_id %d\n", g_server_cfg.domain_id);
+    RMT_LOG("g_agent_cfg.net_interface %s\n", g_server_cfg.net_interface);
+
 exit:
     return ret;
 }

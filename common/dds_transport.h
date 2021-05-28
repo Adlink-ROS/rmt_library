@@ -11,7 +11,7 @@ typedef enum _PAIR_KIND {
 struct DeviceInfo_Msg;
 struct dds_transport;
 
-int dds_transport_config_init(char *interface);
+int dds_transport_config_init(char *interface, int domain_id);
 struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long));
 struct dds_transport *dds_transport_agent_init(void);
 int dds_transport_send(PAIR_KIND kind, struct dds_transport *transport, void *msg);
