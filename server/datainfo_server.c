@@ -112,7 +112,6 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     // Setup instance
     // RMT_TODO: we should make sure random sequence will not duplicate
     // RMT_TODO: we should make sure unlimited key will not cause problem
-    // RMT_TODO: if we recive some data which is not ours, it'll always be in the buffer. (Need to use lifespan to clean the buffer)
     reply_instance.random_seq = req_msg.random_seq;
 
     // send request
