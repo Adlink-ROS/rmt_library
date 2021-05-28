@@ -7,6 +7,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
+typedef void (*devinfo_func)(char *);
 typedef int (*INFO_FUNC)(char *);
 
 typedef struct datainfo_func {
@@ -29,10 +30,11 @@ typedef struct _rmt_agent_cfg {
     int device_id;                   // 0 for default device ID generated from MAC
     int domain_id;                   // 0 for default domain ID 0
     unsigned long datainfo_val_size; // 0 for default size 256
+    unsigned long devinfo_size;      // 0 for default size 1024
 } rmt_agent_cfg;
 
 int rmt_agent_configure(rmt_agent_cfg *config);
-int rmt_agent_init(datainfo_func *func_maps, fileinfo_func *file_maps);
+int rmt_agent_init(devinfo_func search_func, datainfo_func *func_maps, fileinfo_func *file_maps);
 int rmt_agent_running(void);
 int rmt_agent_deinit(void);
 char* rmt_agent_version(void);

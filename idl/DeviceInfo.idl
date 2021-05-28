@@ -8,6 +8,7 @@ module DeviceInfo
     string ip;
     string mac;
     string rmt_version;
+    string devinfo;
   };
   #pragma keylist Msg deviceID
 };

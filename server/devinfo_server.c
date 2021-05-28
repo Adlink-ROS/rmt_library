@@ -48,6 +48,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     selected_dev->info->mac = strdup(devinfo_msg->mac);
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
+    selected_dev->info->devinfo = strdup(devinfo_msg->devinfo);
     selected_dev->internal_id = (long) arg;
 
     // Add new device at the head if this is new device
@@ -70,6 +71,7 @@ static void free_dev_list(dev_list *dev_ptr)
         free(dev_ptr->info->mac);
         free(dev_ptr->info->model);
         free(dev_ptr->info->rmt_version);
+        free(dev_ptr->info->devinfo);
         free(dev_ptr->info);
         free(dev_ptr);
     }
