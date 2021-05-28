@@ -13,6 +13,7 @@ int agent_config_set(rmt_agent_cfg *config)
 
     g_agent_cfg.domain_id = 0;
     g_agent_cfg.datainfo_val_size = 256;
+    g_agent_cfg.devinfo_size = 1024;
     if (net_select_interface(g_agent_cfg.net_interface) < 0) {
         RMT_ERROR("Unable to select interface.\n");
         ret = -1;
@@ -34,10 +35,14 @@ int agent_config_set(rmt_agent_cfg *config)
         if (config->net_interface != NULL) {
             strncpy(g_agent_cfg.net_interface, config->net_interface, sizeof(g_agent_cfg.net_interface));
         }
+        if (config->devinfo_size != 0) {
+            g_agent_cfg.devinfo_size = config->devinfo_size;
+        }
     }
 
     RMT_LOG("g_agent_cfg.domain_id %d\n", g_agent_cfg.domain_id);
     RMT_LOG("g_agent_cfg.datainfo_val_size %d\n", g_agent_cfg.datainfo_val_size);
+    RMT_LOG("g_agent_cfg.devinfo_size %d\n", g_agent_cfg.devinfo_size);
     RMT_LOG("g_agent_cfg.device_id %lu\n", g_agent_cfg.device_id);
     RMT_LOG("g_agent_cfg.net_interface %s\n", g_agent_cfg.net_interface);
 
