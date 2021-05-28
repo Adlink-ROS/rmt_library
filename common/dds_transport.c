@@ -273,7 +273,8 @@ int dds_transport_try_recv_instance(void *instance, PAIR_KIND kind, struct dds_t
 
     samples[0] = dds_alloc(transport->pairs[kind].size);
 
-    while (0 != (hdl = dds_lookup_instance(transport->pairs[kind].reader, instance))) {
+    hdl = dds_lookup_instance(transport->pairs[kind].reader, instance);
+    while (true) {
         rc = dds_take_instance(transport->pairs[kind].reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES, hdl);
         if (rc < 0) {
             // If there is no agent, it'll return DDS_RETCODE_PRECONDITION_NOT_MET. We should ignore this.
