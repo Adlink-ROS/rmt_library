@@ -62,7 +62,7 @@ int rmt_agent_configure(rmt_agent_cfg *config);
  * @retval  0 Success
  * @retval -1 Something wrong
  */
-int rmt_agent_init(devinfo_func search_func, datainfo_func *func_maps, fileinfo_func *file_maps);
+int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_maps, fileinfo_func *file_func_maps);
 
 /**
  * @brief rmt_agent_running
