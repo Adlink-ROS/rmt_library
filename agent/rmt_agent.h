@@ -7,6 +7,11 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
+/**
+ * @file
+ * RMT agent library API.
+ */
+
 typedef void (*devinfo_func)(char *);
 typedef int (*INFO_FUNC)(char *);
 
@@ -33,10 +38,59 @@ typedef struct _rmt_agent_cfg {
     unsigned long devinfo_size;      // 0 for default size 1024
 } rmt_agent_cfg;
 
+/**
+ * @brief rmt_agent_configure
+ * Set the config for RMT agent
+ *
+ * @param[in] rmt_agent_cfg The config structure for RMT agent
+ *
+ * @returns The error code
+ * @retval  0 Success
+ * @retval -1 Something wrong
+ */
 int rmt_agent_configure(rmt_agent_cfg *config);
-int rmt_agent_init(devinfo_func search_func, datainfo_func *func_maps, fileinfo_func *file_maps);
+
+/**
+ * @brief rmt_agent_init
+ * Init RMT agent
+ *
+ * @param[in] search_func The callback for getting devinfo
+ * @param[in] func_maps The function map for getting datainfo
+ * @param[in] file_maps The function map for getting fileinfo
+ *
+ * @returns The error code
+ * @retval  0 Success
+ * @retval -1 Something wrong
+ */
+int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_maps, fileinfo_func *file_func_maps);
+
+/**
+ * @brief rmt_agent_running
+ * Update the device data and receive requests from server
+ * Note: the function should always run
+ *
+ * @returns The error code
+ * @retval  0 Success
+ * @retval -1 Something wrong
+ */
 int rmt_agent_running(void);
+
+/**
+ * @brief rmt_agent_deinit
+ * Release resource of RMT agent
+ *
+ * @returns The error code
+ * @retval  0 Success
+ * @retval -1 Something wrong
+ */
 int rmt_agent_deinit(void);
+
+/**
+ * @brief rmt_agent_version
+ * Get the current version of RMT agent library
+ *
+ * @returns The version of RMT agent library
+ */
 char* rmt_agent_version(void);
 
 /* *INDENT-OFF* */

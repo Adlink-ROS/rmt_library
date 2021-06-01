@@ -6,10 +6,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install necessary packages
-        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev
+        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev libyaml-cpp-dev
       - name: Build
         working-directory: ./
-        run: cmake -Bbuild -H. && cmake --build build
+        run: cmake -Bbuild -H. -DUSE_ROS=off && cmake --build build
       - name: Test
         working-directory: ./build
         run: ctest -V
@@ -18,10 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install necessary packages
-        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev
+        run: sudo apt-get install libcunit1-dev uncrustify libnm-dev libyaml-cpp-dev
       - name: Build
         working-directory: ./
-        run: cmake -Bbuild -H. && cmake --build build
+        run: cmake -Bbuild -H. -DUSE_ROS=off && cmake --build build
       - name: Test
         working-directory: ./build
         run: ctest -V

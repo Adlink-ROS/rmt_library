@@ -41,8 +41,8 @@ int agent_config_set(rmt_agent_cfg *config)
     }
 
     RMT_LOG("g_agent_cfg.domain_id %d\n", g_agent_cfg.domain_id);
-    RMT_LOG("g_agent_cfg.datainfo_val_size %d\n", g_agent_cfg.datainfo_val_size);
-    RMT_LOG("g_agent_cfg.devinfo_size %d\n", g_agent_cfg.devinfo_size);
+    RMT_LOG("g_agent_cfg.datainfo_val_size %lu\n", g_agent_cfg.datainfo_val_size);
+    RMT_LOG("g_agent_cfg.devinfo_size %lu\n", g_agent_cfg.devinfo_size);
     RMT_LOG("g_agent_cfg.device_id %lu\n", g_agent_cfg.device_id);
     RMT_LOG("g_agent_cfg.net_interface %s\n", g_agent_cfg.net_interface);
 
