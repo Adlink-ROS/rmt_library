@@ -57,7 +57,7 @@ int rmt_agent_configure(rmt_agent_cfg *config);
  * @param[in] search_func The callback for getting devinfo
  * @param[in] func_maps The function map for getting datainfo
  * @param[in] file_maps The function map for getting fileinfo
- * 
+ *
  * @returns The error code
  * @retval  0 Success
  * @retval -1 Something wrong
