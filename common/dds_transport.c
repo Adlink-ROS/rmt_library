@@ -30,8 +30,8 @@ typedef struct dds_comm_pair {
 static dds_entity_t g_domain = 0;
 static int g_domain_id = 0;
 static unsigned int g_participant_num = 0;
-typedef int (*server_liveliness_fptr)(long);
-static server_liveliness_fptr server_liveliness_callback = NULL;
+typedef int (*device_delete_fptr)(long);
+static device_delete_fptr g_device_delete_callback = NULL;
 typedef struct dds_transport {
     dds_entity_t participant;
     dds_comm_pair pairs[PAIR_TOTAL];
@@ -106,13 +106,22 @@ exit:
 static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_changed_status_t status, void *arg)
 {
     if (status.not_alive_count) {
-        if (server_liveliness_callback) {
-            server_liveliness_callback((long) status.last_publication_handle);
+        if (g_device_delete_callback) {
+            g_device_delete_callback((long) status.last_publication_handle);
         }
     }
 }
 
-struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long))
+void callback_subscription_matched(dds_entity_t reader, const dds_subscription_matched_status_t status, void* arg)
+{
+    if (status.current_count_change < 0) {
+        if (g_device_delete_callback) {
+            g_device_delete_callback((long) status.last_publication_handle);
+        }
+    }
+}
+
+struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(long))
 {
     dds_transport *transport;
     dds_listener_t *listener;
@@ -126,8 +135,9 @@ struct dds_transport *dds_transport_server_init(int (*liveliness_callback)(long)
 
     /* Create a devinfo Reader. */
     listener = dds_create_listener(NULL);
-    server_liveliness_callback = liveliness_callback;
+    g_device_delete_callback = dev_delete_callback;
     dds_lset_liveliness_changed(listener, callback_liveliness_changed);
+    dds_lset_subscription_matched(listener, callback_subscription_matched);
     dds_qos_t *devinfo_qos = dds_create_qos();
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
