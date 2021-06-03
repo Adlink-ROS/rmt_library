@@ -125,10 +125,10 @@ void server_cmd_set_task(void)
     data_info *info_list;
     int info_list_num;
 
-    // set task to Inspection
+    // set task to Navigation
     printf("Try to set task to id 6166\n");
     set_info.deviceID = 6166;
-    strncpy(set_info.value_list, "task_mode:Inspection", CONFIG_KEY_STR_LEN);
+    strncpy(set_info.value_list, "task_mode:Navigation", CONFIG_KEY_STR_LEN);
     info_list = rmt_server_set_info(&set_info, 1, &info_list_num);
     for (int i = 0; i < info_list_num; i++) {
         printf("ID: %ld\n", info_list[i].deviceID);
