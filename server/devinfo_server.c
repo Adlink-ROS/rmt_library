@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "dds_transport.h"
 #include "DeviceInfo.h"
@@ -15,15 +16,18 @@ typedef struct _dev_list {
 } dev_list;
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
+static pthread_mutex_t g_dev_mutex;
 
 transfer_result empty_result;
 
 static int add_device(void *msg, void *recv_buf, void *arg)
 {
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
-    // Check whether the device exist or not.
-    dev_list *dev_ptr = g_dev_head;
+    dev_list *dev_ptr;
 
+    pthread_mutex_lock(&g_dev_mutex);
+    // Check whether the device exist or not.
+    dev_ptr = g_dev_head;
     while (dev_ptr) {
         if (dev_ptr->info->deviceID == devinfo_msg->deviceID) {
             break;
@@ -59,6 +63,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
         g_dev_head = selected_dev;
         g_dev_num++;
     }
+    pthread_mutex_unlock(&g_dev_mutex);
 
     return 0;
 }
@@ -79,9 +84,11 @@ static void free_dev_list(dev_list *dev_ptr)
 
 static int del_device(long internal_id)
 {
-    dev_list *dev_ptr = g_dev_head;
+    dev_list *dev_ptr;
     dev_list *to_be_freed = NULL;
 
+    pthread_mutex_lock(&g_dev_mutex);
+    dev_ptr = g_dev_head;
     if (dev_ptr == NULL) {
         goto exit;
     }
@@ -98,12 +105,14 @@ static int del_device(long internal_id)
         if (dev_ptr->next->internal_id == internal_id) {
             to_be_freed = dev_ptr->next;
             dev_ptr->next = dev_ptr->next->next;
+            g_dev_num--;
             goto exit;
         }
         dev_ptr = dev_ptr->next;
     }
 
 exit:
+    pthread_mutex_unlock(&g_dev_mutex);
     // If the matched internal ID exist in our device list.
     if (to_be_freed) {
         RMT_WARN("Lost device ID %lu\n", to_be_freed->info->deviceID);
@@ -131,11 +140,12 @@ int devinfo_server_create_list(struct dds_transport *transport, device_info **de
         goto exit;
     }
 
+    pthread_mutex_lock(&g_dev_mutex);
     *num = g_dev_num;
     *dev = (device_info *) malloc(sizeof(device_info) * g_dev_num);
     if (*dev == NULL) {
         ret = -1;
-        goto exit;
+        goto exit_mutex;
     }
     dev_list *dev_ptr = g_dev_head;
     for (int i = 0; i < g_dev_num; i++) {
@@ -143,6 +153,10 @@ int devinfo_server_create_list(struct dds_transport *transport, device_info **de
         dev_ptr = dev_ptr->next;
     }
 
+exit_mutex:
+    // RMT_TODO: What will happen if the device is removed and user still can access the device list?
+    //           I think they can't use the same memory.
+    pthread_mutex_unlock(&g_dev_mutex);
 exit:
     return ret;
 }
@@ -161,10 +175,12 @@ void devinfo_server_init(void)
     empty_result.result = 0;
     empty_result.file_len = 0;
     empty_result.pFile = NULL;
+    pthread_mutex_init(&g_dev_mutex, NULL);
 }
 
 int devinfo_server_deinit(void)
 {
+    pthread_mutex_lock(&g_dev_mutex);
     // Remove all device
     while (g_dev_head) {
         dev_list *dev_ptr = g_dev_head;
@@ -172,12 +188,17 @@ int devinfo_server_deinit(void)
         free_dev_list(dev_ptr);
         g_dev_num--;
     }
+    pthread_mutex_unlock(&g_dev_mutex);
+    // RMT_TODO: What if other function is called while calling deinit?
+    pthread_mutex_destroy(&g_dev_mutex);
 }
 
 int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer_result dev_result)
 {
-    dev_list *dev_ptr = g_dev_head;
+    dev_list *dev_ptr;
 
+    pthread_mutex_lock(&g_dev_mutex);
+    dev_ptr = g_dev_head;
     for (int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             dev_ptr->agent_transfer_status = dev_status;
@@ -186,13 +207,16 @@ int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer
         }
         dev_ptr = dev_ptr->next;
     }
+    pthread_mutex_unlock(&g_dev_mutex);
 }
 
 int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfer_result *dev_result)
 {
-    dev_list *dev_ptr = g_dev_head;
+    dev_list *dev_ptr;
     int found = 0;
 
+    pthread_mutex_lock(&g_dev_mutex);
+    dev_ptr = g_dev_head;
     for (int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             *dev_status = dev_ptr->agent_transfer_status;
@@ -202,6 +226,7 @@ int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfe
         }
         dev_ptr = dev_ptr->next;
     }
+    pthread_mutex_unlock(&g_dev_mutex);
 
     if (!found) {
         *dev_status = STATUS_AGENT_ERROR;

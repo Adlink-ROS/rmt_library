@@ -36,6 +36,7 @@ int rmt_server_init(void)
     datainfo_server_init();
     g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_transport) {
+        RMT_LOG("Init server successfully\n");
         g_recv_thread_status = 1;
         pthread_create(&g_recv_thread, NULL, recv_thread_func, NULL);
         return 0;
@@ -49,42 +50,50 @@ device_info* rmt_server_create_device_list(int *num)
 {
     device_info *dev;
 
+    RMT_LOG("Create device list.\n");
     devinfo_server_create_list(g_transport, &dev, num);
     return dev;
 }
 
 int rmt_server_free_device_list(device_info *dev)
 {
+    RMT_LOG("Free device list.\n");
     return devinfo_server_free_list(dev);
 }
 
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
+    RMT_LOG("Get info.\n");
     return datainfo_server_get_info(g_transport, id_list, id_num, key_list, info_num);
 }
 
 int rmt_server_free_info(data_info* info_list)
 {
+    RMT_LOG("Free info.\n");
     return datainfo_server_free_info(info_list);
 }
 
 data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num)
 {
+    RMT_LOG("Set info.\n");
     return datainfo_server_set_info(g_transport, dev_list, dev_num, info_num);
 }
 
 data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_num, char *value_list, int *info_num)
 {
+    RMT_LOG("Set info with same value.\n");
     return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
 }
 
 int rmt_server_send_file(unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, unsigned long file_len)
 {
+    RMT_LOG("Send file.\n");
     return datainfo_server_send_file(g_transport, id_list, id_num, callbackname, filename, pFile, file_len);
 }
 
 int rmt_server_recv_file(unsigned long id, char *callbackname, char *filename)
 {
+    RMT_LOG("Receive file.\n");
     return datainfo_server_recv_file(g_transport, id, callbackname, filename);
 }
 
@@ -92,6 +101,7 @@ transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *
 {
     transfer_status current_status;
 
+    RMT_LOG("Get result.\n");
     devinfo_server_get_status_by_id(device_id, &current_status, result);
     return current_status;
 }
@@ -100,6 +110,7 @@ int rmt_server_deinit(void)
 {
     int ret;
 
+    RMT_LOG("Deinit RMT server.\n")
     // kill the thread
     g_recv_thread_status = 0;
     pthread_join(g_recv_thread, NULL);
@@ -111,5 +122,6 @@ int rmt_server_deinit(void)
 
 char* rmt_server_version(void)
 {
+    RMT_LOG("Get RMT version.\n");
     return PROJECT_VERSION;
 }
