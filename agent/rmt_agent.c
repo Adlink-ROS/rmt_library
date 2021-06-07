@@ -38,6 +38,7 @@ int rmt_agent_running(void)
 
 int rmt_agent_deinit(void)
 {
+    devinfo_agent_deinit();
     return dds_transport_deinit(g_transport);
 }
 
