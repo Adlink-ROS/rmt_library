@@ -12,7 +12,7 @@ install(
   FILES
     ${CMAKE_BINARY_DIR}/lib/libddsc.so
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0
-    ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.7.0
+    ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.8.0
   DESTINATION 
     lib
 )
