@@ -40,7 +40,7 @@ static void get_device_info(void)
         g_agent_devinfo_func(tmp_devinfo);
 
     if ((memcmp(&g_dev, &tmp_dev, sizeof(device_info)) != 0)
-        && (strcmp(g_devinfo, tmp_devinfo) != 0)) {
+        || (strcmp(g_devinfo, tmp_devinfo) != 0)) {
         g_dev = tmp_dev;
         memset(g_devinfo, 0, g_agent_cfg.devinfo_size);
         strcpy(g_devinfo, tmp_devinfo);
