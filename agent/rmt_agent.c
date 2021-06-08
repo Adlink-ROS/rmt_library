@@ -38,8 +38,12 @@ int rmt_agent_running(void)
 
 int rmt_agent_deinit(void)
 {
+    int ret;
+
     devinfo_agent_deinit();
-    return dds_transport_deinit(g_transport);
+    ret = dds_transport_deinit(g_transport);
+    agent_config_deinit();
+    return ret;
 }
 
 char* rmt_agent_version(void)
