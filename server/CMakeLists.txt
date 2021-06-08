@@ -28,6 +28,11 @@ target_link_libraries(rmt_server_shared PRIVATE CycloneDDS::ddsc RmtIdl_lib pthr
 add_executable(server_example server_example.c)
 target_link_libraries(server_example PRIVATE rmt_server)
 
+# Make sure warning as error
+target_compile_options(rmt_server PRIVATE -Wall -Wextra -pedantic -Werror)
+target_compile_options(rmt_server_shared PRIVATE -Wall -Wextra -pedantic -Werror)
+target_compile_options(server_example PRIVATE -Wall -Wextra -pedantic -Werror)
+
 # Make header public
 set_target_properties(rmt_server PROPERTIES PUBLIC_HEADER "rmt_server.h")
 

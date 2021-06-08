@@ -42,13 +42,16 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
     unsigned long myid = devinfo_get_id();
     DataInfo_Request *datainfo_msg = (DataInfo_Request *) msg;
 
+    arg = arg;
+    recv_buf = recv_buf;
+
     RMT_LOG("id_list.length: %d\n", datainfo_msg->id_list._length);
     RMT_LOG("type: %d\n", datainfo_msg->type);
     RMT_LOG("msg: %s\n", datainfo_msg->msg);
 
     // check whether the ID matches or not
     int found_idx = -1;
-    for (int i = 0; i < datainfo_msg->id_list._length; i++) {
+    for (unsigned int i = 0; i < datainfo_msg->id_list._length; i++) {
         RMT_LOG("id_list.id %d:%lu\n", i, datainfo_msg->id_list._buffer[i]);
         if (myid == datainfo_msg->id_list._buffer[i]) {
             RMT_LOG("The ID matches!\n");
@@ -81,7 +84,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                         RMT_ERROR("There is no get function for key %s\n", keys);
                     }
                     // Make sure result_msg length is enough
-                    int new_size = strlen(result_msg) + strlen(keys) + strlen(value) + 2;
+                    unsigned int new_size = strlen(result_msg) + strlen(keys) + strlen(value) + 2;
                     if (result_msg_size <= new_size) {
                         result_msg_size = new_size * 2;
                         result_msg = realloc(result_msg, result_msg_size);
@@ -173,7 +176,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                     fclose(fp);
                 }
                 if (g_fileinfo_func_maps[i].import_func) {
-                    int result = g_fileinfo_func_maps[i].import_func(filename, datainfo_msg->binary._buffer, datainfo_msg->binary._length);
+                    int result = g_fileinfo_func_maps[i].import_func(filename, (char *) datainfo_msg->binary._buffer, datainfo_msg->binary._length);
                     sprintf(result_msg, "%d", result);
                     RMT_LOG("result of import func: %d\n", result);
                 } else {
@@ -219,7 +222,7 @@ static int recv_request(void *msg, void *arg, void *recv_buf)
                 }
                 if (g_fileinfo_func_maps[i].export_func) {
                     // RMT_TODO: Should we consider export function will extent the file length?
-                    int result = g_fileinfo_func_maps[i].export_func(filename, file_content, file_size);
+                    int result = g_fileinfo_func_maps[i].export_func(filename, (char *) file_content, file_size);
                     sprintf(result_msg, "%d", result);
                     RMT_LOG("result of export func: %d\n", result);
                 } else {

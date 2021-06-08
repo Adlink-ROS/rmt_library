@@ -14,6 +14,7 @@ int g_recv_thread_status = 0; // 0: stop, 1: running
 
 void *recv_thread_func(void *data)
 {
+    data = data;
     RMT_LOG("Start recv thread.\n")
     while (1 == g_recv_thread_status) {
         devinfo_server_update(g_transport);
@@ -51,7 +52,7 @@ device_info* rmt_server_create_device_list(int *num)
     device_info *dev;
 
     RMT_LOG("Create device list.\n");
-    devinfo_server_create_list(g_transport, &dev, num);
+    devinfo_server_create_list(g_transport, &dev, (unsigned int *)num);
     return dev;
 }
 
