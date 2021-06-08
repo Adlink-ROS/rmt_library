@@ -40,13 +40,12 @@ typedef struct dds_transport {
 int dds_transport_config_init(char *interface, int domain_id)
 {
     char dds_config[2048];
-    char selected_interface[40];
     int ret = 0;
 
     sprintf(dds_config, DDS_CONFIG, interface);
     g_domain_id = domain_id;
     g_domain = dds_create_domain(g_domain_id, dds_config);
-exit:
+
     return ret;
 }
 
@@ -100,11 +99,17 @@ static struct dds_transport *dds_transport_init(void)
     transport->pairs[PAIR_DATA_REPLY].size = sizeof(DataInfo_Reply);
 
 exit:
+    if ((ret == -1) && (transport != NULL)) {
+        dds_delete(transport->participant);
+        free(transport);
+    }
     return transport;
 }
 
 static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_changed_status_t status, void *arg)
 {
+    rd = rd;
+    arg = arg;
     if (status.not_alive_count) {
         if (g_device_delete_callback) {
             g_device_delete_callback((long) status.last_publication_handle);
@@ -114,6 +119,8 @@ static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_ch
 
 void callback_subscription_matched(dds_entity_t reader, const dds_subscription_matched_status_t status, void* arg)
 {
+    reader = reader;
+    arg = arg;
     if (status.current_count_change < 0) {
         if (g_device_delete_callback) {
             g_device_delete_callback((long) status.last_publication_handle);
@@ -177,6 +184,10 @@ struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(long)
     dds_sleepfor(DDS_MSECS(1000));
 
 exit:
+    if ((ret == -1) && (transport != NULL)) {
+        dds_delete(transport->participant);
+        free(transport);
+    }
     return transport;
 }
 
@@ -223,6 +234,10 @@ struct dds_transport *dds_transport_agent_init(void)
     dds_delete_qos(datainfo_qos);
 
 exit:
+    if ((ret == -1) && (transport != NULL)) {
+        dds_delete(transport->participant);
+        free(transport);
+    }
     return transport;
 }
 
@@ -327,6 +342,9 @@ int dds_transport_deinit(struct dds_transport *transport)
     if ((g_participant_num == 0) && (g_domain > 0)) {
         dds_delete(g_domain);
         g_domain = 0;
+    }
+    if (transport) {
+        free(transport);
     }
 
     return ret;

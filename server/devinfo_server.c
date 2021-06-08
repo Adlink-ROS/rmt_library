@@ -25,6 +25,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     dev_list *dev_ptr;
 
+    recv_buf = recv_buf;
     pthread_mutex_lock(&g_dev_mutex);
     // Check whether the device exist or not.
     dev_ptr = g_dev_head;
@@ -148,7 +149,7 @@ int devinfo_server_create_list(struct dds_transport *transport, device_info **de
         goto exit_mutex;
     }
     dev_list *dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         (*dev)[i] = *dev_ptr->info;
         dev_ptr = dev_ptr->next;
     }
@@ -178,7 +179,7 @@ void devinfo_server_init(void)
     pthread_mutex_init(&g_dev_mutex, NULL);
 }
 
-int devinfo_server_deinit(void)
+void devinfo_server_deinit(void)
 {
     pthread_mutex_lock(&g_dev_mutex);
     // Remove all device
@@ -193,31 +194,35 @@ int devinfo_server_deinit(void)
     pthread_mutex_destroy(&g_dev_mutex);
 }
 
-int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer_result dev_result)
+int devinfo_server_set_status_by_id(unsigned long id, transfer_status dev_status, transfer_result dev_result)
 {
+    int ret = -1;
     dev_list *dev_ptr;
 
     pthread_mutex_lock(&g_dev_mutex);
     dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             dev_ptr->agent_transfer_status = dev_status;
             dev_ptr->transfer_result = dev_result;
+            ret = 0;
             break;
         }
         dev_ptr = dev_ptr->next;
     }
     pthread_mutex_unlock(&g_dev_mutex);
+
+    return ret;
 }
 
-int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfer_result *dev_result)
+int devinfo_server_get_status_by_id(unsigned long id, transfer_status *dev_status, transfer_result *dev_result)
 {
     dev_list *dev_ptr;
     int found = 0;
 
     pthread_mutex_lock(&g_dev_mutex);
     dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             *dev_status = dev_ptr->agent_transfer_status;
             *dev_result = dev_ptr->transfer_result;
