@@ -22,7 +22,7 @@ int server_config_set(char *interface, int domain_id)
         g_server_cfg.domain_id = domain_id;
     }
     if (interface != NULL) {
-        strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface));
+        strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface) - 1);
     }
 
     RMT_LOG("g_agent_cfg.domain_id %d\n", g_server_cfg.domain_id);
