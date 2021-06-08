@@ -26,7 +26,8 @@ int agent_config_set(rmt_agent_cfg *config)
 
     // If there is user's config
     if (config != NULL) {
-        g_agent_cfg.user_config = config;
+        g_agent_cfg.user_config = malloc(sizeof(rmt_agent_cfg));
+        *g_agent_cfg.user_config = *config;
         if (config->domain_id != 0) {
             g_agent_cfg.domain_id = config->domain_id;
         }
@@ -60,7 +61,9 @@ void agent_config_deinit(void)
     if (g_agent_cfg.user_config) {
         if (g_agent_cfg.user_config->net_interface) {
             free(g_agent_cfg.user_config->net_interface);
+            g_agent_cfg.user_config->net_interface = NULL;
         }
         free(g_agent_cfg.user_config);
+        g_agent_cfg.user_config = NULL;
     }
 }
