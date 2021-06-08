@@ -1,3 +1,4 @@
+#include <string.h>
 #include "rmt_agent.h"
 #include "dds_transport.h"
 #include "devinfo_agent.h"
@@ -5,6 +6,7 @@
 #include "version.h"
 #include "logger.h"
 #include "agent_config.h"
+#include "network.h"
 
 static struct dds_transport *g_transport;
 
@@ -17,20 +19,51 @@ int rmt_agent_configure(rmt_agent_cfg *config)
 
 int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_maps, fileinfo_func *file_func_maps)
 {
-    dds_transport_config_init(g_agent_cfg.net_interface, g_agent_cfg.domain_id);
+    int ret = 0;
+
     devinfo_agent_init(agent_devinfo_func);
     datainfo_agent_init(data_func_maps, file_func_maps, g_agent_cfg.datainfo_val_size);
-    g_transport = dds_transport_agent_init();
-    if (g_transport) {
-        return 0;
-    } else {
-        RMT_ERROR("Unable to init agent\n");
-        return -1;
+    if (dds_transport_config_init(g_agent_cfg.net_interface, g_agent_cfg.domain_id) < 0) {
+        RMT_ERROR("Unable to init communication\n");
+        ret = -1;
+        goto exit;
     }
+    g_transport = dds_transport_agent_init();
+    if (!g_transport) {
+        RMT_ERROR("Unable to init agent\n");
+        ret = -1;
+        goto exit;
+    }
+
+exit:
+    return ret;
 }
 
 int rmt_agent_running(void)
 {
+    if ((g_agent_cfg.user_config == NULL) || (g_agent_cfg.user_config->net_interface == NULL)) {
+        char interface[40];
+
+        net_select_interface(interface);
+        if (strcmp(interface, g_agent_cfg.net_interface) != 0) {
+            RMT_LOG("Interface %s disappear! Reinit communication...\n", g_agent_cfg.net_interface);
+            if (g_transport) {
+                dds_transport_deinit(g_transport);
+                g_transport = NULL;
+            }
+            if (dds_transport_config_init(interface, g_agent_cfg.domain_id) < 0) {
+                RMT_ERROR("Unable to init communication\n");
+                return -1;
+            }
+            g_transport = dds_transport_agent_init();
+            if (g_transport == NULL) {
+                RMT_ERROR("Unable to init agent\n");
+                return -1;
+            }
+            RMT_LOG("Init interface %s successfully!\n", interface);
+            strcpy(g_agent_cfg.net_interface, interface);
+        }
+    }
     devinfo_agent_update(g_transport);
     datainfo_agent_update(g_transport);
     return 0;

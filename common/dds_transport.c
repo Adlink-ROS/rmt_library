@@ -45,6 +45,10 @@ int dds_transport_config_init(char *interface, int domain_id)
     sprintf(dds_config, DDS_CONFIG, interface);
     g_domain_id = domain_id;
     g_domain = dds_create_domain(g_domain_id, dds_config);
+    // DDS_RETCODE_PRECONDITION_NOT_MET means the domain already exists
+    if ((g_domain < 0) && (g_domain != DDS_RETCODE_PRECONDITION_NOT_MET)) {
+        ret = -1;
+    }
 
     return ret;
 }
