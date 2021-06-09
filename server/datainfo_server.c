@@ -41,7 +41,7 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
         return -1;
     }
 
-    RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
+    RMT_LOG("Receive device ID: %lu\n", datainfo_msg->deviceID);
     replys->list[replys->num].deviceID = datainfo_msg->deviceID;
     strncpy(replys->list[replys->num].value_list, datainfo_msg->msg, CONFIG_KEY_STR_LEN);
     replys->num++;
@@ -61,7 +61,7 @@ static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
         return -1;
     }
 
-    RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
+    RMT_LOG("Receive device ID: %lu\n", datainfo_msg->deviceID);
     RMT_LOG("Receive result: %s\n", datainfo_msg->msg);
     transfer_result file_result;
     file_result.result = atoi(datainfo_msg->msg);
