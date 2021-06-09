@@ -34,6 +34,8 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
     reply_data *replys = (reply_data *)recv_buf;
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
+    arg = arg;
+
     // Check whether this reply is for me or not.
     if ((datainfo_msg->type != replys->req->type) || (datainfo_msg->random_seq != replys->req->random_seq)) {
         return -1;
@@ -49,7 +51,10 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
 static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
-    transfer_status status;
+    transfer_status status = STATUS_DONE;
+
+    recv_buf = recv_buf;
+    arg = arg;
 
     // Check whether this reply is for me or not.
     if ((datainfo_msg->type != g_file_transfer_stat.type) || (datainfo_msg->random_seq != g_file_transfer_stat.random_seq)) {

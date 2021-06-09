@@ -12,7 +12,7 @@ typedef struct _dev_list {
     device_info *info;
     transfer_status agent_transfer_status;
     transfer_result transfer_result;
-    long internal_id;
+    uint64_t internal_id;
 } dev_list;
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
@@ -25,6 +25,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     DeviceInfo_Msg *devinfo_msg = (DeviceInfo_Msg *) msg;
     dev_list *dev_ptr;
 
+    recv_buf = recv_buf;
     pthread_mutex_lock(&g_dev_mutex);
     // Check whether the device exist or not.
     dev_ptr = g_dev_head;
@@ -53,7 +54,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
     selected_dev->info->devinfo = strdup(devinfo_msg->devinfo);
-    selected_dev->internal_id = (long) arg;
+    selected_dev->internal_id = (uint64_t) arg;
 
     // Add new device at the head if this is new device
     // Note: g_dev_num should ALWAYS put at the bottom. We should make sure selected_dev is ready before putting into linked list.
@@ -82,7 +83,7 @@ static void free_dev_list(dev_list *dev_ptr)
     }
 }
 
-static int del_device(long internal_id)
+static int del_device(uint64_t internal_id)
 {
     dev_list *dev_ptr;
     dev_list *to_be_freed = NULL;
@@ -121,7 +122,7 @@ exit:
     return 0;
 }
 
-int devinfo_server_del_device_callback(long internal_id)
+int devinfo_server_del_device_callback(uint64_t internal_id)
 {
     return del_device(internal_id);
 }
@@ -148,7 +149,7 @@ int devinfo_server_create_list(struct dds_transport *transport, device_info **de
         goto exit_mutex;
     }
     dev_list *dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         (*dev)[i] = *dev_ptr->info;
         dev_ptr = dev_ptr->next;
     }
@@ -178,7 +179,7 @@ void devinfo_server_init(void)
     pthread_mutex_init(&g_dev_mutex, NULL);
 }
 
-int devinfo_server_deinit(void)
+void devinfo_server_deinit(void)
 {
     pthread_mutex_lock(&g_dev_mutex);
     // Remove all device
@@ -193,31 +194,35 @@ int devinfo_server_deinit(void)
     pthread_mutex_destroy(&g_dev_mutex);
 }
 
-int devinfo_server_set_status_by_id(int id, transfer_status dev_status, transfer_result dev_result)
+int devinfo_server_set_status_by_id(unsigned long id, transfer_status dev_status, transfer_result dev_result)
 {
+    int ret = -1;
     dev_list *dev_ptr;
 
     pthread_mutex_lock(&g_dev_mutex);
     dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             dev_ptr->agent_transfer_status = dev_status;
             dev_ptr->transfer_result = dev_result;
+            ret = 0;
             break;
         }
         dev_ptr = dev_ptr->next;
     }
     pthread_mutex_unlock(&g_dev_mutex);
+
+    return ret;
 }
 
-int devinfo_server_get_status_by_id(int id, transfer_status *dev_status, transfer_result *dev_result)
+int devinfo_server_get_status_by_id(unsigned long id, transfer_status *dev_status, transfer_result *dev_result)
 {
     dev_list *dev_ptr;
     int found = 0;
 
     pthread_mutex_lock(&g_dev_mutex);
     dev_ptr = g_dev_head;
-    for (int i = 0; i < g_dev_num; i++) {
+    for (unsigned int i = 0; i < g_dev_num; i++) {
         if (id == dev_ptr->info->deviceID) {
             *dev_status = dev_ptr->agent_transfer_status;
             *dev_result = dev_ptr->transfer_result;

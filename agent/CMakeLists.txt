@@ -20,6 +20,9 @@ set(SOURCE_CODE rmt_agent.c
 add_library(rmt_agent SHARED ${SOURCE_CODE})
 target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
+# Make sure warning as error
+target_compile_options(rmt_agent PRIVATE -Wall -Wextra -pedantic -Werror)
+
 # Make header public
 set_target_properties(rmt_agent PROPERTIES PUBLIC_HEADER "rmt_agent.h")
 

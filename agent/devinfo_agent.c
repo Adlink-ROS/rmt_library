@@ -21,8 +21,6 @@ static device_info g_dev;
 static devinfo_func g_agent_devinfo_func = NULL;
 static char *g_devinfo;
 
-static int device_info_publisher_update(void);
-
 static void get_device_info(void)
 {
     device_info tmp_dev = g_dev;
@@ -65,7 +63,6 @@ int devinfo_agent_init(devinfo_func agent_devinfo_func)
     g_agent_devinfo_func = agent_devinfo_func;
     g_devinfo = (char *) calloc(g_agent_cfg.devinfo_size, sizeof(char));
 
-exit:
     return ret;
 }
 

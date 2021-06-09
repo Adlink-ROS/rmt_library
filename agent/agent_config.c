@@ -33,7 +33,7 @@ int agent_config_set(rmt_agent_cfg *config)
             g_agent_cfg.device_id = config->device_id;
         }
         if (config->net_interface != NULL) {
-            strncpy(g_agent_cfg.net_interface, config->net_interface, sizeof(g_agent_cfg.net_interface));
+            strncpy(g_agent_cfg.net_interface, config->net_interface, sizeof(g_agent_cfg.net_interface) - 1);
         }
         if (config->devinfo_size != 0) {
             g_agent_cfg.devinfo_size = config->devinfo_size;
