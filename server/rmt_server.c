@@ -10,24 +10,28 @@
 #include "logger.h"
 #include "network.h"
 
-static struct dds_transport *g_transport;
-static pthread_t g_recv_thread;
-int g_recv_thread_status = 0; // 0: stop, 1: running
+typedef struct {
+    struct dds_transport *transport;
+    /* related to recv thread */
+    pthread_t recv_thread;
+    int recv_thread_status; // 0: stop, 1: running
+} rmt_server_info;
+static rmt_server_info g_svr_info;
 
 void *recv_thread_func(void *data)
 {
     data = data;
     RMT_LOG("Start recv thread.\n")
-    while (1 == g_recv_thread_status) {
+    while (1 == g_svr_info.recv_thread_status) {
         // If interface changed, we should reinit the server
         if (g_server_cfg.auto_detect_interface) {
             char interface[40];
             net_select_interface(interface);
             if (strcmp(interface, g_server_cfg.net_interface) != 0) {
                 RMT_LOG("Interface %s disappear! Reinit communication...\n", g_server_cfg.net_interface);
-                if (g_transport) {
-                    dds_transport_deinit(g_transport);
-                    g_transport = NULL;
+                if (g_svr_info.transport) {
+                    dds_transport_deinit(g_svr_info.transport);
+                    g_svr_info.transport = NULL;
                     // clear the remaining device
                     devinfo_server_deinit();
                 }
@@ -35,8 +39,8 @@ void *recv_thread_func(void *data)
                     RMT_ERROR("Unable to init communication\n");
                     continue;
                 }
-                g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
-                if (g_transport == NULL) {
+                g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
+                if (g_svr_info.transport == NULL) {
                     RMT_ERROR("Unable to init agent\n");
                     continue;
                 }
@@ -46,8 +50,8 @@ void *recv_thread_func(void *data)
                 strcpy(g_server_cfg.net_interface, interface);
             }
         }
-        devinfo_server_update(g_transport);
-        dataserver_info_file_transfer_thread(g_transport);
+        devinfo_server_update(g_svr_info.transport);
+        dataserver_info_file_transfer_thread(g_svr_info.transport);
         usleep(10000); // sleep 10ms
     }
     RMT_LOG("Stop recv thread.\n")
@@ -64,11 +68,11 @@ int rmt_server_init(void)
     dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();
-    g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
-    if (g_transport) {
+    g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
+    if (g_svr_info.transport) {
         RMT_LOG("Init server successfully\n");
-        g_recv_thread_status = 1;
-        pthread_create(&g_recv_thread, NULL, recv_thread_func, NULL);
+        g_svr_info.recv_thread_status = 1;
+        pthread_create(&g_svr_info.recv_thread, NULL, recv_thread_func, NULL);
         return 0;
     } else {
         RMT_ERROR("Unable to init server\n");
@@ -81,7 +85,7 @@ device_info* rmt_server_create_device_list(int *num)
     device_info *dev;
 
     RMT_LOG("Create device list.\n");
-    devinfo_server_create_list(g_transport, &dev, (unsigned int *)num);
+    devinfo_server_create_list(g_svr_info.transport, &dev, (unsigned int *)num);
     return dev;
 }
 
@@ -94,7 +98,7 @@ int rmt_server_free_device_list(device_info *dev)
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
     RMT_LOG("Get info.\n");
-    return datainfo_server_get_info(g_transport, id_list, id_num, key_list, info_num);
+    return datainfo_server_get_info(g_svr_info.transport, id_list, id_num, key_list, info_num);
 }
 
 int rmt_server_free_info(data_info* info_list)
@@ -106,25 +110,25 @@ int rmt_server_free_info(data_info* info_list)
 data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num)
 {
     RMT_LOG("Set info.\n");
-    return datainfo_server_set_info(g_transport, dev_list, dev_num, info_num);
+    return datainfo_server_set_info(g_svr_info.transport, dev_list, dev_num, info_num);
 }
 
 data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_num, char *value_list, int *info_num)
 {
     RMT_LOG("Set info with same value.\n");
-    return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
+    return datainfo_server_set_info_with_same_value(g_svr_info.transport, id_list, id_num, value_list, info_num);
 }
 
 int rmt_server_send_file(unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, unsigned long file_len)
 {
     RMT_LOG("Send file.\n");
-    return datainfo_server_send_file(g_transport, id_list, id_num, callbackname, filename, pFile, file_len);
+    return datainfo_server_send_file(g_svr_info.transport, id_list, id_num, callbackname, filename, pFile, file_len);
 }
 
 int rmt_server_recv_file(unsigned long id, char *callbackname, char *filename)
 {
     RMT_LOG("Receive file.\n");
-    return datainfo_server_recv_file(g_transport, id, callbackname, filename);
+    return datainfo_server_recv_file(g_svr_info.transport, id, callbackname, filename);
 }
 
 transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *result)
@@ -142,10 +146,10 @@ int rmt_server_deinit(void)
 
     RMT_LOG("Deinit RMT server.\n")
     // kill the thread
-    g_recv_thread_status = 0;
-    pthread_join(g_recv_thread, NULL);
+    g_svr_info.recv_thread_status = 0;
+    pthread_join(g_svr_info.recv_thread, NULL);
 
-    ret = dds_transport_deinit(g_transport);
+    ret = dds_transport_deinit(g_svr_info.transport);
     devinfo_server_deinit();
     return ret;
 }
