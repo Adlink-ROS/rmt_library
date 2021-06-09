@@ -30,7 +30,7 @@ typedef struct dds_comm_pair {
 static dds_entity_t g_domain = 0;
 static int g_domain_id = 0;
 static unsigned int g_participant_num = 0;
-typedef int (*device_delete_fptr)(long);
+typedef int (*device_delete_fptr)(uint64_t);
 static device_delete_fptr g_device_delete_callback = NULL;
 typedef struct dds_transport {
     dds_entity_t participant;
@@ -128,7 +128,7 @@ void callback_subscription_matched(dds_entity_t reader, const dds_subscription_m
     }
 }
 
-struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(long))
+struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint64_t))
 {
     dds_transport *transport;
     dds_listener_t *listener;

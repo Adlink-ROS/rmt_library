@@ -12,7 +12,7 @@ typedef struct _dev_list {
     device_info *info;
     transfer_status agent_transfer_status;
     transfer_result transfer_result;
-    long internal_id;
+    uint64_t internal_id;
 } dev_list;
 static dev_list *g_dev_head = NULL;
 static uint32_t g_dev_num = 0;
@@ -54,7 +54,7 @@ static int add_device(void *msg, void *recv_buf, void *arg)
     selected_dev->info->model = strdup(devinfo_msg->model);
     selected_dev->info->rmt_version = strdup(devinfo_msg->rmt_version);
     selected_dev->info->devinfo = strdup(devinfo_msg->devinfo);
-    selected_dev->internal_id = (long) arg;
+    selected_dev->internal_id = (uint64_t) arg;
 
     // Add new device at the head if this is new device
     // Note: g_dev_num should ALWAYS put at the bottom. We should make sure selected_dev is ready before putting into linked list.
@@ -83,7 +83,7 @@ static void free_dev_list(dev_list *dev_ptr)
     }
 }
 
-static int del_device(long internal_id)
+static int del_device(uint64_t internal_id)
 {
     dev_list *dev_ptr;
     dev_list *to_be_freed = NULL;
@@ -122,7 +122,7 @@ exit:
     return 0;
 }
 
-int devinfo_server_del_device_callback(long internal_id)
+int devinfo_server_del_device_callback(uint64_t internal_id)
 {
     return del_device(internal_id);
 }
