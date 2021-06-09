@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include "rmt_server.h"
 #include "version.h"
 #include "dds_transport.h"
@@ -7,6 +8,7 @@
 #include "datainfo_server.h"
 #include "server_config.h"
 #include "logger.h"
+#include "network.h"
 
 static struct dds_transport *g_transport;
 static pthread_t g_recv_thread;
@@ -17,6 +19,33 @@ void *recv_thread_func(void *data)
     data = data;
     RMT_LOG("Start recv thread.\n")
     while (1 == g_recv_thread_status) {
+        // If interface changed, we should reinit the server
+        if (g_server_cfg.auto_detect_interface) {
+            char interface[40];
+            net_select_interface(interface);
+            if (strcmp(interface, g_server_cfg.net_interface) != 0) {
+                RMT_LOG("Interface %s disappear! Reinit communication...\n", g_server_cfg.net_interface);
+                if (g_transport) {
+                    dds_transport_deinit(g_transport);
+                    g_transport = NULL;
+                    // clear the remaining device
+                    devinfo_server_deinit();
+                }
+                if (dds_transport_config_init(interface, g_server_cfg.domain_id) < 0) {
+                    RMT_ERROR("Unable to init communication\n");
+                    continue;
+                }
+                g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
+                if (g_transport == NULL) {
+                    RMT_ERROR("Unable to init agent\n");
+                    continue;
+                }
+                devinfo_server_init();
+                datainfo_server_init();
+                RMT_LOG("Init interface %s successfully!\n", interface);
+                strcpy(g_server_cfg.net_interface, interface);
+            }
+        }
         devinfo_server_update(g_transport);
         dataserver_info_file_transfer_thread(g_transport);
         usleep(10000); // sleep 10ms
