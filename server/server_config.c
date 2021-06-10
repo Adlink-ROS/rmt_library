@@ -21,7 +21,7 @@ int server_config_set(char *interface, int domain_id)
     if (domain_id != 0) {
         g_server_cfg.domain_id = domain_id;
     }
-    if (interface != NULL && strlen(interface) != 0) {
+    if ((interface != NULL) && (strlen(interface) != 0)) {
         strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface) - 1);
         g_server_cfg.auto_detect_interface = 0;
     } else {
