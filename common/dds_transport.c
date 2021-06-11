@@ -15,6 +15,9 @@
                    "    <General>" \
                    "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
                    "    </General>" \
+                   "    <Internal>" \
+                   "      <MultipleReceiveThreads>false</MultipleReceiveThreads>" \
+                   "    </Internal>" \
                    "  </Domain>" \
                    "</CycloneDDS>"
 #define MAX_SAMPLES 1

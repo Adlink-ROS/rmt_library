@@ -29,8 +29,9 @@ int server_config_set(char *interface, int domain_id)
         g_server_cfg.auto_detect_interface = 1;
     }
 
-    RMT_LOG("g_agent_cfg.domain_id %d\n", g_server_cfg.domain_id);
-    RMT_LOG("g_agent_cfg.net_interface %s\n", g_server_cfg.net_interface);
+    RMT_LOG("g_server_cfg.domain_id %d\n", g_server_cfg.domain_id);
+    RMT_LOG("g_server_cfg.net_interface %s\n", g_server_cfg.net_interface);
+    RMT_LOG("g_server_cfg.auto_detect_interface %d\n", g_server_cfg.auto_detect_interface);
 
 exit:
     return ret;

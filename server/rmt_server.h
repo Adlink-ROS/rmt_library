@@ -196,6 +196,12 @@ int rmt_server_deinit(void);
  */
 char* rmt_server_version(void);
 
+/**
+ * @brief rmt_reinit_server
+ * Reinit the server
+ */
+void rmt_reinit_server(void);
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
 } /* extern "C" */

@@ -375,3 +375,8 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
         }
     }
 }
+
+int dataserver_is_file_transfering(void)
+{
+    return g_file_transfer_stat.status;
+}
