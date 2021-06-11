@@ -9,5 +9,6 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
 int datainfo_server_send_file(struct dds_transport *transport, unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, uint32_t file_len);
 int datainfo_server_recv_file(struct dds_transport *transport, unsigned long id, char *callbackname, char *filename);
 void dataserver_info_file_transfer_thread(struct dds_transport *transport);
+int dataserver_is_file_transfering(void);
 
 #endif /*_DATAINFO_SERVER_*/

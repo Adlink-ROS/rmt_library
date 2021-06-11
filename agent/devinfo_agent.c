@@ -13,7 +13,6 @@ static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
 typedef struct _device_info {
     char hostname[1024];
-    char interface[40];
     char ip[40];
     char mac[20];
 } device_info;
@@ -30,9 +29,9 @@ static void get_device_info(void)
     gethostname(tmp_dev.hostname, sizeof(tmp_dev.hostname));
     g_dev.hostname[sizeof(tmp_dev.hostname) - 1] = 0;
     // Get IP
-    net_get_ip(tmp_dev.interface, tmp_dev.ip, sizeof(tmp_dev.ip));
+    net_get_ip(g_agent_cfg.net_interface, tmp_dev.ip, sizeof(tmp_dev.ip));
     // Get MAC
-    net_get_mac(tmp_dev.interface, tmp_dev.mac, sizeof(tmp_dev.mac));
+    net_get_mac(g_agent_cfg.net_interface, tmp_dev.mac, sizeof(tmp_dev.mac));
     // Call customized search info
     if (g_agent_devinfo_func != NULL)
         g_agent_devinfo_func(tmp_devinfo);
@@ -58,7 +57,6 @@ int devinfo_agent_init(devinfo_func agent_devinfo_func)
 {
     int ret = 0;
 
-    strcpy(g_dev.interface, g_agent_cfg.net_interface);
     g_msg.deviceID = g_agent_cfg.device_id;
     g_agent_devinfo_func = agent_devinfo_func;
     g_devinfo = (char *) calloc(g_agent_cfg.devinfo_size, sizeof(char));

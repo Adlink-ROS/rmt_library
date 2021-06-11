@@ -173,6 +173,8 @@ int devinfo_server_free_list(device_info *dev)
 
 void devinfo_server_init(void)
 {
+    g_dev_head = NULL;
+    g_dev_num = 0;
     empty_result.result = 0;
     empty_result.file_len = 0;
     empty_result.pFile = NULL;

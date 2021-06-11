@@ -21,12 +21,17 @@ int server_config_set(char *interface, int domain_id)
     if (domain_id != 0) {
         g_server_cfg.domain_id = domain_id;
     }
-    if (interface != NULL) {
+    if ((interface != NULL) && (strlen(interface) != 0)) {
         strncpy(g_server_cfg.net_interface, interface, sizeof(g_server_cfg.net_interface) - 1);
+        g_server_cfg.auto_detect_interface = 0;
+    } else {
+        // If user doesn't assign interface, we can detect interface change automatically.
+        g_server_cfg.auto_detect_interface = 1;
     }
 
-    RMT_LOG("g_agent_cfg.domain_id %d\n", g_server_cfg.domain_id);
-    RMT_LOG("g_agent_cfg.net_interface %s\n", g_server_cfg.net_interface);
+    RMT_LOG("g_server_cfg.domain_id %d\n", g_server_cfg.domain_id);
+    RMT_LOG("g_server_cfg.net_interface %s\n", g_server_cfg.net_interface);
+    RMT_LOG("g_server_cfg.auto_detect_interface %d\n", g_server_cfg.auto_detect_interface);
 
 exit:
     return ret;

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include "rmt_agent.h"
@@ -11,6 +12,7 @@ int agent_config_set(rmt_agent_cfg *config)
 {
     int ret = 0;
 
+    // Setup default config
     g_agent_cfg.domain_id = 0;
     g_agent_cfg.datainfo_val_size = 256;
     g_agent_cfg.devinfo_size = 1024;
@@ -20,9 +22,12 @@ int agent_config_set(rmt_agent_cfg *config)
         goto exit;
     }
     g_agent_cfg.device_id = net_get_id_from_mac(g_agent_cfg.net_interface);
+    g_agent_cfg.user_config = NULL;
 
-    // if there is user's config
+    // If there is user's config
     if (config != NULL) {
+        g_agent_cfg.user_config = malloc(sizeof(rmt_agent_cfg));
+        *g_agent_cfg.user_config = *config;
         if (config->domain_id != 0) {
             g_agent_cfg.domain_id = config->domain_id;
         }
@@ -34,6 +39,7 @@ int agent_config_set(rmt_agent_cfg *config)
         }
         if (config->net_interface != NULL) {
             strncpy(g_agent_cfg.net_interface, config->net_interface, sizeof(g_agent_cfg.net_interface) - 1);
+            g_agent_cfg.user_config->net_interface = strdup(config->net_interface);
         }
         if (config->devinfo_size != 0) {
             g_agent_cfg.devinfo_size = config->devinfo_size;
@@ -48,4 +54,16 @@ int agent_config_set(rmt_agent_cfg *config)
 
 exit:
     return ret;
+}
+
+void agent_config_deinit(void)
+{
+    if (g_agent_cfg.user_config) {
+        if (g_agent_cfg.user_config->net_interface) {
+            free(g_agent_cfg.user_config->net_interface);
+            g_agent_cfg.user_config->net_interface = NULL;
+        }
+        free(g_agent_cfg.user_config);
+        g_agent_cfg.user_config = NULL;
+    }
 }

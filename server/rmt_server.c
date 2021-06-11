@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include "rmt_server.h"
 #include "version.h"
 #include "dds_transport.h"
@@ -7,18 +8,71 @@
 #include "datainfo_server.h"
 #include "server_config.h"
 #include "logger.h"
+#include "network.h"
 
-static struct dds_transport *g_transport;
-static pthread_t g_recv_thread;
-int g_recv_thread_status = 0; // 0: stop, 1: running
+typedef enum {
+    SVR_STAT_STOP,
+    SVR_STAT_RUNNING,
+} server_status;
+
+typedef struct {
+    struct dds_transport *transport;
+    /* related to recv thread */
+    pthread_t recv_thread;
+    int recv_thread_status; // 0: stop, 1: running
+    /* server current status */
+    server_status status;
+    unsigned long using_api;
+} rmt_server_info;
+static rmt_server_info g_svr_info;
 
 void *recv_thread_func(void *data)
 {
     data = data;
     RMT_LOG("Start recv thread.\n")
-    while (1 == g_recv_thread_status) {
-        devinfo_server_update(g_transport);
-        dataserver_info_file_transfer_thread(g_transport);
+    while (1 == g_svr_info.recv_thread_status) {
+        if (g_svr_info.transport) {
+            devinfo_server_update(g_svr_info.transport);
+            dataserver_info_file_transfer_thread(g_svr_info.transport);
+        }
+        // If interface changed, we should reinit the server
+        if ((g_server_cfg.auto_detect_interface) || (g_svr_info.status == SVR_STAT_STOP)) {
+            char interface[40];
+            net_select_interface(interface);
+            if ((strcmp(interface, g_server_cfg.net_interface) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
+                // While need to restart interface, change the status to make sure no one can call API again.
+                if (g_svr_info.status == SVR_STAT_RUNNING) {
+                    g_svr_info.status = SVR_STAT_STOP;
+                    RMT_LOG("Stop the server for interface change.\n");
+                }
+                if ((g_svr_info.using_api != 0) || (dataserver_is_file_transfering())) {
+                    // Make sure all the API exist and no file is transfering.
+                    continue;
+                }
+                RMT_LOG("Interface %s disappear! Reinit communication...\n", g_server_cfg.net_interface);
+                if (g_svr_info.transport) {
+                    RMT_LOG("Free the communication resource\n");
+                    dds_transport_deinit(g_svr_info.transport);
+                    g_svr_info.transport = NULL;
+                    // clear the remaining device
+                    devinfo_server_deinit();
+                }
+                if (dds_transport_config_init(interface, g_server_cfg.domain_id) < 0) {
+                    RMT_ERROR("Unable to init communication\n");
+                    continue;
+                }
+                g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
+                if (g_svr_info.transport == NULL) {
+                    RMT_ERROR("Unable to init agent\n");
+                    continue;
+                }
+                devinfo_server_init();
+                datainfo_server_init();
+                RMT_LOG("Init interface %s successfully!\n", interface);
+                strcpy(g_server_cfg.net_interface, interface);
+                g_svr_info.status = SVR_STAT_RUNNING;
+            }
+        }
         usleep(10000); // sleep 10ms
     }
     RMT_LOG("Stop recv thread.\n")
@@ -35,11 +89,13 @@ int rmt_server_init(void)
     dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();
-    g_transport = dds_transport_server_init(devinfo_server_del_device_callback);
-    if (g_transport) {
+    g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
+    if (g_svr_info.transport) {
         RMT_LOG("Init server successfully\n");
-        g_recv_thread_status = 1;
-        pthread_create(&g_recv_thread, NULL, recv_thread_func, NULL);
+        g_svr_info.recv_thread_status = 1;
+        pthread_create(&g_svr_info.recv_thread, NULL, recv_thread_func, NULL);
+        g_svr_info.using_api = 0;
+        g_svr_info.status = SVR_STAT_RUNNING;
         return 0;
     } else {
         RMT_ERROR("Unable to init server\n");
@@ -51,8 +107,16 @@ device_info* rmt_server_create_device_list(int *num)
 {
     device_info *dev;
 
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        *num = 0;
+        return NULL;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Create device list.\n");
-    devinfo_server_create_list(g_transport, &dev, (unsigned int *)num);
+    devinfo_server_create_list(g_svr_info.transport, &dev, (unsigned int *)num);
+
+    g_svr_info.using_api--;
     return dev;
 }
 
@@ -64,8 +128,19 @@ int rmt_server_free_device_list(device_info *dev)
 
 data_info* rmt_server_get_info(unsigned long *id_list, int id_num, char *key_list, int *info_num)
 {
+    data_info *data;
+
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        *info_num = 0;
+        return NULL;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Get info.\n");
-    return datainfo_server_get_info(g_transport, id_list, id_num, key_list, info_num);
+    data = datainfo_server_get_info(g_svr_info.transport, id_list, id_num, key_list, info_num);
+
+    g_svr_info.using_api--;
+    return data;
 }
 
 int rmt_server_free_info(data_info* info_list)
@@ -76,34 +151,83 @@ int rmt_server_free_info(data_info* info_list)
 
 data_info* rmt_server_set_info(data_info *dev_list, int dev_num, int *info_num)
 {
+    data_info *data;
+
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        *info_num = 0;
+        return NULL;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Set info.\n");
-    return datainfo_server_set_info(g_transport, dev_list, dev_num, info_num);
+    data = datainfo_server_set_info(g_svr_info.transport, dev_list, dev_num, info_num);
+
+    g_svr_info.using_api--;
+    return data;
 }
 
 data_info* rmt_server_set_info_with_same_value(unsigned long *id_list, int id_num, char *value_list, int *info_num)
 {
+    data_info *data;
+
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        *info_num = 0;
+        return NULL;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Set info with same value.\n");
-    return datainfo_server_set_info_with_same_value(g_transport, id_list, id_num, value_list, info_num);
+    data = datainfo_server_set_info_with_same_value(g_svr_info.transport, id_list, id_num, value_list, info_num);
+
+    g_svr_info.using_api--;
+    return data;
 }
 
 int rmt_server_send_file(unsigned long *id_list, int id_num, char *callbackname, char *filename, void *pFile, unsigned long file_len)
 {
+    int ret;
+
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        return -1;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Send file.\n");
-    return datainfo_server_send_file(g_transport, id_list, id_num, callbackname, filename, pFile, file_len);
+    ret = datainfo_server_send_file(g_svr_info.transport, id_list, id_num, callbackname, filename, pFile, file_len);
+
+    g_svr_info.using_api--;
+    return ret;
 }
 
 int rmt_server_recv_file(unsigned long id, char *callbackname, char *filename)
 {
+    int ret;
+
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        return -1;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Receive file.\n");
-    return datainfo_server_recv_file(g_transport, id, callbackname, filename);
+    ret = datainfo_server_recv_file(g_svr_info.transport, id, callbackname, filename);
+
+    g_svr_info.using_api--;
+    return ret;
 }
 
 transfer_status rmt_server_get_result(unsigned long device_id, transfer_result *result)
 {
     transfer_status current_status;
 
+    if (g_svr_info.status != SVR_STAT_RUNNING) {
+        return STATUS_SERVER_ERROR;
+    }
+    g_svr_info.using_api++;
+
     RMT_LOG("Get result.\n");
     devinfo_server_get_status_by_id(device_id, &current_status, result);
+
+    g_svr_info.using_api--;
     return current_status;
 }
 
@@ -113,10 +237,10 @@ int rmt_server_deinit(void)
 
     RMT_LOG("Deinit RMT server.\n")
     // kill the thread
-    g_recv_thread_status = 0;
-    pthread_join(g_recv_thread, NULL);
+    g_svr_info.recv_thread_status = 0;
+    pthread_join(g_svr_info.recv_thread, NULL);
 
-    ret = dds_transport_deinit(g_transport);
+    ret = dds_transport_deinit(g_svr_info.transport);
     devinfo_server_deinit();
     return ret;
 }
@@ -125,4 +249,11 @@ char* rmt_server_version(void)
 {
     RMT_LOG("Get RMT version.\n");
     return PROJECT_VERSION;
+}
+
+void rmt_reinit_server(void)
+{
+    RMT_LOG("Reinit server.\n")
+    g_svr_info.status = SVR_STAT_STOP;
+    return;
 }

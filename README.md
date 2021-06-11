@@ -13,7 +13,7 @@ You can use the repo with other two projects
 ```bash
 sudo apt install -y libcunit1-dev swig
 # Used by CycloneDDS
-sudo apt install maven default-jdk
+sudo apt install bison
 # Used by agent example
 sudo apt install libnm-dev
 ```
