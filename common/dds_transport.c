@@ -5,8 +5,6 @@
 #include "DeviceInfo.h"
 #include "DataInfo.h"
 
-// RMT_TODO: domain ID should be able to choose.
-#define DOMAIN_ID 0
 #define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
 #define TOPIC_PAIR_DATA_REQ    "DataReq_Msg"
 #define TOPIC_PAIR_DATA_REPLY  "DataReply_Msg"
