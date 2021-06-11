@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.10)
 project(RMT_library VERSION 0.9.2)
 
 # Include external project
-# RMT_TODO: upgrade CycloneDDS to 0.8.0
 execute_process(COMMAND git submodule update --init --recursive)
 add_subdirectory(external/cyclonedds EXCLUDE_FROM_ALL)
 install(
