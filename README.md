@@ -3,10 +3,20 @@
 The repository is Robot Management Tool library.
 The library provides the communication way between server and agent.
 
-You can use the repo with other two projects
+Here are some related repository:
 
 * Server side: https://github.com/Adlink-ROS/rmt_web_devkit
 * Agent side: https://github.com/Adlink-ROS/RMT_example
+* Documentation: https://github.com/Adlink-ROS/RMT-User-Manual
+
+# Official Release Flow (Internal Use)
+
+When we want to update the Robot Management Tool, we should follow the steps here:
+
+1. Add tag in RMT repo and it'll create deb binary to release page on GitHub automatically.
+2. Copy the deb binary to rmt_web_devkit and RMT_example. After some modification, add tag to them.
+3. Copy the deb library and doxygen result to RMT-User-Manual.
+4. Update the documentation on RMT-User-Manual.
 
 # Install necessary packages
 
@@ -18,16 +28,11 @@ sudo apt install bison
 sudo apt install libnm-dev
 ```
 
-# Download
+# Build
 
 ```bash
 cd $HOME
 git clone https://github.com/Adlink-ROS/RMT.git
-```
-
-# Build
-
-```bash
 cd ~/RMT
 # If you don't want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=off" instead
 cmake -Bbuild -H.
