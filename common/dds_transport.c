@@ -8,6 +8,10 @@
 #define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
 #define TOPIC_PAIR_DATA_REQ    "DataReq_Msg"
 #define TOPIC_PAIR_DATA_REPLY  "DataReply_Msg"
+/*
+ * The reason we need to disable multiple recv thread is that CycloneDDS will hang if we call dds_delete to delete the domain
+ * This is because the recv thread need to wait for sending packets, but sending packets will not be available while disableing interface
+ */
 #define DDS_CONFIG "<CycloneDDS>" \
                    "  <Domain id=\"any\">" \
                    "    <General>" \
