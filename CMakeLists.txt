@@ -29,22 +29,25 @@ add_subdirectory(server)
 add_subdirectory(agent)
 
 # Build docs by Doxygen. The output xml files are also needed by SWIG
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
-  set(DOXYGEN_PROJECT_NAME "RMT Library")
-  set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
-  set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/docs)
-  set(DOXYGEN_GENERATE_HTML YES)
-  set(DOXYGEN_GENERATE_XML YES) # used by SWIG and pydoc
-  set(DOXYGEN_GENERATE_TREEVIEW YES)
-  doxygen_add_docs(
-    docs
-    ${PROJECT_SOURCE_DIR}/server/rmt_server.h ${PROJECT_SOURCE_DIR}/agent/rmt_agent.h
-    COMMENT "Generate doxygen docs"
-  )
-else (DOXYGEN_FOUND)
-  message("\n*** ERROR: Doxygen not found! Try 'sudo apt install doxygen' ***\n")
-endif (DOXYGEN_FOUND)
+option(BUILD_RMT_DOCS "Build RMT docs" OFF)
+if(BUILD_RMT_DOCS)
+  find_package(Doxygen)
+  if(DOXYGEN_FOUND)
+    set(DOXYGEN_PROJECT_NAME "RMT Library")
+    set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/docs)
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_GENERATE_XML YES) # used by SWIG and pydoc
+    set(DOXYGEN_GENERATE_TREEVIEW YES)
+    doxygen_add_docs(
+      docs
+      ${PROJECT_SOURCE_DIR}/server/rmt_server.h ${PROJECT_SOURCE_DIR}/agent/rmt_agent.h
+      COMMENT "Generate doxygen docs"
+    )
+  else(DOXYGEN_FOUND)
+    message("\n*** ERROR: Doxygen not found! Try 'sudo apt install doxygen' ***\n")
+  endif(DOXYGEN_FOUND)
+endif(BUILD_RMT_DOCS)
 
 # Use SWIG to generate python lib
 add_subdirectory(swig)
@@ -54,7 +57,7 @@ if(BUILD_AGENT)
   add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
   # I ignore all target in subdirectory and then only pick the necessary target.
   # If I use all target, then the cpack will include the subdirectory.
-  add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target docs)
+  add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target)
 endif()
 
 # Add uncrustify tools

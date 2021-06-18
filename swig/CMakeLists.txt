@@ -10,10 +10,12 @@ include_directories("${CMAKE_BINARY_DIR}/server") # include version.h
 include_directories("${CMAKE_SOURCE_DIR}/server") # include rmt_server.h
 include_directories("${CMAKE_SOURCE_DIR}/common") # include common/*.h
 
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
-  set(CMAKE_SWIG_FLAGS -DDOXYGEN=${DOXYGEN_FOUND})
-endif ()
+if (BUILD_RMT_DOCS)
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    set(CMAKE_SWIG_FLAGS -DDOXYGEN=${DOXYGEN_FOUND})
+  endif (DOXYGEN_FOUND)
+endif (BUILD_RMT_DOCS)
 
 if (CMAKE_VERSION VERSION_LESS "3.8")
   swig_add_module(rmt_py_wrapper python python_conversion.i ${CMAKE_SOURCE_DIR}/server/rmt_server.c)
@@ -39,25 +41,27 @@ install(
   DESTINATION ${PYTHON3_PATH}
 )
 
-if (DOXYGEN_FOUND)
-  set(DOCFILES rmt__agent rmt__server)
-  foreach(_file ${DOCFILES})
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i
-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/doxy2swig.py
-        ${CMAKE_BINARY_DIR}/docs/xml/${_file}_8h.xml
-        ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i
-      DEPENDS ${CMAKE_BINARY_DIR}/docs/xml/${_file}_8h.xml
-    )
-    add_custom_target(${_file}doc_i DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i)
-    add_dependencies(${SWIG_MODULE_rmt_py_wrapper_REAL_NAME} ${_file}doc_i)
-  endforeach()
+if (BUILD_RMT_DOCS)
+  if (DOXYGEN_FOUND)
+    set(DOCFILES rmt__agent rmt__server)
+    foreach(_file ${DOCFILES})
+      add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i
+        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/doxy2swig.py
+          ${CMAKE_BINARY_DIR}/docs/xml/${_file}_8h.xml
+          ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i
+        DEPENDS ${CMAKE_BINARY_DIR}/docs/xml/${_file}_8h.xml
+      )
+      add_custom_target(${_file}doc_i DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_file}_doc.i)
+      add_dependencies(${SWIG_MODULE_rmt_py_wrapper_REAL_NAME} ${_file}doc_i)
+    endforeach()
 
-  # build --target pydoc
-  add_custom_target(pydoc
-    pydoc3 -w rmt_py_wrapper python_example
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating Python API documentation with pydoc" VERBATIM
-  )
-else (DOXYGEN_FOUND)
-  message("\n*** ERROR: Doxygen not found! Try 'sudo apt install doxygen' ***\n")
-endif ()
+    # build --target pydoc
+    add_custom_target(pydoc
+      pydoc3 -w rmt_py_wrapper python_example
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Generating Python API documentation with pydoc" VERBATIM
+    )
+  else (DOXYGEN_FOUND)
+    message("\n*** ERROR: Doxygen not found! Try 'sudo apt install doxygen' ***\n")
+  endif (DOXYGEN_FOUND)
+endif (BUILD_RMT_DOCS)
