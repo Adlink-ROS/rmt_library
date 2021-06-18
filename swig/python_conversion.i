@@ -3,7 +3,13 @@
 // Include the header in the wrapper code
 #include "rmt_server.h"
 %}
- 
+
+%feature("autodoc", "1");
+#ifdef DOXYGEN
+    %include rmt__agent_doc.i
+    %include rmt__server_doc.i
+#endif
+
 %include "typemaps.i"
 // typemap for the write buffer of rmt_server_send_file()
 %typemap(in) (void *pFile, unsigned long file_len) {

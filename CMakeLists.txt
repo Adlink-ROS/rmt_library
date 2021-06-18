@@ -13,7 +13,7 @@ install(
     ${CMAKE_BINARY_DIR}/lib/libddsc.so
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.7.0
-  DESTINATION 
+  DESTINATION
     lib
 )
 
@@ -26,6 +26,24 @@ add_subdirectory(server)
 # Build RMT Agent
 add_subdirectory(agent)
 
+# Build docs by Doxygen. The output xml files are also needed by SWIG
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+  set(DOXYGEN_PROJECT_NAME "RMT Library")
+  set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
+  set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/docs)
+  set(DOXYGEN_GENERATE_HTML YES)
+  set(DOXYGEN_GENERATE_XML YES) # used by SWIG and pydoc
+  set(DOXYGEN_GENERATE_TREEVIEW YES)
+  doxygen_add_docs(
+    docs
+    ${PROJECT_SOURCE_DIR}/server/rmt_server.h ${PROJECT_SOURCE_DIR}/agent/rmt_agent.h
+    COMMENT "Generate doxygen docs"
+  )
+else (DOXYGEN_FOUND)
+  message("\n*** ERROR: Doxygen not found! Try 'sudo apt install doxygen' ***\n")
+endif (DOXYGEN_FOUND)
+
 # Use SWIG to generate python lib
 add_subdirectory(swig)
 
@@ -33,7 +51,7 @@ add_subdirectory(swig)
 add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
 # I ignore all target in subdirectory and then only pick the necessary target.
 # If I use all target, then the cpack will include the subdirectory.
-add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target)
+add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target docs)
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h

@@ -135,6 +135,9 @@ def set_same_config():
     print(result)
 
 def discover():
+    r"""
+    Discover all the available agents in the same network
+    """
     rmt_py_wrapper.rmt_server_init()
 
     num_ptr = rmt_py_wrapper.new_intptr()
@@ -142,7 +145,7 @@ def discover():
     num = rmt_py_wrapper.intptr_value(num_ptr)
     rmt_py_wrapper.delete_intptr(num_ptr) # release num_ptr
 
-    # Put data in JSON format    
+    # Put data in JSON format
     data = {"total": num, "items": []}
     items = []
     for i in range(0, num):
