@@ -106,9 +106,9 @@ To generate the API documents, please make sure you have installed **doxygen** a
 Then, rebuild the source codes with below commands:
 ```bash
 cmake -Bbuild -H. -DBUILD_RMT_DOCS=ON
-cmake --build --target docs
-cmake --build --target all
-cmake --build --target pydoc
+cmake --build build --target docs
+cmake --build build --target all
+cmake --build build --target pydoc
 ```
 
 * C API docs will be placed at `~/RMT/build/docs`
