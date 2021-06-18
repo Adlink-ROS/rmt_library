@@ -105,7 +105,7 @@ To generate the API documents, please make sure you have installed **doxygen** a
 
 Then, rebuild the source codes with below commands:
 ```bash
-cmake -Bbuild -H. -DBUILD_RMT_DOCS
+cmake -Bbuild -H. -DBUILD_RMT_DOCS=ON
 cmake --build --target docs
 cmake --build --target all
 cmake --build --target pydoc
