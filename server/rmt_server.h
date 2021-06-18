@@ -45,7 +45,7 @@ typedef enum _transfer_status {
 } transfer_status;
 
 typedef struct _rmt_server_cfg {
-    char *net_interface;           // NULL for default interface chosen by RMT server
+    char *net_interface;           // NULL or empty for default interface chosen by RMT server
     int domain_id;                 // 0 for default domain ID 0
 } rmt_server_cfg;
 
@@ -195,6 +195,12 @@ int rmt_server_deinit(void);
  * @returns return the library version in string
  */
 char* rmt_server_version(void);
+
+/**
+ * @brief rmt_reinit_server
+ * Reinit the server
+ */
+void rmt_reinit_server(void);
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

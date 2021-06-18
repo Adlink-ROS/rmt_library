@@ -188,7 +188,7 @@ void server_cmd_send_file(void)
     transfer_status agent_status;
     int id_num = 1;
     unsigned long id_list[1] = {6166};
-    unsigned char *file_content = "This is file content.\n";
+    char *file_content = "This is file content.\n";
     unsigned long file_len = strlen(file_content);
 
     rmt_server_send_file(id_list, id_num, "custom_callback", "myfile.txt", file_content, file_len);
@@ -270,6 +270,9 @@ int main(int argc, char *argv[])
             server_cmd_set();
             server_cmd_send_file();
             server_cmd_recv_file();
+            break;
+        default:
+            printf("No such function.\n");
             break;
     }
 

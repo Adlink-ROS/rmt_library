@@ -34,12 +34,14 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
     reply_data *replys = (reply_data *)recv_buf;
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
 
+    arg = arg;
+
     // Check whether this reply is for me or not.
     if ((datainfo_msg->type != replys->req->type) || (datainfo_msg->random_seq != replys->req->random_seq)) {
         return -1;
     }
 
-    RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
+    RMT_LOG("Receive device ID: %lu\n", datainfo_msg->deviceID);
     replys->list[replys->num].deviceID = datainfo_msg->deviceID;
     strncpy(replys->list[replys->num].value_list, datainfo_msg->msg, CONFIG_KEY_STR_LEN);
     replys->num++;
@@ -49,14 +51,17 @@ static int recv_reply(void *msg, void *recv_buf, void *arg)
 static int recv_file_transfer_reply(void *msg, void *recv_buf, void *arg)
 {
     DataInfo_Reply *datainfo_msg = (DataInfo_Reply *) msg;
-    transfer_status status;
+    transfer_status status = STATUS_DONE;
+
+    recv_buf = recv_buf;
+    arg = arg;
 
     // Check whether this reply is for me or not.
     if ((datainfo_msg->type != g_file_transfer_stat.type) || (datainfo_msg->random_seq != g_file_transfer_stat.random_seq)) {
         return -1;
     }
 
-    RMT_LOG("Receive device ID: %ld\n", datainfo_msg->deviceID);
+    RMT_LOG("Receive device ID: %lu\n", datainfo_msg->deviceID);
     RMT_LOG("Receive result: %s\n", datainfo_msg->msg);
     transfer_result file_result;
     file_result.result = atoi(datainfo_msg->msg);
@@ -369,4 +374,9 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
             g_file_transfer_stat.id_num = 0;
         }
     }
+}
+
+int dataserver_is_file_transfering(void)
+{
+    return g_file_transfer_stat.status;
 }

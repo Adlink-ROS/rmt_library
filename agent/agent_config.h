@@ -10,10 +10,12 @@ typedef struct _agent_config {
     int domain_id;                   // 0 for default domain ID 0
     unsigned long datainfo_val_size; // 0 for default size 256
     unsigned long devinfo_size;      // 0 for default size 1024
+    rmt_agent_cfg *user_config;      // backup user original config
 } agent_config;
 
 extern agent_config g_agent_cfg;
 
 int agent_config_set(rmt_agent_cfg *config);
+void agent_config_deinit(void);
 
 #endif /*_AGENT_CONFIG_*/

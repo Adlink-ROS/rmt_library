@@ -2,17 +2,19 @@
 cmake_minimum_required(VERSION 3.10)
 
 # project name, version
-project(RMT_library VERSION 0.9.2)
+project(RMT_library VERSION 0.9.3)
+
+# Build agent or not
+option(BUILD_AGENT "Build agent" ON)
 
 # Include external project
-# RMT_TODO: upgrade CycloneDDS to 0.8.0
 execute_process(COMMAND git submodule update --init --recursive)
 add_subdirectory(external/cyclonedds EXCLUDE_FROM_ALL)
 install(
   FILES
     ${CMAKE_BINARY_DIR}/lib/libddsc.so
     ${CMAKE_BINARY_DIR}/lib/libddsc.so.0
-    ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.7.0
+    ${CMAKE_BINARY_DIR}/lib/libddsc.so.0.8.0
   DESTINATION
     lib
 )
@@ -20,10 +22,10 @@ install(
 # Build IDL
 add_subdirectory(idl)
 
-# Build RMT server
+# Build RMT server library
 add_subdirectory(server)
 
-# Build RMT Agent
+# Build RMT Agent library
 add_subdirectory(agent)
 
 # Build docs by Doxygen. The output xml files are also needed by SWIG
@@ -47,11 +49,13 @@ endif (DOXYGEN_FOUND)
 # Use SWIG to generate python lib
 add_subdirectory(swig)
 
-# Build example
-add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
-# I ignore all target in subdirectory and then only pick the necessary target.
-# If I use all target, then the cpack will include the subdirectory.
-add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target docs)
+# Build agent example
+if(BUILD_AGENT)
+  add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
+  # I ignore all target in subdirectory and then only pick the necessary target.
+  # If I use all target, then the cpack will include the subdirectory.
+  add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target docs)
+endif()
 
 # Add uncrustify tools
 file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/agent/*.h

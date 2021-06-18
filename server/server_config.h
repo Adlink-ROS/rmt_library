@@ -4,8 +4,9 @@
 #include "rmt_server.h"
 
 typedef struct _server_config {
-    char net_interface[40];        // empty for default interface chosen by RMT server
-    int domain_id;                 // 0 for default domain ID 0
+    char net_interface[40];        // The current interface used by RMT server
+    int auto_detect_interface;     // 1 for interface auto detection, only enabled while user doesn't assign his/her interface
+    int domain_id;                 // The current domain ID
 } server_config;
 
 extern server_config g_server_cfg;
