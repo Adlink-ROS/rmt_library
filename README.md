@@ -21,7 +21,7 @@ When we want to update the Robot Management Tool, we should follow the steps her
 # Install necessary packages
 
 ```bash
-sudo apt install -y libcunit1-dev swig
+sudo apt install -y libcunit1-dev swig doxygen
 # Used by CycloneDDS
 sudo apt install bison
 # Used by agent example
@@ -44,7 +44,7 @@ cmake --build build --target package
 # Run
 
 * Run example
-  
+
 ```bash
 # 1st terminal: Run the agent
 cd ~/RMT/build/examples/RMT_example/agent
@@ -99,3 +99,19 @@ cd ~/RMT/build/agent
 cd ~/RMT/build/swig
 python3 python_example.py
 ```
+## API Documents
+
+To generate the API documents, please make sure you have installed **doxygen** and **pydoc3** in your system before the next step.
+
+Then, rebuild the source codes with below commands:
+```bash
+cmake -Bbuild -H. -DBUILD_RMT_DOCS
+cmake --build --target docs
+cmake --build --target all
+cmake --build --target pydoc
+```
+
+* C API docs will be placed at `~/RMT/build/docs`
+
+* Python API docs will be placed at `~/RMT/build/swig`
+
