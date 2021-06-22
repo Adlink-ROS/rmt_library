@@ -73,6 +73,27 @@ cd ~/RMT/build/examples/RMT_example/agent
 ./multi_agents.py -n 5 -s 20
 ```
 
+# Release
+
+* If you want to release RMT Library, you should build with Release mode, which includes license verification in librmt_agent.so.
+
+```bash
+cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --build build --target package
+```
+
+* License verification
+  - If agent is running in ADLINK device, you can use directly.
+  - Otherwise, you should create license with neuron-license-manager.
+
+```bash
+# Create the license
+/opt/neuron-license-manager/bin/license-generator -s <signature> -o NeuronSDK.key NeuronSDK
+# $PWD is where you put the license
+export ADLINK_LICENSE=$PWD
+```
+
 # Test
 
 ## CUnit:

@@ -18,6 +18,12 @@ set(SOURCE_CODE rmt_agent.c
 
 # Build library rmt_agent
 add_library(rmt_agent SHARED ${SOURCE_CODE})
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+  set(NEURON_LICENSE_MANAGER_PATH /opt/neuron-license-manager)
+  set(TARGET_BUILD_LICENSE
+      "-Wl,--whole-archive -L${NEURON_LICENSE_MANAGER_PATH}/lib -lproduct_verifier -lLicenseInjector-NeuronSDK -llicense++_static -los -lCryptoHelper -lbase -lini -lcrypto -lstdc++ -Wl,--no-whole-archive")
+  set_target_properties(rmt_agent PROPERTIES LINK_FLAGS ${TARGET_BUILD_LICENSE})
+endif()
 target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Make sure warning as error

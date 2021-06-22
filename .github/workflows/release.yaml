@@ -13,7 +13,7 @@ jobs:
         run: sudo apt-get install libcunit1-dev uncrustify libnm-dev libyaml-cpp-dev
       - name: Build
         working-directory: ./
-        run: cmake -Bbuild -H. -DBUILD_AGENT=off && cmake --build build
+        run: cmake -Bbuild -H. -DBUILD_AGENT=off -DCMAKE_BUILD_TYPE=Release && cmake --build build
       - name: Packages
         working-directory: ./
         run: cmake --build build --target package
