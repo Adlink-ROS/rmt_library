@@ -22,8 +22,8 @@
 }
 
 // In python, it's not required to put 'transfer_result' as a function parameter
-// to get the result. Instead, python function can return multiple values with 
-// different types. Therefore, we just set 'numinputs=0' to ignore this input 
+// to get the result. Instead, python function can return multiple values with
+// different types. Therefore, we just set 'numinputs=0' to ignore this input
 // parameter and then use 'argout' to append it to return value
 %typemap(in,numinputs=0) transfer_result* (transfer_result tmp) %{
     $1 = &tmp;

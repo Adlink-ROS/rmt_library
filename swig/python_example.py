@@ -11,7 +11,7 @@ def usage():
     print("\t--send_file")
     print("\t--recv_file")
     print("Example:")
-    print("\t./python_example.py -gs")    
+    print("\t./python_example.py -gs")
 
 def get_config(dev_list, dev_num):
     # Create config key string
@@ -28,7 +28,7 @@ def get_config(dev_list, dev_num):
     info_list = rmt_py_wrapper.data_info_list.frompointer(rmt_py_wrapper.rmt_server_get_info(id_list, dev_num, config_key_str, info_num_ptr))
     info_num = rmt_py_wrapper.intptr_value(info_num_ptr)
     rmt_py_wrapper.delete_intptr(info_num_ptr) # release info_num_ptr
-    
+
     print("=== get config result ===")
     config_data = []
     for i in range(0, info_num):
@@ -51,7 +51,7 @@ def set_diff_config():
     # Create data_info_array to set config
     dev_num = 2
     data_info_array = rmt_py_wrapper.new_data_info_array(dev_num)
-    
+
     # Set for device 5566:
     data_info_element = rmt_py_wrapper.data_info()
     data_info_element.deviceID = 5566
@@ -184,7 +184,7 @@ def test_send_binary():
         print("sleep for 1 second")
         time.sleep(1)
         agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
-     
+
     print("get_result: agent_status=%d" % agent_status)
     print("transfer_result=%d" % result)
     print(bytes(byte_array).decode("utf-8"))
@@ -203,7 +203,7 @@ def test_recv_binary():
         print("sleep for 1 second")
         time.sleep(1)
         agent_status, result, byte_array = rmt_py_wrapper.rmt_server_get_result(target_id)
-     
+
     print("get_result: agent_status=%d" % agent_status)
     print("transfer_result=%d" % result)
     print("file_len=%d" % len(byte_array))
@@ -236,7 +236,7 @@ def main(args):
         elif o in ("--recv_file"):
             flag_recv_file = True
         else:
-            assert False, "unhandled option"    
+            assert False, "unhandled option"
 
     # Get RMT_VERSION
     print("RMT_VERSION=%s" % rmt_py_wrapper.rmt_server_version())
