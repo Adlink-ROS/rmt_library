@@ -10,6 +10,12 @@ extern "C" {
 /* *INDENT-ON* */
 
 /**
+ * @mainpage
+ * Welcome to the RMT C API Documents.
+ * Please turn off the Ad-blocker on your browser to for better experience.
+ */
+
+/**
  * @file
  * RMT server library API.
  */

@@ -115,3 +115,4 @@ cmake --build build --target pydoc
 
 * Python API docs will be placed at `~/RMT/build/swig`
 
+To update the online user manual, please copy the html files to the repo: `https://github.com/Adlink-ROS/RMT-User-Manual/tree/main/docs`.
