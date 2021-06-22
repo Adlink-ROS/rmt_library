@@ -1,5 +1,5 @@
-idlc_generate(DeviceInfo_lib "DeviceInfo.idl")
-idlc_generate(DataInfo_lib "DataInfo.idl")
+idlc_generate(TARGET DeviceInfo_lib FILES "DeviceInfo.idl")
+idlc_generate(TARGET DataInfo_lib FILES "DataInfo.idl")
 
 add_library(RmtIdl_lib)
 
