@@ -34,7 +34,7 @@ sudo apt install libnm-dev
 cd $HOME
 git clone https://github.com/Adlink-ROS/RMT.git
 cd ~/RMT
-# If you don't want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=off" instead
+# If you want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=ON" instead
 cmake -Bbuild -H.
 cmake --build build
 # If you want to build deb file, run the command and find deb file in build folder
