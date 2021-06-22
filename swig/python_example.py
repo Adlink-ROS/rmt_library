@@ -3,17 +3,27 @@ import rmt_py_wrapper
 import json
 import sys, getopt
 import time
+import psutil
+import socket
 
 def usage():
     print("Usage:")
     print("\t-g | --get_config")
     print("\t-s | --set_config")
+    print("\t-n eth0 | --net-intf eth0")
     print("\t--send_file")
     print("\t--recv_file")
     print("Example:")
-    print("\t./python_example.py -gs")
+    print("\t./python_example.py -gs -n eth0")
 
 def get_config(dev_list, dev_num):
+    r"""
+    Get current configuration and status from the given devices
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_get_info()
+    """
+
     # Create config key string
     config_list = ["cpu", "ram", "hostname", "wifi"]
     config_key_str = ""
@@ -48,6 +58,13 @@ def get_config(dev_list, dev_num):
     return config_data
 
 def set_diff_config():
+    r"""
+    Set different configurations or states to the given devices
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_set_info()
+    """
+
     # Create data_info_array to set config
     dev_num = 2
     data_info_array = rmt_py_wrapper.new_data_info_array(dev_num)
@@ -102,6 +119,13 @@ def set_diff_config():
     print(result)
 
 def set_same_config():
+    r"""
+    Set the same configuration or state to each given devices
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_set_info_with_same_value()
+    """
+
     # Prepare mock data for setting config
     dev_num = 2
     id_list = rmt_py_wrapper.ulong_array(dev_num)
@@ -134,12 +158,20 @@ def set_same_config():
     result = json.dumps(config_data, indent=4)
     print(result)
 
-def discover():
+def discover(my_interface):
     r"""
     Discover all the available agents in the same network
-    """
-    rmt_py_wrapper.rmt_server_init()
 
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_configure()
+    - rmt_py_wrapper.rmt_server_init()
+    - rmt_py_wrapper.rmt_server_create_device_list()
+    """
+
+    print("Use interface({}) for RMT server".format(my_interface))
+    rmt_py_wrapper.rmt_server_configure(my_interface, 0)
+
+    rmt_py_wrapper.rmt_server_init()
     num_ptr = rmt_py_wrapper.new_intptr()
     dev_list = rmt_py_wrapper.device_info_list.frompointer(rmt_py_wrapper.rmt_server_create_device_list(num_ptr))
     num = rmt_py_wrapper.intptr_value(num_ptr)
@@ -167,6 +199,14 @@ def discover():
     return dev_list, num
 
 def test_send_binary():
+    r"""
+    Send a binary file to the target device(s)
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_send_file()
+    - rmt_py_wrapper.rmt_server_get_result()
+    """
+
     print("=== test send binary ===")
     custom_callback = "custom_callback"
     filename = "my_testfile"
@@ -190,6 +230,14 @@ def test_send_binary():
     print(bytes(byte_array).decode("utf-8"))
 
 def test_recv_binary():
+    r"""
+    Retrieve a binary file from a target device
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_recv_file()
+    - rmt_py_wrapper.rmt_server_get_result()
+    """
+
     print("=== test recv binary ===")
     target_id = 6166
     custom_callback = "custom_callback"
@@ -212,8 +260,13 @@ def test_recv_binary():
     print("=== file content end ===")
 
 def main(args):
+
+    def valid_interface(interface):
+        interface_addrs = psutil.net_if_addrs().get(interface) or []
+        return socket.AF_INET in [snicaddr.family for snicaddr in interface_addrs]
+
     try:
-        opts, args = getopt.getopt(args, "hgs", ["help", "get_config", "set_config", "send_file", "recv_file"])
+        opts, args = getopt.getopt(args, "hgsn:", ["help", "get_config", "set_config", "send_file", "recv_file", "net_intf="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err)  # will print something like "option -a not recognized"
@@ -223,18 +276,24 @@ def main(args):
     flag_set_config = False
     flag_send_file = False
     flag_recv_file = False
-    for o, a in opts:
-        if o in ("-h", "--help"):
+    my_interface = ""
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif o in ("-g", "--get_config"):
+        elif opt in ("-g", "--get_config"):
             flag_get_config = True
-        elif o in ("-s", "--set_config"):
+        elif opt in ("-s", "--set_config"):
             flag_set_config = True
-        elif o in ("--send_file"):
+        elif opt in ("--send_file"):
             flag_send_file = True
-        elif o in ("--recv_file"):
+        elif opt in ("--recv_file"):
             flag_recv_file = True
+        elif opt in ("-n", "--net-intf"):
+            my_interface = arg
+            if not valid_interface(my_interface):
+                print("Interface({}) is invalid or inactive.".format(my_interface))
+                sys.exit(2)
         else:
             assert False, "unhandled option"
 
@@ -242,7 +301,7 @@ def main(args):
     print("RMT_VERSION=%s" % rmt_py_wrapper.rmt_server_version())
 
     # Discovery devices
-    dev_list, num = discover()
+    dev_list, num = discover(my_interface)
 
     # Get config
     if flag_get_config:
@@ -260,6 +319,8 @@ def main(args):
     # Recv file
     if flag_recv_file:
         test_recv_binary()
+
+    rmt_py_wrapper.rmt_server_deinit()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
