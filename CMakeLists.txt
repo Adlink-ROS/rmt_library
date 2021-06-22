@@ -7,6 +7,11 @@ project(RMT_library VERSION 0.9.3)
 # Build agent or not
 option(BUILD_AGENT "Build agent" ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE "RelWithDebInfo")
+  message("RMT library is built with ${CMAKE_BUILD_TYPE} by default.")
+endif()
+
 # Include external project
 execute_process(COMMAND git submodule update --init --recursive)
 add_subdirectory(external/cyclonedds EXCLUDE_FROM_ALL)

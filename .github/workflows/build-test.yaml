@@ -7,6 +7,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install necessary packages
         run: sudo apt-get install libcunit1-dev uncrustify libnm-dev libyaml-cpp-dev
+      - name: Install Neuron License Manager
+        working-directory: ./packages
+        run: sudo apt install ./*.deb 
       - name: Build
         working-directory: ./
         run: cmake -Bbuild -H. -DUSE_ROS=off && cmake --build build
@@ -19,6 +22,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install necessary packages
         run: sudo apt-get install libcunit1-dev uncrustify libnm-dev libyaml-cpp-dev
+      - name: Install Neuron License Manager
+        working-directory: ./packages
+        run: sudo apt install ./*.deb 
       - name: Build
         working-directory: ./
         run: cmake -Bbuild -H. -DUSE_ROS=off && cmake --build build

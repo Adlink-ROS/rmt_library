@@ -34,7 +34,9 @@ sudo apt install libnm-dev
 cd $HOME
 git clone https://github.com/Adlink-ROS/RMT.git
 cd ~/RMT
-# If you don't want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=off" instead
+# Install necessary packages (Neuron License Manager)
+sudo apt install ./packages/*.deb
+# If you want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=ON" instead
 cmake -Bbuild -H.
 cmake --build build
 # If you want to build deb file, run the command and find deb file in build folder
@@ -73,6 +75,27 @@ cd ~/RMT/build/examples/RMT_example/agent
 ./multi_agents.py -n 5 -s 20
 ```
 
+# Release
+
+* If you want to release RMT Library, you should build with Release mode, which includes license verification in librmt_agent.so.
+
+```bash
+cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --build build --target package
+```
+
+* License verification
+  - If agent is running in ADLINK device, you can use directly.
+  - Otherwise, you should create license with neuron-license-manager.
+
+```bash
+# Create the license
+/opt/neuron-license-manager/bin/license-generator -s <signature> -o NeuronSDK.key NeuronSDK
+# $PWD is where you put the license
+export ADLINK_LICENSE=$PWD
+```
+
 # Test
 
 ## CUnit:
@@ -99,11 +122,13 @@ cd ~/RMT/build/agent
 cd ~/RMT/build/swig
 python3 python_example.py
 ```
-## API Documents
+
+# API Documents
 
 To generate the API documents, please make sure you have installed **doxygen** and **pydoc3** in your system before the next step.
 
 Then, rebuild the source codes with below commands:
+
 ```bash
 cmake -Bbuild -H. -DBUILD_RMT_DOCS=ON
 cmake --build build --target docs
