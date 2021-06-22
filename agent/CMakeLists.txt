@@ -18,12 +18,18 @@ set(SOURCE_CODE rmt_agent.c
 
 # Build library rmt_agent
 add_library(rmt_agent SHARED ${SOURCE_CODE})
+
+set(NEURON_LICENSE_MANAGER_PATH /opt/neuron-license-manager)
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  set(NEURON_LICENSE_MANAGER_PATH /opt/neuron-license-manager)
+  # Need these library to do license verification
   set(TARGET_BUILD_LICENSE
       "-Wl,--whole-archive -L${NEURON_LICENSE_MANAGER_PATH}/lib -lproduct_verifier -lLicenseInjector-NeuronSDK -llicense++_static -los -lCryptoHelper -lbase -lini -lcrypto -lstdc++ -Wl,--no-whole-archive")
-  set_target_properties(rmt_agent PROPERTIES LINK_FLAGS ${TARGET_BUILD_LICENSE})
+else()
+  # We need product_verifier to check the model name
+  set(TARGET_BUILD_LICENSE
+      "-Wl,--whole-archive -L${NEURON_LICENSE_MANAGER_PATH}/lib -lproduct_verifier -Wl,--no-whole-archive")
 endif()
+set_target_properties(rmt_agent PROPERTIES LINK_FLAGS ${TARGET_BUILD_LICENSE})
 target_link_libraries(rmt_agent PRIVATE CycloneDDS::ddsc RmtIdl_lib)
 
 # Make sure warning as error

@@ -12,6 +12,7 @@
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
 typedef struct _device_info {
+    char model[256];
     char hostname[1024];
     char ip[40];
     char mac[20];
@@ -19,6 +20,9 @@ typedef struct _device_info {
 static device_info g_dev;
 static devinfo_func g_agent_devinfo_func = NULL;
 static char *g_devinfo;
+
+// Workaround: we don't have header file here.
+int product_verifier_show_products(char *buf, int buf_size);
 
 static void get_device_info(void)
 {
@@ -45,7 +49,9 @@ static void get_device_info(void)
     }
     free(tmp_devinfo);
 
-    g_msg.model = "ROScube-I"; // RMT_TODO: get the correct model.
+    memset(g_dev.model, 0, sizeof(g_dev.model));
+    product_verifier_show_products(g_dev.model, sizeof(g_dev.model));
+    g_msg.model = g_dev.model;
     g_msg.host = g_dev.hostname;
     g_msg.ip = g_dev.ip;
     g_msg.mac = g_dev.mac;
