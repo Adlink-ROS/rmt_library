@@ -34,6 +34,8 @@ sudo apt install libnm-dev
 cd $HOME
 git clone https://github.com/Adlink-ROS/RMT.git
 cd ~/RMT
+# Install necessary packages (Neuron License Manager)
+sudo apt install ./packages/*.deb
 # If you want to build agent with ROS, run "cmake -Bbuild -H. -DUSE_ROS=ON" instead
 cmake -Bbuild -H.
 cmake --build build
