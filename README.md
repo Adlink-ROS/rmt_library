@@ -99,11 +99,13 @@ cd ~/RMT/build/agent
 cd ~/RMT/build/swig
 python3 python_example.py
 ```
-## API Documents
+
+# API Documents
 
 To generate the API documents, please make sure you have installed **doxygen** and **pydoc3** in your system before the next step.
 
 Then, rebuild the source codes with below commands:
+
 ```bash
 cmake -Bbuild -H. -DBUILD_RMT_DOCS=ON
 cmake --build build --target docs
