@@ -6,7 +6,7 @@ The library provides the communication way between server and agent.
 Here are some related repository:
 
 * Server side: https://github.com/Adlink-ROS/rmt_web_devkit
-* Agent side: https://github.com/Adlink-ROS/RMT_example
+* Agent side: https://github.com/Adlink-ROS/rmt-agent.git
 * Documentation: https://github.com/Adlink-ROS/RMT-User-Manual
 
 # Official Release Flow (Internal Use)
@@ -32,7 +32,7 @@ sudo apt install libnm-dev
 
 ```bash
 cd $HOME
-git clone https://github.com/Adlink-ROS/RMT.git
+git clone https://github.com/Adlink-ROS/rmt_library.git
 cd ~/RMT
 # Install necessary packages (Neuron License Manager)
 sudo apt install ./packages/*.deb
@@ -49,8 +49,8 @@ cmake --build build --target package
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/examples/RMT_example/agent
-./agent_example
+cd ~/RMT/build/examples/rmt-agent/agent
+./rmt-agent
 # 2nd terminal: Run the server
 cd ~/RMT/build/server
 ./server_example
@@ -60,17 +60,17 @@ cd ~/RMT/build/server
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/examples/RMT_example/agent
-./agent_example --id 6166 --net enp1s0
+cd ~/RMT/build/examples/rmt-agent/agent
+./rmt-agent --id 6166 --net enp1s0
 # 2nd terminal: Run the server
 cd ~/RMT/build/server
-./server_example --net enp1s0
+./rmt-agent --net enp1s0
 ```
 
 * Run multiple agents
 
 ```bash
-cd ~/RMT/build/examples/RMT_example/agent
+cd ~/RMT/build/examples/rmt-agent/agent
 # invoke 5 agents with device ID from 20 to 24
 ./multi_agents.py -n 5 -s 20
 ```
@@ -113,7 +113,7 @@ ctest -V
 
 ```bash
 cd ~/RMT/build/agent
-./agent_example
+./rmt-agent
 ```
 
 * Start testing
