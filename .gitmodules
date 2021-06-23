@@ -1,3 +1,6 @@
 [submodule "external/cyclonedds"]
 	path = external/cyclonedds
 	url = https://github.com/eclipse-cyclonedds/cyclonedds.git
+[submodule "examples/rmt-agent"]
+	path = examples/rmt-agent
+	url = https://github.com/Adlink-ROS/rmt-agent.git
