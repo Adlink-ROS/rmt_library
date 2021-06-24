@@ -124,11 +124,12 @@ uint64_t net_generate_id(void)
         if (priority < tmp_priority) {
             strcpy(selected_interface, intf->if_name);
             priority = tmp_priority;
-            // Generate ID
+            // Generate ID: Only use the last 3 digit to generate ID (Vendor ID will be ignored, since we only support ADLINK device now)
             ret_id = 0;
-            for (int i = 0; i < 6; i++) {
+            for (int i = 3; i < 6; i++) {
                 ret_id <<= 8;
-                ret_id += ifr.ifr_hwaddr.sa_data[i];
+                // Convert to unsigned char to make sure the digit is positive
+                ret_id += (unsigned char) ifr.ifr_hwaddr.sa_data[i];
             }
         }
     }
