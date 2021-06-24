@@ -86,23 +86,55 @@ int net_get_mac(char *interface, char *mac, int mac_len)
     return 0;
 }
 
-uint64_t net_get_id_from_mac(char *interface)
+/*
+ * The ID is generated from the MAC of selected interface.
+ * The priority of selected interface:
+ *   - ADLINK MAC has higher priority. (Priority: 3)
+ *   - Ethernet has higher priority. (Priority: 1)
+ * The selected interface don't need to be up. (The ID should be consistent for each mahcine.)
+ */
+uint64_t net_generate_id(void)
 {
-    uint64_t id = 0;
+    uint64_t ret_id = 0;
+    struct if_nameindex *if_nidxs, *intf;
+    char selected_interface[128] = {0};
+    int priority = -1, tmp_priority;
     struct ifreq ifr;
     int sockfd;
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    strncpy(ifr.ifr_name, interface, IFNAMSIZ - 1); // get MAC from certain interface
-    ioctl(sockfd, SIOCGIFHWADDR, &ifr);
-
-    close(sockfd);
-
-    for (int i = 0; i < 6; i++) {
-        id <<= 8;
-        id += ifr.ifr_hwaddr.sa_data[i];
+    if_nidxs = if_nameindex();
+    if (if_nidxs == NULL) {
+        goto exit;
     }
+    for (intf = if_nidxs; intf->if_index != 0 || intf->if_name != NULL; intf++) {
+        tmp_priority = 0;
+        // Ethernet or not
+        if (intf->if_name[0] == 'e') {
+            tmp_priority += 1;
+        }
+        // ADLINK MAC or not
+        strncpy(ifr.ifr_name, intf->if_name, IFNAMSIZ - 1);
+        ioctl(sockfd, SIOCGIFHWADDR, &ifr);
+        if (memcmp(ifr.ifr_hwaddr.sa_data, "\x00\x30\x64", 3) == 0) {
+            tmp_priority += 3;
+        }
+        // Compare priority
+        if (priority < tmp_priority) {
+            strcpy(selected_interface, intf->if_name);
+            priority = tmp_priority;
+            // Generate ID
+            ret_id = 0;
+            for (int i = 0; i < 6; i++) {
+                ret_id <<= 8;
+                ret_id += ifr.ifr_hwaddr.sa_data[i];
+            }
+        }
+    }
+    if_freenameindex(if_nidxs);
 
-    return id;
+exit:
+    close(sockfd);
+    return ret_id;
 }
