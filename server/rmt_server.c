@@ -39,8 +39,9 @@ void *recv_thread_func(void *data)
         }
         // If interface changed, we should reinit the server
         if ((g_server_cfg.auto_detect_interface) || (g_svr_info.status == SVR_STAT_STOP)) {
-            char interface[40];
-            char ip[40];
+            char interface[40] = {0};
+            char ip[40] = {0};
+
             net_select_interface(interface);
             net_get_ip(interface, ip, sizeof(ip));
             if ((strcmp(interface, g_server_cfg.net_interface) != 0) || (strcmp(ip, g_server_cfg.net_ip) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
@@ -49,8 +50,12 @@ void *recv_thread_func(void *data)
                     g_svr_info.status = SVR_STAT_STOP;
                     RMT_LOG("Stop the server for interface change.\n");
                 }
+                // Make sure all the API exist and no file is transfering.
                 if ((g_svr_info.using_api != 0) || (dataserver_is_file_transfering())) {
-                    // Make sure all the API exist and no file is transfering.
+                    continue;
+                }
+                // Make sure the available interface exist.
+                if (strlen(interface) == 0) {
                     continue;
                 }
                 RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_server_cfg.net_interface, g_server_cfg.net_ip);
