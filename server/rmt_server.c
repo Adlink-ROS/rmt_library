@@ -19,9 +19,11 @@ typedef struct {
     struct dds_transport *transport;
     /* related to recv thread */
     pthread_t recv_thread;
-    int recv_thread_status; // 0: stop, 1: running
+    /* whether recv thread is running or not. 0: stop, 1: running*/
+    int recv_thread_status;
     /* server current status */
     server_status status;
+    /* how many api is used now. */
     unsigned long using_api;
 } rmt_server_info;
 static rmt_server_info g_svr_info;
@@ -38,8 +40,10 @@ void *recv_thread_func(void *data)
         // If interface changed, we should reinit the server
         if ((g_server_cfg.auto_detect_interface) || (g_svr_info.status == SVR_STAT_STOP)) {
             char interface[40];
+            char ip[40];
             net_select_interface(interface);
-            if ((strcmp(interface, g_server_cfg.net_interface) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
+            net_get_ip(interface, ip, sizeof(ip));
+            if ((strcmp(interface, g_server_cfg.net_interface) != 0) || (strcmp(ip, g_server_cfg.net_ip) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
                 // While need to restart interface, change the status to make sure no one can call API again.
                 if (g_svr_info.status == SVR_STAT_RUNNING) {
                     g_svr_info.status = SVR_STAT_STOP;
@@ -49,7 +53,7 @@ void *recv_thread_func(void *data)
                     // Make sure all the API exist and no file is transfering.
                     continue;
                 }
-                RMT_LOG("Interface %s disappear! Reinit communication...\n", g_server_cfg.net_interface);
+                RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_server_cfg.net_interface, g_server_cfg.net_ip);
                 if (g_svr_info.transport) {
                     RMT_LOG("Free the communication resource\n");
                     dds_transport_deinit(g_svr_info.transport);
@@ -68,8 +72,9 @@ void *recv_thread_func(void *data)
                 }
                 devinfo_server_init();
                 datainfo_server_init();
-                RMT_LOG("Init interface %s successfully!\n", interface);
+                RMT_LOG("Init interface %s with IP %s successfully!\n", interface, ip);
                 strcpy(g_server_cfg.net_interface, interface);
+                strcpy(g_server_cfg.net_ip, ip);
                 g_svr_info.status = SVR_STAT_RUNNING;
             }
         }
