@@ -49,6 +49,10 @@ int net_get_ip(char *interface, char *ip, int ip_len)
     int sockfd;
     struct ifreq ifr;
 
+    if (strlen(interface) == 0) {
+        return -1;
+    }
+
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
     ifr.ifr_addr.sa_family = AF_INET; // get IPv4 address

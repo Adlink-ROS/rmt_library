@@ -42,12 +42,15 @@ exit:
 int rmt_agent_running(void)
 {
     if ((g_agent_cfg.user_config == NULL) || (g_agent_cfg.user_config->net_interface == NULL)) {
-        char interface[40];
+        char interface[40] = {0};
+        char ip[40] = {0};
 
         net_select_interface(interface);
-        if (strcmp(interface, g_agent_cfg.net_interface) != 0) {
-            RMT_LOG("Interface %s disappear! Reinit communication...\n", g_agent_cfg.net_interface);
+        net_get_ip(interface, ip, sizeof(ip));
+        if ((strcmp(interface, g_agent_cfg.net_interface) != 0) || (strcmp(ip, g_agent_cfg.net_ip) != 0)) {
+            RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_agent_cfg.net_interface, g_agent_cfg.net_ip);
             if (g_transport) {
+                RMT_LOG("Free the communication resource\n");
                 dds_transport_deinit(g_transport);
                 g_transport = NULL;
             }
@@ -60,8 +63,9 @@ int rmt_agent_running(void)
                 RMT_ERROR("Unable to init agent\n");
                 return -1;
             }
-            RMT_LOG("Init interface %s successfully!\n", interface);
+            RMT_LOG("Init interface %s with IP %s successfully!\n", interface, ip);
             strcpy(g_agent_cfg.net_interface, interface);
+            strcpy(g_agent_cfg.net_ip, ip);
         }
     }
     devinfo_agent_update(g_transport);

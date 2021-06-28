@@ -21,6 +21,11 @@ int agent_config_set(rmt_agent_cfg *config)
         ret = -1;
         goto exit;
     }
+    if (net_get_ip(g_agent_cfg.net_interface, g_agent_cfg.net_ip, sizeof(g_agent_cfg.net_ip)) < 0) {
+        RMT_ERROR("Unable to get IP from interface %s\n", g_agent_cfg.net_interface);
+        ret = -1;
+        goto exit;
+    }
     g_agent_cfg.device_id = net_generate_id();
     g_agent_cfg.user_config = NULL;
 
