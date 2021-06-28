@@ -21,7 +21,7 @@ int agent_config_set(rmt_agent_cfg *config)
         ret = -1;
         goto exit;
     }
-    g_agent_cfg.device_id = net_get_id_from_mac(g_agent_cfg.net_interface);
+    g_agent_cfg.device_id = net_generate_id();
     g_agent_cfg.user_config = NULL;
 
     // If there is user's config

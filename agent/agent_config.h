@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "rmt_agent.h"
 
+// RMT_TODO: I think ID should support string type, but the swig API can not receive string array now.
 typedef struct _agent_config {
     char net_interface[40];          // empty for default interface chosen by RMT agent
     uint64_t device_id;              // 0 for default device ID generated from MAC

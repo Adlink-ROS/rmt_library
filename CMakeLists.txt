@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # project name, version
-project(RMT_library VERSION 0.9.3)
+project(RMT_library VERSION 0.9.4)
 
 # Build agent or not
 option(BUILD_AGENT "Build agent" ON)
@@ -59,10 +59,10 @@ add_subdirectory(swig)
 
 # Build agent example
 if(BUILD_AGENT)
-  add_subdirectory(examples/RMT_example/agent EXCLUDE_FROM_ALL)
+  add_subdirectory(examples/rmt-agent/agent EXCLUDE_FROM_ALL)
   # I ignore all target in subdirectory and then only pick the necessary target.
   # If I use all target, then the cpack will include the subdirectory.
-  add_custom_target(build_agent ALL DEPENDS agent_example agent_link_target nb2_task_link_target)
+  add_custom_target(build_agent ALL DEPENDS rmt-agent agent_link_target nb2_task_link_target)
 endif()
 
 # Add uncrustify tools
