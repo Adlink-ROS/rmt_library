@@ -42,7 +42,7 @@ exit:
 int rmt_agent_running(void)
 {
     if ((g_agent_cfg.user_config == NULL) || (g_agent_cfg.user_config->net_interface == NULL)) {
-        char interface[40];
+        char interface[40] = {0};
 
         net_select_interface(interface);
         if (strcmp(interface, g_agent_cfg.net_interface) != 0) {
