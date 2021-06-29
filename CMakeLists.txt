@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # project name, version
-project(RMT_library VERSION 0.9.4)
+project(RMT_library VERSION 0.9.5)
 
 # Build agent or not
 option(BUILD_AGENT "Build agent" ON)
