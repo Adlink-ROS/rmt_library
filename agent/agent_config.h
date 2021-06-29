@@ -6,7 +6,8 @@
 
 // RMT_TODO: I think ID should support string type, but the swig API can not receive string array now.
 typedef struct _agent_config {
-    char net_interface[40];          // empty for default interface chosen by RMT agent
+    char net_interface[40];          // The current interface used by RMT agent
+    char net_ip[40];                 // The current IP used by RMT agent
     uint64_t device_id;              // 0 for default device ID generated from MAC
     int domain_id;                   // 0 for default domain ID 0
     unsigned long datainfo_val_size; // 0 for default size 256

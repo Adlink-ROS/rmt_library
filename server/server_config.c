@@ -16,6 +16,11 @@ int server_config_set(char *interface, int domain_id)
         ret = -1;
         goto exit;
     }
+    if (net_get_ip(g_server_cfg.net_interface, g_server_cfg.net_ip, sizeof(g_server_cfg.net_ip)) < 0) {
+        RMT_ERROR("Unable to get IP from interface %s\n", g_server_cfg.net_interface);
+        ret = -1;
+        goto exit;
+    }
 
     // if there is user's config
     if (domain_id != 0) {
