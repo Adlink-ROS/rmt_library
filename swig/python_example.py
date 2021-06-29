@@ -55,6 +55,9 @@ def get_config(dev_list, dev_num):
     result = json.dumps(config_data, indent=4)
     print(result)
 
+    # Free info_list
+    rmt_py_wrapper.rmt_server_free_info(info_list.cast())
+
     return config_data
 
 def set_diff_config():
@@ -78,7 +81,7 @@ def set_diff_config():
 
     # Set for device 6166:
     data_info_element.deviceID = 6166
-    data_info_element.value_list = "hostname:hacked_by_ting;locate:on"
+    data_info_element.value_list = "hostname:new_hostname;locate:on"
     dev_idx = 1
     rmt_py_wrapper.data_info_array_setitem(data_info_array, dev_idx, data_info_element)
 
@@ -117,6 +120,9 @@ def set_diff_config():
         config_data.append(dict_data)
     result = json.dumps(config_data, indent=4)
     print(result)
+
+    # Free info_list
+    rmt_py_wrapper.rmt_server_free_info(info_list.cast())
 
 def set_same_config():
     r"""
@@ -158,20 +164,17 @@ def set_same_config():
     result = json.dumps(config_data, indent=4)
     print(result)
 
-def discover(my_interface):
+    # Free info_list
+    rmt_py_wrapper.rmt_server_free_info(info_list.cast())
+
+def discover():
     r"""
     Discover all the available agents in the same network
 
     The following APIs are used to implement this function:
-    - rmt_py_wrapper.rmt_server_configure()
-    - rmt_py_wrapper.rmt_server_init()
     - rmt_py_wrapper.rmt_server_create_device_list()
     """
 
-    print("Use interface({}) for RMT server".format(my_interface))
-    rmt_py_wrapper.rmt_server_configure(my_interface, 0)
-
-    rmt_py_wrapper.rmt_server_init()
     num_ptr = rmt_py_wrapper.new_intptr()
     dev_list = rmt_py_wrapper.device_info_list.frompointer(rmt_py_wrapper.rmt_server_create_device_list(num_ptr))
     num = rmt_py_wrapper.intptr_value(num_ptr)
@@ -260,6 +263,15 @@ def test_recv_binary():
     print("=== file content end ===")
 
 def main(args):
+    r"""
+    Init and de-init RMT server library
+
+    The following APIs are used to implement this function:
+    - rmt_py_wrapper.rmt_server_version()
+    - rmt_py_wrapper.rmt_server_configure()
+    - rmt_py_wrapper.rmt_server_init()
+    - rmt_py_wrapper.rmt_server_deinit()
+    """
 
     def valid_interface(interface):
         interface_addrs = psutil.net_if_addrs().get(interface) or []
@@ -300,8 +312,15 @@ def main(args):
     # Get RMT_VERSION
     print("RMT_VERSION=%s" % rmt_py_wrapper.rmt_server_version())
 
+    # Set network interface for DDS communication
+    print("Use interface({}) for RMT server".format(my_interface))
+    rmt_py_wrapper.rmt_server_configure(my_interface, 0)
+
+    # Init RMT server
+    rmt_py_wrapper.rmt_server_init()
+
     # Discovery devices
-    dev_list, num = discover(my_interface)
+    dev_list, num = discover()
 
     # Get config
     if flag_get_config:
@@ -320,6 +339,8 @@ def main(args):
     if flag_recv_file:
         test_recv_binary()
 
+    # Free & de-init
+    rmt_py_wrapper.rmt_server_free_device_list(dev_list.cast())
     rmt_py_wrapper.rmt_server_deinit()
 
 if __name__ == "__main__":
