@@ -49,10 +49,10 @@ cmake --build build --target package
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/examples/rmt-agent/agent
+cd ~/rmt_library/build/examples/rmt-agent/agent
 ./rmt-agent
 # 2nd terminal: Run the server
-cd ~/RMT/build/server
+cd ~/rmt_library/build/server
 ./server_example
 ```
 
@@ -60,17 +60,17 @@ cd ~/RMT/build/server
 
 ```bash
 # 1st terminal: Run the agent
-cd ~/RMT/build/examples/rmt-agent/agent
+cd ~/rmt_library/build/examples/rmt-agent/agent
 ./rmt-agent --id 6166 --net enp1s0
 # 2nd terminal: Run the server
-cd ~/RMT/build/server
+cd ~/rmt_library/build/server
 ./rmt-agent --net enp1s0
 ```
 
 * Run multiple agents
 
 ```bash
-cd ~/RMT/build/examples/rmt-agent/agent
+cd ~/rmt_library/build/examples/rmt-agent/agent
 # invoke 5 agents with device ID from 20 to 24
 ./multi_agents.py -n 5 -s 20
 ```
@@ -101,7 +101,7 @@ export ADLINK_LICENSE=$PWD
 ## CUnit:
 
 ```bash
-cd ~/RMT/build
+cd ~/rmt_library/build
 ctest
 # verbose
 ctest -V
@@ -112,14 +112,14 @@ ctest -V
 * Run few agents before testing
 
 ```bash
-cd ~/RMT/build/agent
+cd ~/rmt_library/build/agent
 ./rmt-agent
 ```
 
 * Start testing
 
 ```bash
-cd ~/RMT/build/swig
+cd ~/rmt_library/build/swig
 python3 python_example.py
 ```
 
@@ -136,8 +136,8 @@ cmake --build build --target all
 cmake --build build --target pydoc
 ```
 
-* C API docs will be placed at `~/RMT/build/docs`
+* C API docs will be placed at `~/rmt_library/build/docs`
 
-* Python API docs will be placed at `~/RMT/build/swig`
+* Python API docs will be placed at `~/rmt_library/build/swig`
 
 To update the online user manual, please copy the html files to the repo: `https://github.com/Adlink-ROS/RMT-User-Manual/tree/main/docs`.
