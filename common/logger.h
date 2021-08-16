@@ -10,8 +10,8 @@
 #if RMT_LOG_ENABLE
  # define RMT_LOG(...)             \
           do {                     \
-              fprintf(stderr, "RMT_LOG:");  \
-              fprintf(stderr, __VA_ARGS__); \
+              fprintf(g_fp, "RMT_LOG:");  \
+              fprintf(g_fp, __VA_ARGS__); \
           } while(0);
 #else
  # define RMT_LOG
@@ -20,8 +20,8 @@
 #if RMT_WARN_ENABLE
  # define RMT_WARN(...)            \
           do {                     \
-              fprintf(stderr, "RMT_WARN:"); \
-              fprintf(stderr, __VA_ARGS__); \
+              fprintf(g_fp, "RMT_WARN:"); \
+              fprintf(g_fp, __VA_ARGS__); \
           } while(0);
 #else
  # define RMT_WARN
@@ -30,11 +30,16 @@
 #if RMT_ERROR_ENABLE
  # define RMT_ERROR(...)           \
           do {                     \
-             fprintf(stderr, "RMT_ERROR:"); \
-             fprintf(stderr, __VA_ARGS__);  \
+              fprintf(g_fp, "RMT_ERROR:"); \
+              fprintf(g_fp, __VA_ARGS__);  \
           } while(0);
 #else
  # define RMT_ERROR
 #endif /*RMT_ERROR_ENABLE*/
+
+extern FILE *g_fp; 
+
+void log_init(void);
+void log_deinit(void);
 
 #endif /*_LOGGER_*/

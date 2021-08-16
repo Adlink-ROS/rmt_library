@@ -91,6 +91,7 @@ void *recv_thread_func(void *data)
 
 int rmt_server_configure(char *interface, int domain_id)
 {
+    log_init();
     return server_config_set(interface, domain_id);
 }
 
@@ -252,6 +253,8 @@ int rmt_server_deinit(void)
 
     ret = dds_transport_deinit(g_svr_info.transport);
     devinfo_server_deinit();
+    log_deinit();
+
     return ret;
 }
 
