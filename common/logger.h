@@ -37,7 +37,7 @@
  # define RMT_ERROR
 #endif /*RMT_ERROR_ENABLE*/
 
-extern FILE *g_fp; 
+extern FILE *g_fp;
 
 void log_init(void);
 void log_deinit(void);

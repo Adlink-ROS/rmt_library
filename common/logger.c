@@ -2,9 +2,10 @@
 
 #define LOG_NAME "/tmp/rmt.log"
 
-FILE *g_fp; 
+FILE *g_fp;
 
-void log_init(void) {
+void log_init(void)
+{
     // RMT_TODO: Use config to control the log
     if (0) {
         g_fp = fopen(LOG_NAME, "a");
@@ -17,8 +18,9 @@ void log_init(void) {
     }
 }
 
-void log_deinit(void) {
-    if (g_fp && g_fp != stderr) {
+void log_deinit(void)
+{
+    if (g_fp && (g_fp != stderr)) {
         fclose(g_fp);
     }
 }
