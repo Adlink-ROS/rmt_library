@@ -14,6 +14,7 @@ set(SOURCE_CODE rmt_agent.c
                 agent_config.c
                 ${PROJECT_SOURCE_DIR}/common/network.c
                 ${PROJECT_SOURCE_DIR}/common/dds_transport.c
+                ${PROJECT_SOURCE_DIR}/common/logger.c
    )
 
 # Build library rmt_agent

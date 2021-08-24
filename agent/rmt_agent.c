@@ -14,6 +14,7 @@ static struct dds_transport *g_transport;
 //           Because we can decide whether to keep some config default or not.
 int rmt_agent_configure(rmt_agent_cfg *config)
 {
+    log_init();
     return agent_config_set(config);
 }
 
@@ -80,6 +81,8 @@ int rmt_agent_deinit(void)
     devinfo_agent_deinit();
     ret = dds_transport_deinit(g_transport);
     agent_config_deinit();
+    log_deinit();
+
     return ret;
 }
 
