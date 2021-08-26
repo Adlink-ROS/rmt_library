@@ -140,7 +140,7 @@ int devinfo_server_del_device_callback_robot_id(char *robot_id)
     }
 
     // If the device is on the head of list
-    if (strstr(dev_ptr->info->host, robot_id) != NULL) {
+    if (strstr(dev_ptr->info->devinfo, robot_id) != NULL) {
         g_dev_head = dev_ptr->next;
         g_dev_num--;
         to_be_freed = dev_ptr;
@@ -148,7 +148,7 @@ int devinfo_server_del_device_callback_robot_id(char *robot_id)
     }
     // Check if the device exist
     while (dev_ptr->next) {
-        if (strstr(dev_ptr->next->info->host, robot_id) != NULL) {
+        if (strstr(dev_ptr->next->info->devinfo, robot_id) != NULL) {
             to_be_freed = dev_ptr->next;
             dev_ptr->next = dev_ptr->next->next;
             g_dev_num--;
