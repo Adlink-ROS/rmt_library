@@ -127,6 +127,47 @@ int devinfo_server_del_device_callback(uint64_t internal_id)
     return del_device(internal_id);
 }
 
+#ifdef SUPPORT_ZENOH
+int devinfo_server_del_device_callback_robot_id(char *robot_id)
+{
+    dev_list *dev_ptr;
+    dev_list *to_be_freed = NULL;
+
+    pthread_mutex_lock(&g_dev_mutex);
+    dev_ptr = g_dev_head;
+    if (dev_ptr == NULL) {
+        goto exit;
+    }
+
+    // If the device is on the head of list
+    if (strstr(dev_ptr->info->host, robot_id) != NULL) {
+        g_dev_head = dev_ptr->next;
+        g_dev_num--;
+        to_be_freed = dev_ptr;
+        goto exit;
+    }
+    // Check if the device exist
+    while (dev_ptr->next) {
+        if (strstr(dev_ptr->next->info->host, robot_id) != NULL) {
+            to_be_freed = dev_ptr->next;
+            dev_ptr->next = dev_ptr->next->next;
+            g_dev_num--;
+            goto exit;
+        }
+        dev_ptr = dev_ptr->next;
+    }
+
+exit:
+    pthread_mutex_unlock(&g_dev_mutex);
+    // If the matched internal ID exist in our device list.
+    if (to_be_freed) {
+        RMT_WARN("Lost robot_id: %s\n", robot_id);
+        free_dev_list(to_be_freed);
+    }
+    return 0;
+}
+#endif /*SUPPORT_ZENOH*/
+
 int devinfo_server_update(struct dds_transport *transport)
 {
     return dds_transport_try_recv(PAIR_DEV_INFO, transport, add_device, NULL);

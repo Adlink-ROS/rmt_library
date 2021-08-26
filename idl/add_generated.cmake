@@ -13,3 +13,6 @@ endfunction()
 
 add_generated("DeviceInfo")
 add_generated("DataInfo")
+if(SUPPORT_ZENOH)
+  add_generated("far_dds_bridge_msgs")
+endif()
