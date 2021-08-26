@@ -166,6 +166,7 @@ exit:
     }
     return 0;
 }
+
 #endif /*SUPPORT_ZENOH*/
 
 int devinfo_server_update(struct dds_transport *transport)

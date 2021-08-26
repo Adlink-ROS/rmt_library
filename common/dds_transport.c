@@ -5,7 +5,7 @@
 #include "DeviceInfo.h"
 #include "DataInfo.h"
 #ifdef SUPPORT_ZENOH
-  #include "far_dds_bridge_msgs.h"
+ #include "far_dds_bridge_msgs.h"
 #endif /*SUPPORT_ZENOH*/
 
 #define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
@@ -186,6 +186,7 @@ void callback_data_available(dds_entity_t reader, void* arg)
 
     return;
 }
+
 #endif /*SUPPORT_ZENOH*/
 
 struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint64_t))
