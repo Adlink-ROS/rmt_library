@@ -4,6 +4,9 @@
 #include "dds_transport.h"
 #include "DeviceInfo.h"
 #include "DataInfo.h"
+#ifdef SUPPORT_ZENOH
+ #include "far_dds_bridge_msgs.h"
+#endif /*SUPPORT_ZENOH*/
 
 #define TOPIC_DEVICE_INFO      "DeviceInfo_Msg"
 #define TOPIC_PAIR_DATA_REQ    "DataReq_Msg"
@@ -137,6 +140,55 @@ void callback_subscription_matched(dds_entity_t reader, const dds_subscription_m
     }
 }
 
+#ifdef SUPPORT_ZENOH
+typedef int (*robot_id_delete_fptr)(char *);
+static robot_id_delete_fptr g_robot_id_delete_callback = NULL;
+
+void set_robot_id_delete_callback(int (*robot_id_delete_callback)(char *))
+{
+    g_robot_id_delete_callback = robot_id_delete_callback;
+}
+
+void callback_data_available(dds_entity_t reader, void* arg)
+{
+    dds_return_t rc;
+    void *samples[MAX_SAMPLES];
+    dds_sample_info_t infos[MAX_SAMPLES];
+
+    reader = reader;
+    arg = arg;
+
+    samples[0] = far_dds_bridge_msgs_msg_QosEvent__alloc();
+
+    while (true) {
+        rc = dds_take(reader, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
+        if (rc < 0) {
+            DDS_FATAL("dds_take: %s\n", dds_strretcode(-rc));
+            break;
+        }
+
+        /* Check if we read some data and it is valid. */
+        if ((rc > 0) && (infos[0].valid_data)) {
+            // Get data successfully
+            far_dds_bridge_msgs_msg_QosEvent *msg;
+            msg = (far_dds_bridge_msgs_msg_QosEvent*) samples[0];
+            //printf("topic: %s, robot_id: %s, qos_event: %u\n", msg->topic, msg->robot_id, msg->qos_event);
+            if (g_robot_id_delete_callback) {
+                g_robot_id_delete_callback(msg->robot_id);
+            }
+        } else {
+            // If there is no reply data
+            break;
+        }
+    }
+
+    far_dds_bridge_msgs_msg_QosEvent_free(samples[0], DDS_FREE_ALL);
+
+    return;
+}
+
+#endif /*SUPPORT_ZENOH*/
+
 struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint64_t))
 {
     dds_transport *transport;
@@ -148,6 +200,28 @@ struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint6
         ret = -1;
         goto exit;
     }
+
+#ifdef SUPPORT_ZENOH
+    dds_entity_t zenoh_topic = dds_create_topic(transport->participant, &far_dds_bridge_msgs_msg_QosEvent_desc, "rt/qos_event", NULL, NULL);
+    if (zenoh_topic < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-zenoh_topic));
+        ret = -1;
+        goto exit;
+    }
+    dds_listener_t *zenoh_listener;
+    zenoh_listener = dds_create_listener(NULL);
+    dds_lset_data_available(zenoh_listener, callback_data_available);
+    dds_qos_t *zenoh_qos = dds_create_qos();
+    dds_qset_reliability(zenoh_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    dds_entity_t zenoh_reader = dds_create_reader(transport->participant, zenoh_topic, zenoh_qos, zenoh_listener);
+    if (zenoh_reader < 0) {
+        DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-zenoh_reader));
+        ret = -1;
+        goto exit;
+    }
+    dds_delete_qos(zenoh_qos);
+    dds_delete_listener(zenoh_listener);
+#endif /*SUPPORT_ZENOH*/
 
     /* Create a devinfo Reader. */
     listener = dds_create_listener(NULL);
@@ -165,7 +239,7 @@ struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint6
         goto exit;
     }
     dds_delete_qos(devinfo_qos);
-    dds_delete_listener (listener);
+    dds_delete_listener(listener);
 
     dds_qos_t *datainfo_qos = dds_create_qos();
     dds_qset_reliability(datainfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));

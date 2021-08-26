@@ -7,6 +7,13 @@ project(RMT_library VERSION 0.9.7)
 # Build agent or not
 option(BUILD_AGENT "Build agent" ON)
 
+# TODO: Currently only works with FARobot now. Should be more generalized in the future.
+# Support zenoh or not
+option(SUPPORT_ZENOH "Support Zenoh" OFF)
+if(SUPPORT_ZENOH)
+  add_definitions(-DSUPPORT_ZENOH)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE "RelWithDebInfo")
   message("RMT library is built with ${CMAKE_BUILD_TYPE} by default.")

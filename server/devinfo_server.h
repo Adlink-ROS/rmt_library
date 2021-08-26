@@ -6,6 +6,9 @@
 extern transfer_result empty_result;
 
 int devinfo_server_del_device_callback(uint64_t internal_id);
+#ifdef SUPPORT_ZENOH
+int devinfo_server_del_device_callback_robot_id(char *robot_id);
+#endif
 int devinfo_server_update(struct dds_transport *transport);
 int devinfo_server_create_list(struct dds_transport *transport, device_info **dev, uint32_t *num);
 int devinfo_server_free_list(device_info *dev);

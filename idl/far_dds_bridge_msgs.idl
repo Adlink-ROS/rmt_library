@@ -1,0 +1,13 @@
+module far_dds_bridge_msgs
+{
+  module msg
+  {
+    struct QosEvent
+    {
+      string topic;
+      string robot_id;
+      unsigned long qos_event;
+    }; 
+#pragma keylist far_dds_bridge_msgs::msg::QosEvent
+  };
+};

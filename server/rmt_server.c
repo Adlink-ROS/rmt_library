@@ -100,6 +100,9 @@ int rmt_server_init(void)
     dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();
+#ifdef SUPPORT_ZENOH
+    set_robot_id_delete_callback(devinfo_server_del_device_callback_robot_id);
+#endif
     g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_svr_info.transport) {
         RMT_LOG("Init server successfully\n");
