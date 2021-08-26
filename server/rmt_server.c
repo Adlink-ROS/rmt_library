@@ -9,6 +9,7 @@
 #include "server_config.h"
 #include "logger.h"
 #include "network.h"
+#include "config.h"
 
 typedef enum {
     SVR_STAT_STOP,
@@ -97,6 +98,7 @@ int rmt_server_configure(char *interface, int domain_id)
 
 int rmt_server_init(void)
 {
+    rmt_config_init();
     dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();

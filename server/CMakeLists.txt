@@ -15,6 +15,7 @@ set(SOURCE_CODE rmt_server.c
                 ${PROJECT_SOURCE_DIR}/common/network.c
                 ${PROJECT_SOURCE_DIR}/common/dds_transport.c
                 ${PROJECT_SOURCE_DIR}/common/logger.c
+                ${PROJECT_SOURCE_DIR}/common/config.c
    )
 
 # Build library rmt_server

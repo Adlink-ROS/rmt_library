@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "agent_config.h"
 #include "network.h"
+#include "config.h"
 
 static struct dds_transport *g_transport;
 
@@ -22,6 +23,7 @@ int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_map
 {
     int ret = 0;
 
+    rmt_config_init();
     devinfo_agent_init(agent_devinfo_func);
     datainfo_agent_init(data_func_maps, file_func_maps, g_agent_cfg.datainfo_val_size);
     if (dds_transport_config_init(g_agent_cfg.net_interface, g_agent_cfg.domain_id) < 0) {
