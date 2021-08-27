@@ -6,6 +6,11 @@
 #define LINE_LEN 1024
 #define DEBUG    0
 
+/* global variable for config */
+rmt_config g_rmt_cfg;
+rmt_runtime_cfg g_rmt_runtime_cfg;
+
+/* config init status */
 typedef enum _rmt_config_status {
     RMT_CFG_NOT_INIT = 0,
     RMT_CFG_INIT     = 1
@@ -13,10 +18,7 @@ typedef enum _rmt_config_status {
 
 static rmt_config_status g_rmt_cfg_status = RMT_CFG_NOT_INIT;
 
-rmt_config g_rmt_cfg;
-
-char *g_config_path;
-
+/* config type and mapping */
 typedef enum _config_type {
     CONFIG_NONE   = 0,
     CONFIG_INT    = 1,
@@ -68,6 +70,8 @@ void rmt_config_deinit(void)
 
 void rmt_config_init(void)
 {
+    char *config_path;
+
     /* Already init */
     if (g_rmt_cfg_status != RMT_CFG_NOT_INIT) {
         return;
@@ -77,16 +81,16 @@ void rmt_config_init(void)
     init_rmt_cfg();
 
     // Get environment variables
-    g_config_path = getenv("RMT_CONFIG");
-    if (g_config_path == NULL) {
-        g_config_path = "./rmt.conf";
+    config_path = getenv("RMT_CONFIG");
+    if (config_path == NULL) {
+        config_path = "./rmt.conf";
     }
 
     char line[LINE_LEN];
     int line_num = 0;
     char key[128];
     char value[256];
-    FILE *fp = fopen(g_config_path, "r");
+    FILE *fp = fopen(config_path, "r");
     if (fp == NULL) {
         fprintf(stderr, "Unable to find config, such as rmt.conf.\n");
         return;
