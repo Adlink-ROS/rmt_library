@@ -11,7 +11,6 @@ include_directories(${PROJECT_SOURCE_DIR}/common)
 set(SOURCE_CODE rmt_server.c
                 devinfo_server.c
                 datainfo_server.c
-                server_config.c
                 ${PROJECT_SOURCE_DIR}/common/network.c
                 ${PROJECT_SOURCE_DIR}/common/dds_transport.c
                 ${PROJECT_SOURCE_DIR}/common/logger.c

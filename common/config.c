@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "config.h"
+#include "network.h"
 
 #define LINE_LEN 1024
 #define DEBUG    0
@@ -35,7 +36,7 @@ config_mapping g_config_mapping[] = {
     { "interface",        CONFIG_STRING, g_rmt_cfg.net_interface          },
     { "domain",           CONFIG_INT,    &g_rmt_cfg.domain_id             },
     { "switch_interface", CONFIG_INT,    &g_rmt_cfg.auto_detect_interface },
-    { NULL,        CONFIG_NONE,   NULL                    }
+    { NULL,               CONFIG_NONE,   NULL                             }
 };
 
 static void init_rmt_cfg(void)
@@ -71,6 +72,28 @@ void rmt_config_deinit(void)
     g_rmt_cfg_status = RMT_CFG_NOT_INIT;
 }
 
+void rmt_runtime_cfg_init(void)
+{
+    /* Setup runtime interface */
+    if (strlen(g_rmt_cfg.net_interface) != 0) {
+        strcpy(g_rmt_runtime_cfg.net_interface, g_rmt_cfg.net_interface);
+    } else {
+        /* If there is no config for network interface, detect by ourselves */
+        if (net_select_interface(g_rmt_runtime_cfg.net_interface) < 0) {
+            //RMT_ERROR("Unable to select interface.\n");
+            return;
+        }
+    }
+
+    /* Setup runtime iP */
+    if (net_get_ip(g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip, sizeof(g_rmt_runtime_cfg.net_ip)) < 0) {
+        //RMT_ERROR("Unable to get IP from interface %s\n", g_rmt_runtime_cfg.net_interface);
+        return;
+    }
+
+    return;
+}
+
 void rmt_config_init(void)
 {
     char *config_path;
@@ -96,7 +119,7 @@ void rmt_config_init(void)
     FILE *fp = fopen(config_path, "r");
     if (fp == NULL) {
         fprintf(stderr, "Unable to find config, such as rmt.conf.\n");
-        return;
+        goto exit;
     }
     while (fgets(line, LINE_LEN, fp) != NULL) {
         line_num++;
@@ -132,7 +155,7 @@ void rmt_config_init(void)
 #endif
     fclose(fp);
 
+exit:
     g_rmt_cfg_status = RMT_CFG_INIT;
-
     return;
 }
