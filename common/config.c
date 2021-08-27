@@ -32,16 +32,19 @@ typedef struct _config_mapping {
 } config_mapping;
 
 config_mapping g_config_mapping[] = {
-    { "interface", CONFIG_STRING, g_rmt_cfg.net_interface },
-    { "domain",    CONFIG_INT,    &g_rmt_cfg.domain_id    },
+    { "interface",        CONFIG_STRING, g_rmt_cfg.net_interface          },
+    { "domain",           CONFIG_INT,    &g_rmt_cfg.domain_id             },
+    { "switch_interface", CONFIG_INT,    &g_rmt_cfg.auto_detect_interface },
     { NULL,        CONFIG_NONE,   NULL                    }
 };
 
 static void init_rmt_cfg(void)
 {
+    /* Setup default config */
     memset(&g_rmt_cfg, 0, sizeof(g_rmt_cfg));
     g_rmt_cfg.net_interface[0] = '\0';
     g_rmt_cfg.domain_id = 0;
+    g_rmt_cfg.auto_detect_interface = 1;
 }
 
 #if DEBUG

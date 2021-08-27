@@ -5,6 +5,7 @@
 typedef struct _rmt_config {
     char net_interface[40];        // The default network interface used by RMT
     int domain_id;                 // The current domain ID
+    int auto_detect_interface;     // Auto switch the interface
 } rmt_config;
 
 extern rmt_config g_rmt_cfg;
