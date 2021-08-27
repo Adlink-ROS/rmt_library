@@ -8,6 +8,7 @@ typedef struct _rmt_config {
 
 extern rmt_config g_rmt_cfg;
 
+void rmt_config_deinit(void);
 void rmt_config_init(void);
 
 #endif /*_CONFIG_*/

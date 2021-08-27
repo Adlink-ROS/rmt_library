@@ -84,6 +84,7 @@ int rmt_agent_deinit(void)
     ret = dds_transport_deinit(g_transport);
     agent_config_deinit();
     log_deinit();
+    rmt_config_deinit();
 
     return ret;
 }

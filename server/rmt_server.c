@@ -259,6 +259,7 @@ int rmt_server_deinit(void)
     ret = dds_transport_deinit(g_svr_info.transport);
     devinfo_server_deinit();
     log_deinit();
+    rmt_config_deinit();
 
     return ret;
 }

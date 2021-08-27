@@ -6,6 +6,13 @@
 #define LINE_LEN 1024
 #define DEBUG    0
 
+typedef enum _rmt_config_status {
+    RMT_CFG_NOT_INIT = 0,
+    RMT_CFG_INIT     = 1
+} rmt_config_status;
+
+static rmt_config_status g_rmt_cfg_status = RMT_CFG_NOT_INIT;
+
 rmt_config g_rmt_cfg;
 
 char *g_config_path;
@@ -54,8 +61,18 @@ static void print_rmt_cfg(void)
 
 #endif /*DEBUG*/
 
+void rmt_config_deinit(void)
+{
+    g_rmt_cfg_status = RMT_CFG_NOT_INIT;
+}
+
 void rmt_config_init(void)
 {
+    /* Already init */
+    if (g_rmt_cfg_status != RMT_CFG_NOT_INIT) {
+        return;
+    }
+
     // Clear rmt_cfg
     init_rmt_cfg();
 
@@ -107,6 +124,8 @@ void rmt_config_init(void)
     print_rmt_cfg();  // debug use
 #endif
     fclose(fp);
+
+    g_rmt_cfg_status = RMT_CFG_INIT;
 
     return;
 }
