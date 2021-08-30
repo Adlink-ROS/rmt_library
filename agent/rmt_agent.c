@@ -5,18 +5,22 @@
 #include "datainfo_agent.h"
 #include "version.h"
 #include "logger.h"
-#include "agent_config.h"
 #include "network.h"
 #include "config.h"
 
 static struct dds_transport *g_transport;
 
-// RMT_TODO: I think it would be better to use string with key-value instead of structure
-//           Because we can decide whether to keep some config default or not.
 int rmt_agent_configure(rmt_agent_cfg *config)
 {
-    log_init();
-    return agent_config_set(config);
+    rmt_config_init();
+    if (config != NULL) {
+        g_rmt_cfg.datainfo_val_size = config->datainfo_val_size;
+        g_rmt_cfg.device_id = config->device_id;
+        g_rmt_cfg.devinfo_size = config->devinfo_size;
+        g_rmt_cfg.domain_id = config->domain_id;
+        strcpy(g_rmt_cfg.net_interface, config->net_interface);
+    }
+    return 0;
 }
 
 int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_maps, fileinfo_func *file_func_maps)
@@ -24,9 +28,11 @@ int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_map
     int ret = 0;
 
     rmt_config_init();
+    rmt_runtime_cfg_init();
+    log_init();
     devinfo_agent_init(agent_devinfo_func);
-    datainfo_agent_init(data_func_maps, file_func_maps, g_agent_cfg.datainfo_val_size);
-    if (dds_transport_config_init(g_agent_cfg.net_interface, g_agent_cfg.domain_id) < 0) {
+    datainfo_agent_init(data_func_maps, file_func_maps, g_rmt_cfg.datainfo_val_size);
+    if (dds_transport_config_init(g_rmt_cfg.net_interface, g_rmt_cfg.domain_id) < 0) {
         RMT_ERROR("Unable to init communication\n");
         ret = -1;
         goto exit;
@@ -44,20 +50,20 @@ exit:
 
 int rmt_agent_running(void)
 {
-    if ((g_agent_cfg.user_config == NULL) || (g_agent_cfg.user_config->net_interface == NULL)) {
+    if (g_rmt_cfg.auto_detect_interface == 1) {
         char interface[40] = {0};
         char ip[40] = {0};
 
         net_select_interface(interface);
         net_get_ip(interface, ip, sizeof(ip));
-        if ((strcmp(interface, g_agent_cfg.net_interface) != 0) || (strcmp(ip, g_agent_cfg.net_ip) != 0)) {
-            RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_agent_cfg.net_interface, g_agent_cfg.net_ip);
+        if ((strcmp(interface, g_rmt_runtime_cfg.net_interface) != 0) || (strcmp(ip, g_rmt_runtime_cfg.net_ip) != 0)) {
+            RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip);
             if (g_transport) {
                 RMT_LOG("Free the communication resource\n");
                 dds_transport_deinit(g_transport);
                 g_transport = NULL;
             }
-            if (dds_transport_config_init(interface, g_agent_cfg.domain_id) < 0) {
+            if (dds_transport_config_init(interface, g_rmt_cfg.domain_id) < 0) {
                 RMT_ERROR("Unable to init communication\n");
                 return -1;
             }
@@ -67,8 +73,8 @@ int rmt_agent_running(void)
                 return -1;
             }
             RMT_LOG("Init interface %s with IP %s successfully!\n", interface, ip);
-            strcpy(g_agent_cfg.net_interface, interface);
-            strcpy(g_agent_cfg.net_ip, ip);
+            strcpy(g_rmt_runtime_cfg.net_interface, interface);
+            strcpy(g_rmt_runtime_cfg.net_ip, ip);
         }
     }
     devinfo_agent_update(g_transport);
@@ -82,7 +88,6 @@ int rmt_agent_deinit(void)
 
     devinfo_agent_deinit();
     ret = dds_transport_deinit(g_transport);
-    agent_config_deinit();
     log_deinit();
     rmt_config_deinit();
 
