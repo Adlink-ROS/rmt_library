@@ -37,6 +37,7 @@ config_mapping g_config_mapping[] = {
     { "domain",           CONFIG_INT,    &g_rmt_cfg.domain_id             },
     { "switch_interface", CONFIG_INT,    &g_rmt_cfg.auto_detect_interface },
     { "logfile",          CONFIG_STRING, g_rmt_cfg.logfile                },
+    { "reply_timeout",    CONFIG_INT,    &g_rmt_cfg.reply_timeout         },
     { "device_id",        CONFIG_INT,    &g_rmt_cfg.device_id             },
     { "datainfo_size",    CONFIG_INT,    &g_rmt_cfg.datainfo_val_size     },
     { "devinfo_size",     CONFIG_INT,    &g_rmt_cfg.devinfo_size          },
@@ -51,6 +52,7 @@ static void init_rmt_cfg(void)
     g_rmt_cfg.domain_id = 0;
     g_rmt_cfg.auto_detect_interface = 1;
     strcpy(g_rmt_cfg.logfile, "stderr");
+    g_rmt_cfg.reply_timeout = 3;
     g_rmt_cfg.device_id = 0;
     g_rmt_cfg.datainfo_val_size = 256;
     g_rmt_cfg.devinfo_size = 1024;

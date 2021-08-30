@@ -9,6 +9,7 @@ typedef struct _rmt_config {
     int domain_id;                   // The current domain ID
     int auto_detect_interface;       // Auto switch the interface
     char logfile[40];                // Where to put the log
+    int reply_timeout;               // Only used by server: set the timeout for receiving reply message from agents.
     uint64_t device_id;              // Only used by agent: Agent ID. 0 means it will be auto generated.
     unsigned long datainfo_val_size; // Only used by agent: Buffer size for datainfo
     unsigned long devinfo_size;      // Only used by agent: Buffer size for devinfo

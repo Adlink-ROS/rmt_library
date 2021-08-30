@@ -7,9 +7,7 @@
 #include "devinfo_server.h"
 #include "DataInfo.h"
 #include "logger.h"
-
-// RMT_TODO: This should be configurable.
-#define DEFAULT_TIMEOUT 3
+#include "rmt_config.h"
 
 typedef struct _reply_data {
     struct DataInfo_Request *req;
@@ -127,8 +125,8 @@ data_info* datainfo_server_get_info(struct dds_transport *transport, unsigned lo
     now_time = start_time;
     // wait for all the reply
     while (replys.num != id_num) {
-        if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
+        if (now_time - start_time > g_rmt_cfg.reply_timeout) {
+            RMT_WARN("get info timeout: %d, expect %d, but receive %d.\n", g_rmt_cfg.reply_timeout, id_num, replys.num);
             break;
         }
         dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
@@ -188,8 +186,8 @@ data_info* datainfo_server_set_info(struct dds_transport *transport, data_info *
     now_time = start_time;
     // wait for all the reply
     while (replys.num != id_num) {
-        if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
+        if (now_time - start_time > g_rmt_cfg.reply_timeout) {
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", g_rmt_cfg.reply_timeout, id_num, replys.num);
             break;
         }
         dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
@@ -236,8 +234,8 @@ data_info* datainfo_server_set_info_with_same_value(struct dds_transport *transp
     now_time = start_time;
     // wait for all the reply
     while (replys.num != id_num) {
-        if (now_time - start_time > DEFAULT_TIMEOUT) {
-            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", DEFAULT_TIMEOUT, id_num, replys.num);
+        if (now_time - start_time > g_rmt_cfg.reply_timeout) {
+            RMT_WARN("set info timeout: %d, expect %d, but receive %d.\n", g_rmt_cfg.reply_timeout, id_num, replys.num);
             break;
         }
         dds_transport_try_recv_instance(&reply_instance, PAIR_DATA_REPLY, transport, recv_reply, &replys);
@@ -356,7 +354,7 @@ void dataserver_info_file_transfer_thread(struct dds_transport *transport)
         }
         // While receive timeout
         time(&now_time);
-        if (now_time - g_file_transfer_stat.start_time > DEFAULT_TIMEOUT) {
+        if (now_time - g_file_transfer_stat.start_time > g_rmt_cfg.reply_timeout) {
             for (int i = 0; i < g_file_transfer_stat.id_num; i++) {
                 transfer_status dev_status;
                 transfer_result dev_result;
