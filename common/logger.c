@@ -1,6 +1,6 @@
 #include <string.h>
 #include "logger.h"
-#include "config.h"
+#include "rmt_config.h"
 
 FILE *g_fp = NULL;
 

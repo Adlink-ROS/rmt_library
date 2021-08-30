@@ -25,8 +25,8 @@ typedef struct _rmt_runtime_cfg {
 extern rmt_runtime_cfg g_rmt_runtime_cfg;
 
 void rmt_config_print(void);
-void rmt_config_deinit(void);
-void rmt_runtime_cfg_init(void);
 void rmt_config_init(void);
+void rmt_config_runtime_init(void);
+void rmt_config_deinit(void);
 
 #endif /*_CONFIG_*/

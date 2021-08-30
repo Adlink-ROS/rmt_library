@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "logger.h"
-#include "config.h"
+#include "rmt_config.h"
 #include "network.h"
 
 #define LINE_LEN 1024
@@ -72,38 +72,6 @@ void rmt_config_print(void)
     }
 }
 
-void rmt_config_deinit(void)
-{
-    g_rmt_cfg_status = RMT_CFG_NOT_INIT;
-}
-
-void rmt_runtime_cfg_init(void)
-{
-    /* Setup runtime interface */
-    if (strlen(g_rmt_cfg.net_interface) != 0) {
-        strcpy(g_rmt_runtime_cfg.net_interface, g_rmt_cfg.net_interface);
-    } else {
-        /* If there is no config for network interface, detect by ourselves */
-        if (net_select_interface(g_rmt_runtime_cfg.net_interface) < 0) {
-            //RMT_ERROR("Unable to select interface.\n");
-            return;
-        }
-    }
-
-    /* Setup runtime iP */
-    if (net_get_ip(g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip, sizeof(g_rmt_runtime_cfg.net_ip)) < 0) {
-        //RMT_ERROR("Unable to get IP from interface %s\n", g_rmt_runtime_cfg.net_interface);
-        return;
-    }
-
-    /* Auto generated device ID */
-    if (g_rmt_cfg.device_id == 0) {
-        g_rmt_cfg.device_id = net_generate_id();
-    }
-
-    return;
-}
-
 void rmt_config_init(void)
 {
     char *config_path;
@@ -164,4 +132,36 @@ void rmt_config_init(void)
 exit:
     g_rmt_cfg_status = RMT_CFG_INIT;
     return;
+}
+
+void rmt_config_runtime_init(void)
+{
+    /* Setup runtime interface */
+    if (strlen(g_rmt_cfg.net_interface) != 0) {
+        strcpy(g_rmt_runtime_cfg.net_interface, g_rmt_cfg.net_interface);
+    } else {
+        /* If there is no config for network interface, detect by ourselves */
+        if (net_select_interface(g_rmt_runtime_cfg.net_interface) < 0) {
+            //RMT_ERROR("Unable to select interface.\n");
+            return;
+        }
+    }
+
+    /* Setup runtime iP */
+    if (net_get_ip(g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip, sizeof(g_rmt_runtime_cfg.net_ip)) < 0) {
+        //RMT_ERROR("Unable to get IP from interface %s\n", g_rmt_runtime_cfg.net_interface);
+        return;
+    }
+
+    /* Auto generated device ID */
+    if (g_rmt_cfg.device_id == 0) {
+        g_rmt_cfg.device_id = net_generate_id();
+    }
+
+    return;
+}
+
+void rmt_config_deinit(void)
+{
+    g_rmt_cfg_status = RMT_CFG_NOT_INIT;
 }

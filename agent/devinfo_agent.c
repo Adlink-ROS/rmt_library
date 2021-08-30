@@ -7,7 +7,7 @@
 #include "version.h"
 #include "network.h"
 #include "logger.h"
-#include "config.h"
+#include "rmt_config.h"
 
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;

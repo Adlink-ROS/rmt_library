@@ -6,7 +6,7 @@
 #include "version.h"
 #include "logger.h"
 #include "network.h"
-#include "config.h"
+#include "rmt_config.h"
 
 static struct dds_transport *g_transport;
 
@@ -30,7 +30,7 @@ int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_map
     int ret = 0;
 
     rmt_config_init();
-    rmt_runtime_cfg_init();
+    rmt_config_runtime_init();
     log_init();
     rmt_config_print();
     devinfo_agent_init(agent_devinfo_func);
