@@ -1,11 +1,16 @@
 #ifndef _CONFIG_
 #define _CONFIG_
 
+#include <stdint.h>
+
 /* The config read from file */
 typedef struct _rmt_config {
-    char net_interface[40];        // The default network interface used by RMT
-    int domain_id;                 // The current domain ID
-    int auto_detect_interface;     // Auto switch the interface
+    char net_interface[40];          // The default network interface used by RMT
+    int domain_id;                   // The current domain ID
+    int auto_detect_interface;       // Auto switch the interface
+    uint64_t device_id;              // Only used by agent: Agent ID. 0 means it will be auto generated.
+    unsigned long datainfo_val_size; // Only used by agent: Buffer size for datainfo
+    unsigned long devinfo_size;      // Only used by agent: Buffer size for devinfo
 } rmt_config;
 
 extern rmt_config g_rmt_cfg;

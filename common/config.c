@@ -36,6 +36,9 @@ config_mapping g_config_mapping[] = {
     { "interface",        CONFIG_STRING, g_rmt_cfg.net_interface          },
     { "domain",           CONFIG_INT,    &g_rmt_cfg.domain_id             },
     { "switch_interface", CONFIG_INT,    &g_rmt_cfg.auto_detect_interface },
+    { "device_id",        CONFIG_INT,    &g_rmt_cfg.device_id             },
+    { "datainfo_size",    CONFIG_INT,    &g_rmt_cfg.datainfo_val_size     },
+    { "devinfo_size",     CONFIG_INT,    &g_rmt_cfg.devinfo_size          },
     { NULL,               CONFIG_NONE,   NULL                             }
 };
 
@@ -46,6 +49,9 @@ static void init_rmt_cfg(void)
     g_rmt_cfg.net_interface[0] = '\0';
     g_rmt_cfg.domain_id = 0;
     g_rmt_cfg.auto_detect_interface = 1;
+    g_rmt_cfg.device_id = 0;
+    g_rmt_cfg.datainfo_val_size = 256;
+    g_rmt_cfg.devinfo_size = 1024;
 }
 
 #if DEBUG
@@ -89,6 +95,11 @@ void rmt_runtime_cfg_init(void)
     if (net_get_ip(g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip, sizeof(g_rmt_runtime_cfg.net_ip)) < 0) {
         //RMT_ERROR("Unable to get IP from interface %s\n", g_rmt_runtime_cfg.net_interface);
         return;
+    }
+
+    /* Auto generated device ID */
+    if (g_rmt_cfg.device_id == 0) {
+        g_rmt_cfg.device_id = net_generate_id();
     }
 
     return;
