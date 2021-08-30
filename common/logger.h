@@ -11,6 +11,8 @@
 #if RMT_LOG_ENABLE
  # define RMT_LOG(...)             \
           do {                     \
+              if (g_log_disable)   \
+                  break;           \
               FILE *fp = stderr;   \
               if (g_fp != NULL)    \
                   fp = g_fp;       \
@@ -33,6 +35,8 @@
 #if RMT_WARN_ENABLE
  # define RMT_WARN(...)            \
           do {                     \
+              if (g_log_disable)   \
+                  break;           \
               FILE *fp = stderr;   \
               if (g_fp != NULL)    \
                   fp = g_fp;       \
@@ -55,6 +59,8 @@
 #if RMT_ERROR_ENABLE
  # define RMT_ERROR(...)           \
           do {                     \
+              if (g_log_disable)   \
+                  break;           \
               FILE *fp = stderr;   \
               if (g_fp != NULL)    \
                   fp = g_fp;       \
@@ -75,6 +81,7 @@
 #endif /*RMT_ERROR_ENABLE*/
 
 extern FILE *g_fp;
+extern int g_log_disable;
 
 void log_init(void);
 void log_deinit(void);
