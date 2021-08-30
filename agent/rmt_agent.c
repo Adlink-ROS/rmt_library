@@ -18,7 +18,9 @@ int rmt_agent_configure(rmt_agent_cfg *config)
         g_rmt_cfg.device_id = config->device_id;
         g_rmt_cfg.devinfo_size = config->devinfo_size;
         g_rmt_cfg.domain_id = config->domain_id;
-        strcpy(g_rmt_cfg.net_interface, config->net_interface);
+        if (config->net_interface != NULL) {
+            strcpy(g_rmt_cfg.net_interface, config->net_interface);
+        }
     }
     return 0;
 }
