@@ -18,12 +18,12 @@
                   fp = g_fp;       \
               time_t now_time;     \
               time(&now_time);     \
-              struct tm *now_tm_local = localtime(&now_time);           \
-              fprintf(fp, "%d/%d %d:%d:%d  ", (1+now_tm_local->tm_mon), \
-                                              (now_tm_local->tm_mday),  \
-                                              now_tm_local->tm_hour,    \
-                                              now_tm_local->tm_min,     \
-                                              now_tm_local->tm_sec);    \
+              struct tm *now_tm_local = localtime(&now_time);                     \
+              fprintf(fp, "%02d/%02d %02d:%02d:%02d  ", (1+now_tm_local->tm_mon), \
+                                                        (now_tm_local->tm_mday),  \
+                                                        now_tm_local->tm_hour,    \
+                                                        now_tm_local->tm_min,     \
+                                                        now_tm_local->tm_sec);    \
               fprintf(fp, "RMT_LOG:");  \
               fprintf(fp, __VA_ARGS__); \
               fflush ((FILE *) fp);     \
@@ -42,12 +42,12 @@
                   fp = g_fp;       \
               time_t now_time;     \
               time(&now_time);     \
-              struct tm *now_tm_local = localtime(&now_time);           \
-              fprintf(fp, "%d/%d %d:%d:%d  ", (1+now_tm_local->tm_mon), \
-                                              (now_tm_local->tm_mday),  \
-                                              now_tm_local->tm_hour,    \
-                                              now_tm_local->tm_min,     \
-                                              now_tm_local->tm_sec);    \
+              struct tm *now_tm_local = localtime(&now_time);                     \
+              fprintf(fp, "%02d/%02d %02d:%02d:%02d  ", (1+now_tm_local->tm_mon), \
+                                                        (now_tm_local->tm_mday),  \
+                                                        now_tm_local->tm_hour,    \
+                                                        now_tm_local->tm_min,     \
+                                                        now_tm_local->tm_sec);    \
               fprintf(fp, "RMT_WARN:"); \
               fprintf(fp, __VA_ARGS__); \
               fflush ((FILE *) fp);     \
@@ -66,12 +66,12 @@
                   fp = g_fp;       \
               time_t now_time;     \
               time(&now_time);     \
-              struct tm *now_tm_local = localtime(&now_time);           \
-              fprintf(fp, "%d/%d %d:%d:%d  ", (1+now_tm_local->tm_mon), \
-                                              (now_tm_local->tm_mday),  \
-                                              now_tm_local->tm_hour,    \
-                                              now_tm_local->tm_min,     \
-                                              now_tm_local->tm_sec);    \
+              struct tm *now_tm_local = localtime(&now_time);                     \
+              fprintf(fp, "%02d/%02d %02d:%02d:%02d  ", (1+now_tm_local->tm_mon), \
+                                                        (now_tm_local->tm_mday),  \
+                                                        now_tm_local->tm_hour,    \
+                                                        now_tm_local->tm_min,     \
+                                                        now_tm_local->tm_sec);    \
               fprintf(fp, "RMT_ERROR:"); \
               fprintf(fp, __VA_ARGS__);  \
               fflush ((FILE *) fp);     \
