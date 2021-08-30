@@ -104,6 +104,7 @@ int rmt_server_init(void)
     rmt_config_init();
     rmt_runtime_cfg_init();
     log_init();
+    rmt_config_print();
     dds_transport_config_init(g_rmt_runtime_cfg.net_interface, g_rmt_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();

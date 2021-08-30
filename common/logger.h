@@ -10,8 +10,12 @@
 #if RMT_LOG_ENABLE
  # define RMT_LOG(...)             \
           do {                     \
-              fprintf(g_fp, "RMT_LOG:");  \
-              fprintf(g_fp, __VA_ARGS__); \
+              FILE *fp = stderr;   \
+              if (g_fp != NULL)    \
+                  fp = g_fp;       \
+              fprintf(fp, "RMT_LOG:");  \
+              fprintf(fp, __VA_ARGS__); \
+              fflush ((FILE *) fp);     \
           } while(0);
 #else
  # define RMT_LOG
@@ -20,8 +24,12 @@
 #if RMT_WARN_ENABLE
  # define RMT_WARN(...)            \
           do {                     \
-              fprintf(g_fp, "RMT_WARN:"); \
-              fprintf(g_fp, __VA_ARGS__); \
+              FILE *fp = stderr;   \
+              if (g_fp != NULL)    \
+                  fp = g_fp;       \
+              fprintf(fp, "RMT_WARN:"); \
+              fprintf(fp, __VA_ARGS__); \
+              fflush ((FILE *) fp);     \
           } while(0);
 #else
  # define RMT_WARN
@@ -30,8 +38,12 @@
 #if RMT_ERROR_ENABLE
  # define RMT_ERROR(...)           \
           do {                     \
-              fprintf(g_fp, "RMT_ERROR:"); \
-              fprintf(g_fp, __VA_ARGS__);  \
+              FILE *fp = stderr;   \
+              if (g_fp != NULL)    \
+                  fp = g_fp;       \
+              fprintf(fp, "RMT_ERROR:"); \
+              fprintf(fp, __VA_ARGS__);  \
+              fflush ((FILE *) fp);     \
           } while(0);
 #else
  # define RMT_ERROR

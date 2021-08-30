@@ -32,6 +32,7 @@ int rmt_agent_init(devinfo_func agent_devinfo_func, datainfo_func *data_func_map
     rmt_config_init();
     rmt_runtime_cfg_init();
     log_init();
+    rmt_config_print();
     devinfo_agent_init(agent_devinfo_func);
     datainfo_agent_init(data_func_maps, file_func_maps, g_rmt_cfg.datainfo_val_size);
     if (dds_transport_config_init(g_rmt_cfg.net_interface, g_rmt_cfg.domain_id) < 0) {

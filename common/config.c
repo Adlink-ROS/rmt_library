@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "logger.h"
 #include "config.h"
 #include "network.h"
 
 #define LINE_LEN 1024
-#define DEBUG    0
 
 /* global variable for config */
 rmt_config g_rmt_cfg;
@@ -36,6 +36,7 @@ config_mapping g_config_mapping[] = {
     { "interface",        CONFIG_STRING, g_rmt_cfg.net_interface          },
     { "domain",           CONFIG_INT,    &g_rmt_cfg.domain_id             },
     { "switch_interface", CONFIG_INT,    &g_rmt_cfg.auto_detect_interface },
+    { "logfile",          CONFIG_STRING, g_rmt_cfg.logfile                },
     { "device_id",        CONFIG_INT,    &g_rmt_cfg.device_id             },
     { "datainfo_size",    CONFIG_INT,    &g_rmt_cfg.datainfo_val_size     },
     { "devinfo_size",     CONFIG_INT,    &g_rmt_cfg.devinfo_size          },
@@ -49,29 +50,27 @@ static void init_rmt_cfg(void)
     g_rmt_cfg.net_interface[0] = '\0';
     g_rmt_cfg.domain_id = 0;
     g_rmt_cfg.auto_detect_interface = 1;
+    strcpy(g_rmt_cfg.logfile, "stderr");
     g_rmt_cfg.device_id = 0;
     g_rmt_cfg.datainfo_val_size = 256;
     g_rmt_cfg.devinfo_size = 1024;
 }
 
-#if DEBUG
-static void print_rmt_cfg(void)
+void rmt_config_print(void)
 {
     for (int i = 0; g_config_mapping[i].name != NULL; i++) {
         switch (g_config_mapping[i].type) {
             case CONFIG_STRING:
-                printf("%s: %s\n", g_config_mapping[i].name, (char *)g_config_mapping[i].pointer);
+                RMT_LOG("%s: %s\n", g_config_mapping[i].name, (char *)g_config_mapping[i].pointer);
                 break;
             case CONFIG_INT:
-                printf("%s: %d\n", g_config_mapping[i].name, *((int *)g_config_mapping[i].pointer));
+                RMT_LOG("%s: %d\n", g_config_mapping[i].name, *((int *)g_config_mapping[i].pointer));
                 break;
             default:
                 break;
         }
     }
 }
-
-#endif /*DEBUG*/
 
 void rmt_config_deinit(void)
 {
@@ -129,7 +128,7 @@ void rmt_config_init(void)
     char value[256];
     FILE *fp = fopen(config_path, "r");
     if (fp == NULL) {
-        fprintf(stderr, "Unable to find config, such as rmt.conf.\n");
+        RMT_ERROR("Unable to find config, such as rmt.conf.\n");
         goto exit;
     }
     while (fgets(line, LINE_LEN, fp) != NULL) {
@@ -138,13 +137,11 @@ void rmt_config_init(void)
         if ((line[0] == '#') || (line[0] == '\n')) continue;
         // Parse key&value
         if (sscanf(line, "%[^:]:%s", key, value) != 2) {
-            fprintf(stderr, "Syntax error: line %d\n", line_num);
+            RMT_ERROR("Syntax error: line %d\n", line_num);
             continue;
         }
+        //RMT_LOG("Line %d: key=%s, value=%s\n", line_num, key, value);  // debug use
         // Put legal key&value into rmt_cfg
-#if DEBUG
-        printf("Line %d: key=%s, value=%s\n", line_num, key, value);  // debug use
-#endif
         for (int i = 0; g_config_mapping[i].name != NULL; i++) {
             if (strcmp(g_config_mapping[i].name, key) == 0) {
                 switch (g_config_mapping[i].type) {
@@ -161,9 +158,7 @@ void rmt_config_init(void)
             }
         }
     }
-#if DEBUG
-    print_rmt_cfg();  // debug use
-#endif
+
     fclose(fp);
 
 exit:
