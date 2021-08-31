@@ -1,26 +1,40 @@
+#include <string.h>
 #include "logger.h"
+#include "rmt_config.h"
 
-#define LOG_NAME "/tmp/rmt.log"
-
-FILE *g_fp;
+FILE *g_fp = NULL;
+int g_log_disable = 0;
 
 void log_init(void)
 {
-    // RMT_TODO: Use config to control the log
-    if (0) {
-        g_fp = fopen(LOG_NAME, "a");
+    /* Disabe log or not */
+    if (strcmp(g_rmt_cfg.logfile, "none") == 0) {
+        g_log_disable = 1;
+        return;
+    }
+
+    if (strcmp(g_rmt_cfg.logfile, "stderr") == 0) {
+        g_fp = stderr;
+    } else {
+        g_fp = fopen(g_rmt_cfg.logfile, "a");
         if (!g_fp) {
             g_fp = stderr;
             RMT_ERROR("Unable to open the log file.\n");
         }
-    } else {
-        g_fp = stderr;
     }
 }
 
 void log_deinit(void)
 {
-    if (g_fp && (g_fp != stderr)) {
-        fclose(g_fp);
+    if (strcmp(g_rmt_cfg.logfile, "none") == 0) {
+        g_log_disable = 0;
+        return;
+    }
+
+    if (g_fp) {
+        if (g_fp != stderr) {
+            fclose(g_fp);
+        }
+        g_fp = NULL;
     }
 }

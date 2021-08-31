@@ -7,7 +7,7 @@ project(RMT_library VERSION 0.9.7)
 # Build agent or not
 option(BUILD_AGENT "Build agent" ON)
 
-# TODO: Currently only works with FARobot now. Should be more generalized in the future.
+# RMT_TODO: Currently only works with FARobot now. Should be more generalized in the future.
 # Support zenoh or not
 option(SUPPORT_ZENOH "Support Zenoh" OFF)
 if(SUPPORT_ZENOH)

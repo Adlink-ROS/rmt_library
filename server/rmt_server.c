@@ -6,9 +6,9 @@
 #include "dds_transport.h"
 #include "devinfo_server.h"
 #include "datainfo_server.h"
-#include "server_config.h"
 #include "logger.h"
 #include "network.h"
+#include "rmt_config.h"
 
 typedef enum {
     SVR_STAT_STOP,
@@ -38,13 +38,13 @@ void *recv_thread_func(void *data)
             dataserver_info_file_transfer_thread(g_svr_info.transport);
         }
         // If interface changed, we should reinit the server
-        if ((g_server_cfg.auto_detect_interface) || (g_svr_info.status == SVR_STAT_STOP)) {
+        if ((g_rmt_cfg.auto_detect_interface) || (g_svr_info.status == SVR_STAT_STOP)) {
             char interface[40] = {0};
             char ip[40] = {0};
 
             net_select_interface(interface);
             net_get_ip(interface, ip, sizeof(ip));
-            if ((strcmp(interface, g_server_cfg.net_interface) != 0) || (strcmp(ip, g_server_cfg.net_ip) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
+            if ((strcmp(interface, g_rmt_runtime_cfg.net_interface) != 0) || (strcmp(ip, g_rmt_runtime_cfg.net_ip) != 0) || (g_svr_info.status == SVR_STAT_STOP)) {
                 // While need to restart interface, change the status to make sure no one can call API again.
                 if (g_svr_info.status == SVR_STAT_RUNNING) {
                     g_svr_info.status = SVR_STAT_STOP;
@@ -58,7 +58,7 @@ void *recv_thread_func(void *data)
                 if (strlen(interface) == 0) {
                     continue;
                 }
-                RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_server_cfg.net_interface, g_server_cfg.net_ip);
+                RMT_LOG("Interface %s with IP %s changed! Reinit communication...\n", g_rmt_runtime_cfg.net_interface, g_rmt_runtime_cfg.net_ip);
                 if (g_svr_info.transport) {
                     RMT_LOG("Free the communication resource\n");
                     dds_transport_deinit(g_svr_info.transport);
@@ -66,7 +66,7 @@ void *recv_thread_func(void *data)
                     // clear the remaining device
                     devinfo_server_deinit();
                 }
-                if (dds_transport_config_init(interface, g_server_cfg.domain_id) < 0) {
+                if (dds_transport_config_init(interface, g_rmt_cfg.domain_id) < 0) {
                     RMT_ERROR("Unable to init communication\n");
                     continue;
                 }
@@ -78,8 +78,8 @@ void *recv_thread_func(void *data)
                 devinfo_server_init();
                 datainfo_server_init();
                 RMT_LOG("Init interface %s with IP %s successfully!\n", interface, ip);
-                strcpy(g_server_cfg.net_interface, interface);
-                strcpy(g_server_cfg.net_ip, ip);
+                strcpy(g_rmt_runtime_cfg.net_interface, interface);
+                strcpy(g_rmt_runtime_cfg.net_ip, ip);
                 g_svr_info.status = SVR_STAT_RUNNING;
             }
         }
@@ -91,13 +91,21 @@ void *recv_thread_func(void *data)
 
 int rmt_server_configure(char *interface, int domain_id)
 {
-    log_init();
-    return server_config_set(interface, domain_id);
+    rmt_config_init();
+    if (interface != NULL) {
+        strcpy(g_rmt_cfg.net_interface, interface);
+    }
+    g_rmt_cfg.domain_id = domain_id;
+    return 0;
 }
 
 int rmt_server_init(void)
 {
-    dds_transport_config_init(g_server_cfg.net_interface, g_server_cfg.domain_id);
+    rmt_config_init();
+    rmt_config_runtime_init();
+    log_init();
+    rmt_config_print();
+    dds_transport_config_init(g_rmt_runtime_cfg.net_interface, g_rmt_cfg.domain_id);
     devinfo_server_init();
     datainfo_server_init();
 #ifdef SUPPORT_ZENOH
@@ -257,6 +265,7 @@ int rmt_server_deinit(void)
     ret = dds_transport_deinit(g_svr_info.transport);
     devinfo_server_deinit();
     log_deinit();
+    rmt_config_deinit();
 
     return ret;
 }

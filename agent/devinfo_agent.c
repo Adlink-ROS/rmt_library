@@ -7,7 +7,7 @@
 #include "version.h"
 #include "network.h"
 #include "logger.h"
-#include "agent_config.h"
+#include "rmt_config.h"
 
 static DeviceInfo_Msg g_msg;
 static int g_info_change = 1;
@@ -27,15 +27,15 @@ int product_verifier_show_products(char *buf, int buf_size);
 static void get_device_info(void)
 {
     device_info tmp_dev = g_dev;
-    char *tmp_devinfo = (char *) calloc(g_agent_cfg.devinfo_size, sizeof(char));
+    char *tmp_devinfo = (char *) calloc(g_rmt_cfg.devinfo_size, sizeof(char));
 
     // Check hostname
     gethostname(tmp_dev.hostname, sizeof(tmp_dev.hostname));
     g_dev.hostname[sizeof(tmp_dev.hostname) - 1] = 0;
     // Get IP
-    net_get_ip(g_agent_cfg.net_interface, tmp_dev.ip, sizeof(tmp_dev.ip));
+    net_get_ip(g_rmt_runtime_cfg.net_interface, tmp_dev.ip, sizeof(tmp_dev.ip));
     // Get MAC
-    net_get_mac(g_agent_cfg.net_interface, tmp_dev.mac, sizeof(tmp_dev.mac));
+    net_get_mac(g_rmt_runtime_cfg.net_interface, tmp_dev.mac, sizeof(tmp_dev.mac));
     // Call customized search info
     if (g_agent_devinfo_func != NULL)
         g_agent_devinfo_func(tmp_devinfo);
@@ -43,7 +43,7 @@ static void get_device_info(void)
     if ((memcmp(&g_dev, &tmp_dev, sizeof(device_info)) != 0)
         || (strcmp(g_devinfo, tmp_devinfo) != 0)) {
         g_dev = tmp_dev;
-        memset(g_devinfo, 0, g_agent_cfg.devinfo_size);
+        memset(g_devinfo, 0, g_rmt_cfg.devinfo_size);
         strcpy(g_devinfo, tmp_devinfo);
         g_info_change = 1;
     }
@@ -63,9 +63,9 @@ int devinfo_agent_init(devinfo_func agent_devinfo_func)
 {
     int ret = 0;
 
-    g_msg.deviceID = g_agent_cfg.device_id;
+    g_msg.deviceID = g_rmt_cfg.device_id;
     g_agent_devinfo_func = agent_devinfo_func;
-    g_devinfo = (char *) calloc(g_agent_cfg.devinfo_size, sizeof(char));
+    g_devinfo = (char *) calloc(g_rmt_cfg.devinfo_size, sizeof(char));
 
     return ret;
 }

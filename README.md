@@ -75,6 +75,14 @@ cd ~/rmt_library/build/examples/rmt-agent/agent
 ./multi_agents.py -n 5 -s 20
 ```
 
+# Configuration
+
+You can refer to `rmt.conf` for example configuration.
+The priority will be like the following.
+
+1. Set environmental variables: `export RMT_CONFIG=<your config path>`
+2. Create configuration `rmt.conf`
+
 # Release
 
 * If you want to release RMT Library, you should build with Release mode, which includes license verification in librmt_agent.so.
