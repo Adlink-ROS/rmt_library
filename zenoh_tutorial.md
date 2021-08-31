@@ -43,6 +43,7 @@ support_zenoh: 1
 ```
 
 * Modify `option(SUPPORT_ZENOH "Support Zenoh" OFF)` from OFF to ON, and then rebuild RMT.
+  - Also note that `devinfo_server_del_device_callback_robot_id` use `devinfo` to check the device alive or not. This is only for FARobot, so you can modify it to `hostname`.
 
 # Run
 
