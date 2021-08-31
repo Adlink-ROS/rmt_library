@@ -11,20 +11,26 @@
 rmt_config g_rmt_cfg;
 rmt_runtime_cfg g_rmt_runtime_cfg;
 
+/* *INDENT-OFF* */
+/* The uncrustify in Ubuntu 18.04 can't handle enum indent well */
 /* config init status */
 typedef enum _rmt_config_status {
     RMT_CFG_NOT_INIT = 0,
     RMT_CFG_INIT     = 1
 } rmt_config_status;
+/* *INDENT-ON* */
 
 static rmt_config_status g_rmt_cfg_status = RMT_CFG_NOT_INIT;
 
+/* *INDENT-OFF* */
+/* The uncrustify in Ubuntu 18.04 can't handle enum indent well */
 /* config type and mapping */
 typedef enum _config_type {
     CONFIG_NONE   = 0,
     CONFIG_INT    = 1,
     CONFIG_STRING = 2
 } config_type;
+/* *INDENT-ON* */
 
 typedef struct _config_mapping {
     char *name;
