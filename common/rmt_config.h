@@ -13,6 +13,9 @@ typedef struct _rmt_config {
     uint64_t device_id;              // Only used by agent: Agent ID. 0 means it will be auto generated.
     unsigned long datainfo_val_size; // Only used by agent: Buffer size for datainfo
     unsigned long devinfo_size;      // Only used by agent: Buffer size for devinfo
+#ifdef SUPPORT_ZENOH
+    int support_zenoh;               // Able to use zenoh or not
+#endif /*SUPPORT_ZENOH*/
 } rmt_config;
 
 extern rmt_config g_rmt_cfg;

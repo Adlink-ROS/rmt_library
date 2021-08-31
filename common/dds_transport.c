@@ -5,6 +5,7 @@
 #include "DeviceInfo.h"
 #include "DataInfo.h"
 #ifdef SUPPORT_ZENOH
+#include "rmt_config.h"
  #include "far_dds_bridge_msgs.h"
 #endif /*SUPPORT_ZENOH*/
 
@@ -202,25 +203,27 @@ struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint6
     }
 
 #ifdef SUPPORT_ZENOH
-    dds_entity_t zenoh_topic = dds_create_topic(transport->participant, &far_dds_bridge_msgs_msg_QosEvent_desc, "rt/qos_event", NULL, NULL);
-    if (zenoh_topic < 0) {
-        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-zenoh_topic));
-        ret = -1;
-        goto exit;
+    if (g_rmt_cfg.support_zenoh) {
+        dds_entity_t zenoh_topic = dds_create_topic(transport->participant, &far_dds_bridge_msgs_msg_QosEvent_desc, "rt/qos_event", NULL, NULL);
+        if (zenoh_topic < 0) {
+            DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-zenoh_topic));
+            ret = -1;
+            goto exit;
+        }
+        dds_listener_t *zenoh_listener;
+        zenoh_listener = dds_create_listener(NULL);
+        dds_lset_data_available(zenoh_listener, callback_data_available);
+        dds_qos_t *zenoh_qos = dds_create_qos();
+        dds_qset_reliability(zenoh_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+        dds_entity_t zenoh_reader = dds_create_reader(transport->participant, zenoh_topic, zenoh_qos, zenoh_listener);
+        if (zenoh_reader < 0) {
+            DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-zenoh_reader));
+            ret = -1;
+            goto exit;
+        }
+        dds_delete_qos(zenoh_qos);
+        dds_delete_listener(zenoh_listener);
     }
-    dds_listener_t *zenoh_listener;
-    zenoh_listener = dds_create_listener(NULL);
-    dds_lset_data_available(zenoh_listener, callback_data_available);
-    dds_qos_t *zenoh_qos = dds_create_qos();
-    dds_qset_reliability(zenoh_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
-    dds_entity_t zenoh_reader = dds_create_reader(transport->participant, zenoh_topic, zenoh_qos, zenoh_listener);
-    if (zenoh_reader < 0) {
-        DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-zenoh_reader));
-        ret = -1;
-        goto exit;
-    }
-    dds_delete_qos(zenoh_qos);
-    dds_delete_listener(zenoh_listener);
 #endif /*SUPPORT_ZENOH*/
 
     /* Create a devinfo Reader. */

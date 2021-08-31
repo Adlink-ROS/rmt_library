@@ -109,7 +109,9 @@ int rmt_server_init(void)
     devinfo_server_init();
     datainfo_server_init();
 #ifdef SUPPORT_ZENOH
-    set_robot_id_delete_callback(devinfo_server_del_device_callback_robot_id);
+    if (g_rmt_cfg.support_zenoh) {
+        set_robot_id_delete_callback(devinfo_server_del_device_callback_robot_id);
+    }
 #endif
     g_svr_info.transport = dds_transport_server_init(devinfo_server_del_device_callback);
     if (g_svr_info.transport) {
