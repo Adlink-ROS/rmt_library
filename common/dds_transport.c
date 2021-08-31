@@ -5,7 +5,7 @@
 #include "DeviceInfo.h"
 #include "DataInfo.h"
 #ifdef SUPPORT_ZENOH
-#include "rmt_config.h"
+ #include "rmt_config.h"
  #include "far_dds_bridge_msgs.h"
 #endif /*SUPPORT_ZENOH*/
 
