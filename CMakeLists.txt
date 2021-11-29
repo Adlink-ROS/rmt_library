@@ -69,7 +69,7 @@ if(BUILD_AGENT)
   add_subdirectory(examples/rmt-agent/agent EXCLUDE_FROM_ALL)
   # I ignore all target in subdirectory and then only pick the necessary target.
   # If I use all target, then the cpack will include the subdirectory.
-  add_custom_target(build_agent ALL DEPENDS rmt-agent agent_link_target nb2_task_link_target)
+  add_custom_target(build_agent ALL DEPENDS rmt-agent agent_link_target)
 endif()
 
 # Add uncrustify tools
