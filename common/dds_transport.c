@@ -131,7 +131,7 @@ static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_ch
     }
 }
 
-void callback_publication_matched(dds_entity_t writer, const dds_publication_matched_status_t  status, void* arg)
+void callback_publication_matched(dds_entity_t writer, const dds_publication_matched_status_t status, void* arg)
 {
     writer = writer;
     arg = arg;
