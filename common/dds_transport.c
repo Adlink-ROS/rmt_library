@@ -4,6 +4,7 @@
 #include "dds_transport.h"
 #include "DeviceInfo.h"
 #include "DataInfo.h"
+#include "logger.h"
 #ifdef SUPPORT_ZENOH
  #include "rmt_config.h"
  #include "far_dds_bridge_msgs.h"
@@ -127,6 +128,19 @@ static void callback_liveliness_changed(dds_entity_t rd, const dds_liveliness_ch
         if (g_device_delete_callback) {
             g_device_delete_callback((long) status.last_publication_handle);
         }
+    }
+}
+
+void callback_publication_matched(dds_entity_t writer, const dds_publication_matched_status_t  status, void* arg)
+{
+    writer = writer;
+    arg = arg;
+    if (status.current_count_change > 0) {
+        RMT_LOG("Detect RMT server.\n");
+        RMT_LOG("Current RMT server number: %d\n", status.current_count);
+    } else if (status.current_count_change < 0) {
+        RMT_LOG("Lost RMT server.\n");
+        RMT_LOG("Current RMT server number: %d\n", status.current_count);
     }
 }
 
@@ -280,6 +294,7 @@ exit:
 struct dds_transport *dds_transport_agent_init(void)
 {
     dds_transport *transport;
+    dds_listener_t *listener;
     int ret = 0;
 
     transport = dds_transport_init();
@@ -290,16 +305,19 @@ struct dds_transport *dds_transport_agent_init(void)
 
     /* Create a devinfo Writer. */
     dds_qos_t *devinfo_qos = dds_create_qos();
+    listener = dds_create_listener(NULL);
+    dds_lset_publication_matched(listener, callback_publication_matched);
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
     dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(5));
-    transport->pairs[PAIR_DEV_INFO].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, NULL);
+    transport->pairs[PAIR_DEV_INFO].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, listener);
     if (transport->pairs[PAIR_DEV_INFO].writer < 0) {
         DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].writer));
         ret = -1;
         goto exit;
     }
     dds_delete_qos(devinfo_qos);
+    dds_delete_listener(listener);
 
     dds_qos_t *datainfo_qos = dds_create_qos();
     dds_qset_reliability(datainfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
