@@ -47,6 +47,7 @@ config_mapping g_config_mapping[] = {
     { "device_id",        CONFIG_INT,    &g_rmt_cfg.device_id             },
     { "datainfo_size",    CONFIG_INT,    &g_rmt_cfg.datainfo_val_size     },
     { "devinfo_size",     CONFIG_INT,    &g_rmt_cfg.devinfo_size          },
+    { "keepalive_time",   CONFIG_INT,    &g_rmt_cfg.keepalive_time        },
 #ifdef SUPPORT_ZENOH
     { "support_zenoh",    CONFIG_INT,    &g_rmt_cfg.support_zenoh         },
 #endif /*SUPPORT_ZENOH*/
@@ -65,6 +66,7 @@ static void init_rmt_cfg(void)
     g_rmt_cfg.device_id = 0;
     g_rmt_cfg.datainfo_val_size = 256;
     g_rmt_cfg.devinfo_size = 1024;
+    g_rmt_cfg.keepalive_time = 5;
 #ifdef SUPPORT_ZENOH
     g_rmt_cfg.support_zenoh = 0;
 #endif /*SUPPORT_ZENOH*/

@@ -5,8 +5,8 @@
 #include "DeviceInfo.h"
 #include "DataInfo.h"
 #include "logger.h"
+#include "rmt_config.h"
 #ifdef SUPPORT_ZENOH
- #include "rmt_config.h"
  #include "far_dds_bridge_msgs.h"
 #endif /*SUPPORT_ZENOH*/
 
@@ -248,7 +248,7 @@ struct dds_transport *dds_transport_server_init(int (*dev_delete_callback)(uint6
     dds_qos_t *devinfo_qos = dds_create_qos();
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(5));
+    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(g_rmt_cfg.keepalive_time));
     transport->pairs[PAIR_DEV_INFO].reader = dds_create_reader(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, listener);
     if (transport->pairs[PAIR_DEV_INFO].reader < 0) {
         DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].reader));
@@ -309,7 +309,7 @@ struct dds_transport *dds_transport_agent_init(void)
     dds_lset_publication_matched(listener, callback_publication_matched);
     dds_qset_reliability(devinfo_qos, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
     dds_qset_durability(devinfo_qos, DDS_DURABILITY_TRANSIENT_LOCAL);
-    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(5));
+    dds_qset_liveliness(devinfo_qos, DDS_LIVELINESS_AUTOMATIC, DDS_SECS(g_rmt_cfg.keepalive_time));
     transport->pairs[PAIR_DEV_INFO].writer = dds_create_writer(transport->participant, transport->pairs[PAIR_DEV_INFO].topic, devinfo_qos, listener);
     if (transport->pairs[PAIR_DEV_INFO].writer < 0) {
         DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-transport->pairs[PAIR_DEV_INFO].writer));
