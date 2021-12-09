@@ -242,7 +242,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    rmt_server_configure(my_interface, 0);
+    if (my_interface) {
+        rmt_server_configure(my_interface, 0);
+    }
     printf("RMT Library version is %s\n", rmt_server_version());
     rmt_server_init();
 
