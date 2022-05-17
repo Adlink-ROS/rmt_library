@@ -14,6 +14,7 @@ typedef struct _rmt_config {
     unsigned long datainfo_val_size; // Only used by agent: Buffer size for datainfo
     unsigned long devinfo_size;      // Only used by agent: Buffer size for devinfo
     unsigned long keepalive_time;    // How long the server / agent send keepalive message
+    char peer_address[40];
 #ifdef SUPPORT_ZENOH
     int support_zenoh;               // Able to use zenoh or not
 #endif /*SUPPORT_ZENOH*/

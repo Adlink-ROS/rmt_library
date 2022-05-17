@@ -48,6 +48,7 @@ config_mapping g_config_mapping[] = {
     { "datainfo_size",    CONFIG_INT,    &g_rmt_cfg.datainfo_val_size     },
     { "devinfo_size",     CONFIG_INT,    &g_rmt_cfg.devinfo_size          },
     { "keepalive_time",   CONFIG_INT,    &g_rmt_cfg.keepalive_time        },
+    { "peer_address",     CONFIG_STRING, &g_rmt_cfg.peer_address          },
 #ifdef SUPPORT_ZENOH
     { "support_zenoh",    CONFIG_INT,    &g_rmt_cfg.support_zenoh         },
 #endif /*SUPPORT_ZENOH*/
@@ -67,6 +68,7 @@ static void init_rmt_cfg(void)
     g_rmt_cfg.datainfo_val_size = 256;
     g_rmt_cfg.devinfo_size = 1024;
     g_rmt_cfg.keepalive_time = 5;
+    g_rmt_cfg.peer_address[0] = '\0';
 #ifdef SUPPORT_ZENOH
     g_rmt_cfg.support_zenoh = 0;
 #endif /*SUPPORT_ZENOH*/

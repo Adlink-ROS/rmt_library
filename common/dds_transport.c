@@ -25,6 +25,34 @@
                    "    <Internal>" \
                    "      <MultipleReceiveThreads>false</MultipleReceiveThreads>" \
                    "    </Internal>" \
+                   "    <Tracing>" \
+                   "      <Verbosity>config</Verbosity>" \
+                   "      <OutputFile>stdout</OutputFile>" \
+                   "    </Tracing>" \
+                   "  </Domain>" \
+                   "</CycloneDDS>"
+
+#define DDS_CONFIG_PEER "<CycloneDDS>" \
+                   "  <Domain id=\"any\">" \
+                   "    <General>" \
+                   "      <NetworkInterfaceAddress>%s</NetworkInterfaceAddress>" \
+                   "      <AllowMulticast>false</AllowMulticast>" \
+                   "    </General>" \
+                   "    <Discovery>" \
+                   "      <ParticipantIndex>auto</ParticipantIndex>" \
+                   "      <Peers>" \
+                   "          <Group>" \
+                   "              <Peer address=\"%s\" />" \
+                   "          </Group>" \
+                   "      </Peers>" \
+                   "    </Discovery>" \
+                   "    <Internal>" \
+                   "      <MultipleReceiveThreads>false</MultipleReceiveThreads>" \
+                   "    </Internal>" \
+                   "    <Tracing>" \
+                   "      <Verbosity>config</Verbosity>" \
+                   "      <OutputFile>stdout</OutputFile>" \
+                   "    </Tracing>" \
                    "  </Domain>" \
                    "</CycloneDDS>"
 #define MAX_SAMPLES 1
@@ -52,7 +80,11 @@ int dds_transport_config_init(char *interface, int domain_id)
     char dds_config[2048];
     int ret = 0;
 
-    sprintf(dds_config, DDS_CONFIG, interface);
+    if (strlen(g_rmt_cfg.peer_address) != 0)
+        sprintf(dds_config, DDS_CONFIG_PEER, interface, g_rmt_cfg.peer_address);
+    else
+        sprintf(dds_config, DDS_CONFIG, interface);
+    RMT_LOG("DDS config: %s\n", dds_config);
     g_domain_id = domain_id;
     g_domain = dds_create_domain(g_domain_id, dds_config);
     // DDS_RETCODE_PRECONDITION_NOT_MET means the domain already exists
@@ -336,7 +368,6 @@ struct dds_transport *dds_transport_agent_init(void)
         goto exit;
     }
     dds_delete_qos(datainfo_qos);
-
 exit:
     if ((ret == -1) && (transport != NULL)) {
         dds_delete(transport->participant);

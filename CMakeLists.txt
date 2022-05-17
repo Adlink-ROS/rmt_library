@@ -9,7 +9,7 @@ option(BUILD_AGENT "Build agent" ON)
 
 # RMT_TODO: Currently only works with FARobot now. Should be more generalized in the future.
 # Support zenoh or not
-option(SUPPORT_ZENOH "Support Zenoh" OFF)
+option(SUPPORT_ZENOH "Support Zenoh" ON)
 if(SUPPORT_ZENOH)
   add_definitions(-DSUPPORT_ZENOH)
 endif()
